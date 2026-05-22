@@ -20,8 +20,9 @@ function canView(
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const supabase = await createClient()
 
   // 1. 조회자 확인
@@ -51,7 +52,7 @@ export async function GET(
       privacy_settings,
       probation_started_at, activated_at, created_at
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!target) {
@@ -59,7 +60,7 @@ export async function GET(
   }
 
   const isSelf = (
-    caller.id === params.id ||
+    caller.id === id ||
     caller.id === target.id
   )
 
