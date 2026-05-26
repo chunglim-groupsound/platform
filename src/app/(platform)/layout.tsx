@@ -1,5 +1,7 @@
 // src/app/(platform)/layout.tsx
 
+import Image from 'next/image'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '@/components/LogoutButton'
 
@@ -26,6 +28,8 @@ export default async function PlatformLayout({
     PROBATION_MEMBER: '유예 부원',
   }
 
+  const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? '')
+
   return (
     <div style={styles.wrapper}>
 
@@ -34,13 +38,34 @@ export default async function PlatformLayout({
         <div style={styles.headerInner}>
 
           {/* 로고 */}
-          <span style={styles.logo}>청림그룹사운드</span>
+          <Link href="/timetable" style={styles.logoLink}>
+            <Image
+              src="/icon.svg"
+              alt="청림그룹사운드 로고"
+              width={28}
+              height={40}
+              style={{ filter: 'invert(1)', flexShrink: 0 }}
+            />
+            <span style={styles.logoText}>청림그룹사운드</span>
+          </Link>
 
-          {/* 유저 정보 + 로그아웃 */}
+          {/* 네비게이션 */}
+          <nav style={styles.nav}>
+            <Link href="/timetable" style={styles.navLink}>타임테이블</Link>
+            <Link href="/members"   style={styles.navLink}>부원</Link>
+            <Link href="/notices"   style={styles.navLink}>공지</Link>
+            {isAdmin && (
+              <Link href="/admin/applications" style={{ ...styles.navLink, ...styles.navAdmin }}>
+                운영
+              </Link>
+            )}
+          </nav>
+
+          {/* 유저 + 로그아웃 */}
           <div style={styles.userArea}>
             {profile && (
               <span style={styles.userInfo}>
-                {profile.name}
+                <span style={styles.userName}>{profile.name}</span>
                 <span style={styles.roleBadge}>
                   {roleLabel[profile.role] ?? profile.role}
                 </span>
@@ -66,49 +91,80 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f4f5f7',
   },
   header: {
     position: 'sticky' as const,
     top: 0,
     zIndex: 100,
-    backgroundColor: '#fff',
-    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#111827',
+    borderBottom: '1px solid rgba(255,255,255,0.06)',
   },
   headerInner: {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: '0 24px',
-    height: '56px',
+    height: '60px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: '32px',
   },
-  logo: {
-    fontSize: '16px',
-    fontWeight: 600,
-    color: '#1a1a1a',
+  logoLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    textDecoration: 'none',
+    flexShrink: 0,
+  },
+  logoText: {
+    fontSize: '15px',
+    fontWeight: 700,
+    color: '#ffffff',
     letterSpacing: '-0.3px',
+  },
+  nav: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    flex: 1,
+  },
+  navLink: {
+    padding: '6px 12px',
+    fontSize: '14px',
+    fontWeight: 500,
+    color: 'rgba(255,255,255,0.65)',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    transition: 'color 0.15s, background 0.15s',
+  },
+  navAdmin: {
+    color: '#93c5fd',
   },
   userArea: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    marginLeft: 'auto',
+    flexShrink: 0,
   },
   userInfo: {
-    fontSize: '14px',
-    color: '#444',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: '7px',
+  },
+  userName: {
+    fontSize: '14px',
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: 500,
   },
   roleBadge: {
     fontSize: '11px',
     padding: '2px 8px',
     borderRadius: '10px',
-    background: '#EFF6FF',
-    color: '#1D4ED8',
+    background: 'rgba(255,255,255,0.1)',
+    color: 'rgba(255,255,255,0.6)',
     fontWeight: 500,
+    border: '1px solid rgba(255,255,255,0.12)',
   },
   main: {
     flex: 1,
