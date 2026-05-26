@@ -38,6 +38,7 @@ export default function ApplicationCard({ application }: Props) {
   const [adminNote, setAdminNote] = useState(application.admin_note ?? '')
   const [loading, setLoading] = useState<'schedule' | 'pass' | 'fail' | null>(null)
   const [done, setDone] = useState(false)
+  const [isScheduled, setIsScheduled] = useState(!!application.interview_scheduled_at)
 
   const member = application.users
 
@@ -58,6 +59,7 @@ export default function ApplicationCard({ application }: Props) {
 
     setLoading(null)
     if (res.ok) {
+      setIsScheduled(true)
       alert(`${member?.name}님께 면접 일정이 전달되었습니다.`)
     } else {
       const { error } = await res.json()
@@ -181,14 +183,19 @@ export default function ApplicationCard({ application }: Props) {
       </div>
 
       {/* ── 합격 / 불합격 버튼 ── */}
+      {!isScheduled && (
+        <p style={{ fontSize: '12px', color: '#E74C3C', marginBottom: '8px' }}>
+          면접 일정을 먼저 저장해야 합격 처리가 가능합니다.
+        </p>
+      )}
       <div style={{ display: 'flex', gap: '10px' }}>
         <button
           onClick={() => handleResult('PASS')}
-          disabled={!!loading}
+          disabled={!!loading || !isScheduled}
           style={{
             padding: '10px 24px', borderRadius: '4px',
-            background: loading === 'pass' ? '#aaa' : '#27AE60',
-            color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold'
+            background: (!isScheduled || loading === 'pass') ? '#aaa' : '#27AE60',
+            color: '#fff', border: 'none', cursor: !isScheduled ? 'not-allowed' : 'pointer', fontWeight: 'bold'
           }}
         >
           {loading === 'pass' ? '처리 중...' : '✅ 합격'}

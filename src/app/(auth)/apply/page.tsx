@@ -17,19 +17,24 @@ const SCHOOL_YEAR_OPTIONS = [
   { value: 4, label: '4학년' },
   { value: 5, label: '5학년 이상' },
 ]
+const GENRE_OPTIONS = ['록', '팝', '인디', '재즈', 'R&B', '메탈', '힙합', '발라드', '펑크', '포크']
 
 // ─────────────────────────────────────────────
 // 폼 타입
 // ─────────────────────────────────────────────
 interface ApplyForm {
-  name:        string
-  generation:  string
-  session:     string[]
-  department:  string   // 학과 (선택)
-  student_id:  string   // 학번 (선택)
-  school_year: string   // 학년 (선택)
-  motivation:  string
-  self_intro:  string
+  name:              string
+  nickname:          string
+  generation:        string
+  session:           string[]
+  profile_image_url: string
+  genre_preference:  string[]
+  phone:             string
+  department:        string
+  student_id:        string
+  school_year:       string
+  motivation:        string
+  self_intro:        string
 }
 
 // ─────────────────────────────────────────────
@@ -40,26 +45,37 @@ export default function ApplyPage() {
   const supabase = createClient()
 
   const [form, setForm] = useState<ApplyForm>({
-    name:        '',
-    generation:  '',
-    session:     [],
-    department:  '',
-    student_id:  '',
-    school_year: '',
-    motivation:  '',
-    self_intro:  '',
+    name:              '',
+    nickname:          '',
+    generation:        '',
+    session:           [],
+    profile_image_url: '',
+    genre_preference:  [],
+    phone:             '',
+    department:        '',
+    student_id:        '',
+    school_year:       '',
+    motivation:        '',
+    self_intro:        '',
   })
   const [agreed,  setAgreed]  = useState(false)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState<string | null>(null)
 
-  // 카카오에서 가져온 이름 pre-fill
+  // 카카오에서 가져온 기본 정보 pre-fill
   useEffect(() => {
     const prefill = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const kakaoName = user.user_metadata?.name ?? ''
-      if (kakaoName) setForm(prev => ({ ...prev, name: kakaoName }))
+      const kakaoName     = user.user_metadata?.name      ?? ''
+      const kakaoNickname = user.user_metadata?.nickname  ?? user.user_metadata?.name ?? ''
+      const kakaoAvatar   = user.user_metadata?.avatar_url ?? ''
+      setForm(prev => ({
+        ...prev,
+        ...(kakaoName     ? { name:              kakaoName }     : {}),
+        ...(kakaoNickname ? { nickname:           kakaoNickname } : {}),
+        ...(kakaoAvatar   ? { profile_image_url:  kakaoAvatar }   : {}),
+      }))
     }
     prefill()
   }, [])
@@ -73,12 +89,21 @@ export default function ApplyPage() {
       : [...form.session, s]
     )
 
+  const toggleGenre = (g: string) =>
+    setField('genre_preference', form.genre_preference.includes(g)
+      ? form.genre_preference.filter(x => x !== g)
+      : [...form.genre_preference, g]
+    )
+
   // ── 유효성 검사 ──────────────────────────────
   const validate = (): string | null => {
-    if (!form.name.trim())       return '이름을 입력해주세요.'
-    if (!form.generation)        return '기수를 입력해주세요.'
+    if (!form.name.trim())         return '이름을 입력해주세요.'
+    if (!form.nickname.trim())     return '닉네임을 입력해주세요.'
+    if (!form.generation)          return '기수를 입력해주세요.'
     if (form.session.length === 0) return '세션을 하나 이상 선택해주세요.'
-    if (!agreed)                 return '개인정보 수집에 동의해주세요.'
+    if (!form.motivation.trim())   return '지원 동기를 입력해주세요.'
+    if (!form.self_intro.trim())   return '자기소개를 입력해주세요.'
+    if (!agreed)                   return '개인정보 수집에 동의해주세요.'
     return null
   }
 
@@ -93,19 +118,26 @@ export default function ApplyPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setError('로그인이 필요합니다.'); setLoading(false); return }
 
-    // users 테이블 업데이트 (기본 정보 + 학과·학번·학년)
+    const kakaoId = user.user_metadata?.provider_id ?? user.id
+
+    // users 테이블 upsert (행이 없으면 생성, 있으면 갱신)
     const { error: updateError } = await supabase
       .from('users')
-      .update({
-        name:        form.name.trim(),
-        generation:  Number(form.generation),
-        session:     form.session,
-        department:  form.department.trim()  || null,
-        student_id:  form.student_id.trim()  || null,
-        school_year: form.school_year ? Number(form.school_year) : null,
+      .upsert({
+        id:                user.id,
+        kakao_id:          kakaoId,
+        name:              form.name.trim(),
+        nickname:          form.nickname.trim()          || null,
+        generation:        Number(form.generation),
+        session:           form.session,
+        profile_image_url: form.profile_image_url.trim() || null,
+        genre_preference:  form.genre_preference,
+        phone:             form.phone.trim()             || null,
+        department:        form.department.trim()        || null,
+        student_id:        form.student_id.trim()        || null,
+        school_year:       form.school_year ? Number(form.school_year) : null,
         privacy_agreed_at: new Date().toISOString(),
       })
-      .eq('id', user.id)
 
     if (updateError) {
       setError('정보 저장 실패: ' + updateError.message)
@@ -154,6 +186,43 @@ export default function ApplyPage() {
             />
           </Field>
 
+          <Field label="닉네임" required>
+            <input
+              value={form.nickname}
+              onChange={e => setField('nickname', e.target.value)}
+              placeholder="활동할 닉네임을 입력해주세요"
+              style={styles.input}
+            />
+          </Field>
+
+          <Field label="연락처" hint="선택">
+            <input
+              type="tel"
+              value={form.phone}
+              onChange={e => setField('phone', e.target.value)}
+              placeholder="예) 010-1234-5678"
+              style={styles.input}
+            />
+          </Field>
+
+          <Field label="프로필 사진 URL" hint="선택 — 카카오 프로필이 자동으로 채워집니다">
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              {form.profile_image_url && (
+                <img
+                  src={form.profile_image_url}
+                  alt="프로필 미리보기"
+                  style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #e0e0e0', flexShrink: 0 }}
+                />
+              )}
+              <input
+                value={form.profile_image_url}
+                onChange={e => setField('profile_image_url', e.target.value)}
+                placeholder="이미지 URL"
+                style={styles.input}
+              />
+            </div>
+          </Field>
+
           <Field label="기수" required>
             <input
               type="number"
@@ -182,6 +251,27 @@ export default function ApplyPage() {
             </div>
           </Field>
 
+        </Section>
+
+        {/* ── 선호 장르 섹션 (선택) ── */}
+        <Section title="선호 장르" hint="선택 항목입니다">
+          <Field label="장르" hint="복수 선택 가능">
+            <div style={styles.tagGroup}>
+              {GENRE_OPTIONS.map(g => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => toggleGenre(g)}
+                  style={{
+                    ...styles.tag,
+                    ...(form.genre_preference.includes(g) ? styles.tagActive : {}),
+                  }}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+          </Field>
         </Section>
 
         {/* ── 학교 정보 섹션 (선택) ── */}
@@ -225,10 +315,10 @@ export default function ApplyPage() {
 
         </Section>
 
-        {/* ── 지원 내용 섹션 (선택) ── */}
-        <Section title="지원 내용" hint="선택 항목입니다">
+        {/* ── 지원 내용 섹션 (필수) ── */}
+        <Section title="지원 내용">
 
-          <Field label="지원 동기">
+          <Field label="지원 동기" required>
             <textarea
               value={form.motivation}
               onChange={e => setField('motivation', e.target.value)}
@@ -238,7 +328,7 @@ export default function ApplyPage() {
             />
           </Field>
 
-          <Field label="자기소개">
+          <Field label="자기소개" required>
             <textarea
               value={form.self_intro}
               onChange={e => setField('self_intro', e.target.value)}
