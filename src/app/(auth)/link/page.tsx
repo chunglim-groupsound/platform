@@ -1,30 +1,13 @@
 'use client'
 // src/app/(auth)/link/page.tsx
-// 기존 부원 카카오 연동 페이지 — 연동 후 학과·학번·학년 추가 입력
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 // ─────────────────────────────────────────────
-// 타입
+// 상수
 // ─────────────────────────────────────────────
-interface ImportedMember {
-  id: string
-  name: string
-  generation: number | null
-  session: string[] | null
-  status: string
-}
-
-interface ExtraInfo {
-  department:  string
-  student_id:  string
-  school_year: string
-}
-
-type Step = 'choice' | 'search' | 'found' | 'notfound' | 'extra' | 'linking'
-
 const SCHOOL_YEAR_OPTIONS = [
   { value: 1, label: '1학년' },
   { value: 2, label: '2학년' },
@@ -32,6 +15,32 @@ const SCHOOL_YEAR_OPTIONS = [
   { value: 4, label: '4학년' },
   { value: 5, label: '5학년 이상' },
 ]
+
+const GENRE_OPTIONS = [
+  '팝', '록', '메탈', 'R&B', '재즈', '블루스',
+  '힙합', '인디', '클래식', '발라드', 'EDM', '기타',
+]
+
+// ─────────────────────────────────────────────
+// 타입
+// ─────────────────────────────────────────────
+interface ImportedMember {
+  id:         string
+  name:       string
+  generation: number | null
+  session:    string[] | null
+  status:     string
+}
+
+interface ExtraInfo {
+  nickname:         string
+  department:       string
+  student_id:       string
+  school_year:      string
+  genre_preference: string[]
+}
+
+type Step = 'choice' | 'search' | 'found' | 'notfound' | 'extra' | 'linking'
 
 // ─────────────────────────────────────────────
 // 컴포넌트
@@ -46,13 +55,25 @@ export default function LinkPage() {
   const [candidates, setCandidates] = useState<ImportedMember[]>([])
   const [selected,   setSelected]   = useState<ImportedMember | null>(null)
   const [extraInfo,  setExtraInfo]  = useState<ExtraInfo>({
-    department: '', student_id: '', school_year: '',
+    nickname:         '',
+    department:       '',
+    student_id:       '',
+    school_year:      '',
+    genre_preference: [],
   })
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState<string | null>(null)
 
-  const setExtra = <K extends keyof ExtraInfo>(key: K, value: string) =>
+  const setExtra = <K extends keyof ExtraInfo>(key: K, value: ExtraInfo[K]) =>
     setExtraInfo(prev => ({ ...prev, [key]: value }))
+
+  const toggleGenre = (genre: string) =>
+    setExtra(
+      'genre_preference',
+      extraInfo.genre_preference.includes(genre)
+        ? extraInfo.genre_preference.filter(g => g !== genre)
+        : [...extraInfo.genre_preference, genre]
+    )
 
   // ── 검색 ─────────────────────────────────────
   const handleSearch = async () => {
@@ -62,10 +83,10 @@ export default function LinkPage() {
     setError(null)
     setLoading(true)
 
-    const res = await fetch('/api/auth/link/search', {
-      method: 'POST',
+    const res  = await fetch('/api/auth/link/search', {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.trim(), generation: Number(generation) }),
+      body:    JSON.stringify({ name: name.trim(), generation: Number(generation) }),
     })
     const data = await res.json()
     setLoading(false)
@@ -80,7 +101,7 @@ export default function LinkPage() {
     }
   }
 
-  // ── 후보 선택 → 추가 정보 입력 단계로 ──────
+  // ── 후보 선택 ────────────────────────────────
   const handleSelect = (member: ImportedMember) => {
     setSelected(member)
     setStep('extra')
@@ -93,11 +114,11 @@ export default function LinkPage() {
     setStep('linking')
     setError(null)
 
-    // 1. 연동 확정 API
-    const linkRes = await fetch('/api/auth/link/confirm', {
-      method: 'POST',
+    // 1. 연동 확정
+    const linkRes  = await fetch('/api/auth/link/confirm', {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targetUserId: selected.id }),
+      body:    JSON.stringify({ targetUserId: selected.id }),
     })
     const linkData = await linkRes.json()
 
@@ -108,21 +129,29 @@ export default function LinkPage() {
       return
     }
 
-    // 2. 추가 정보(학과·학번·학년) 저장
-    //    연동 후에는 linked_auth_id로 본인 확인이 되므로
-    //    supabase 클라이언트로 직접 update 가능
-    const hasExtra =
-      extraInfo.department || extraInfo.student_id || extraInfo.school_year
+    // 2. 추가 정보 저장 (입력된 항목만)
+    const updatePayload: Record<string, unknown> = {}
 
-    if (hasExtra) {
-      await supabase
+    if (extraInfo.nickname.trim())
+      updatePayload.nickname         = extraInfo.nickname.trim()
+    if (extraInfo.department.trim())
+      updatePayload.department       = extraInfo.department.trim()
+    if (extraInfo.student_id.trim())
+      updatePayload.student_id       = extraInfo.student_id.trim()
+    if (extraInfo.school_year)
+      updatePayload.school_year      = Number(extraInfo.school_year)
+    if (extraInfo.genre_preference.length > 0)
+      updatePayload.genre_preference = extraInfo.genre_preference
+
+    if (Object.keys(updatePayload).length > 0) {
+      const { error: updateError } = await supabase
         .from('users')
-        .update({
-          department:  extraInfo.department.trim()  || null,
-          student_id:  extraInfo.student_id.trim()  || null,
-          school_year: extraInfo.school_year ? Number(extraInfo.school_year) : null,
-        })
+        .update(updatePayload)
         .eq('id', selected.id)
+
+      if (updateError) {
+        console.warn('추가 정보 저장 실패 (연동은 완료됨):', updateError.message)
+      }
     }
 
     setLoading(false)
@@ -144,16 +173,12 @@ export default function LinkPage() {
               이전에 활동하셨던 분인가요?<br />
               기존 부원이시라면 기존 정보와 연결해드립니다.
             </p>
-            <button
-              style={{ ...styles.btn, ...styles.btnPrimary }}
-              onClick={() => setStep('search')}
-            >
+            <button style={{ ...styles.btn, ...styles.btnPrimary }}
+              onClick={() => setStep('search')}>
               기존 부원입니다 — 정보 연동하기
             </button>
-            <button
-              style={{ ...styles.btn, ...styles.btnSecondary }}
-              onClick={() => router.push('/apply')}
-            >
+            <button style={{ ...styles.btn, ...styles.btnSecondary }}
+              onClick={() => router.push('/apply')}>
               처음 가입합니다 — 신규 신청하기
             </button>
           </>
@@ -166,37 +191,24 @@ export default function LinkPage() {
             <p style={styles.desc}>운영진이 등록한 이름과 기수를 입력해주세요.</p>
 
             <label style={styles.label}>이름</label>
-            <input
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="홍길동"
-              style={styles.input}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            />
+            <input value={name} onChange={e => setName(e.target.value)}
+              placeholder="홍길동" style={styles.input}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()} />
 
             <label style={styles.label}>기수</label>
-            <input
-              type="number"
-              value={generation}
+            <input type="number" value={generation}
               onChange={e => setGeneration(e.target.value)}
-              placeholder="예) 15"
-              style={styles.input}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            />
+              placeholder="예) 15" style={styles.input}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()} />
 
             {error && <p style={styles.error}>{error}</p>}
 
-            <button
-              style={{ ...styles.btn, ...styles.btnPrimary }}
-              onClick={handleSearch}
-              disabled={loading}
-            >
+            <button style={{ ...styles.btn, ...styles.btnPrimary }}
+              onClick={handleSearch} disabled={loading}>
               {loading ? '검색 중...' : '검색'}
             </button>
-            <button
-              style={{ ...styles.btn, ...styles.btnGhost }}
-              onClick={() => { setStep('choice'); setError(null) }}
-            >
+            <button style={{ ...styles.btn, ...styles.btnGhost }}
+              onClick={() => { setStep('choice'); setError(null) }}>
               뒤로
             </button>
           </>
@@ -207,46 +219,50 @@ export default function LinkPage() {
           <>
             <h2 style={styles.title}>아래 정보가 맞으신가요?</h2>
             <p style={styles.desc}>본인의 정보를 선택해주세요.</p>
-
             {error && <p style={styles.error}>{error}</p>}
-
             {candidates.map(c => (
               <div key={c.id} style={styles.candidateCard}>
                 <strong style={{ fontSize: '16px' }}>{c.name}</strong>
                 <span style={{ marginLeft: '8px', color: '#666', fontSize: '14px' }}>
                   {c.generation}기 · {c.session?.join(', ')}
                 </span>
-                <button
-                  style={{ ...styles.btn, ...styles.btnSuccess, marginTop: '10px' }}
-                  onClick={() => handleSelect(c)}
-                >
+                <button style={{ ...styles.btn, ...styles.btnSuccess, marginTop: '10px' }}
+                  onClick={() => handleSelect(c)}>
                   네, 제 정보입니다
                 </button>
               </div>
             ))}
-
-            <button
-              style={{ ...styles.btn, ...styles.btnGhost }}
-              onClick={() => { setStep('search'); setError(null) }}
-            >
+            <button style={{ ...styles.btn, ...styles.btnGhost }}
+              onClick={() => { setStep('search'); setError(null) }}>
               다시 검색하기
             </button>
           </>
         )}
 
-        {/* ── 추가 정보 입력 (선택) ── */}
+        {/* ── 추가 정보 입력 ── */}
         {step === 'extra' && selected && (
           <>
             <h2 style={styles.title}>추가 정보 입력</h2>
             <p style={styles.desc}>
-              아래 항목은 선택 사항입니다.<br />
-              입력하지 않아도 연동을 완료할 수 있습니다.
+              모두 선택 사항입니다.<br />
+              입력하지 않아도 연동을 완료할 수 있으며,<br />
+              나중에 프로필 수정에서 변경할 수 있습니다.
             </p>
 
             <div style={styles.selectedBadge}>
               ✅ {selected.name} · {selected.generation}기
             </div>
 
+            {/* 닉네임 */}
+            <label style={styles.label}>닉네임</label>
+            <input
+              value={extraInfo.nickname}
+              onChange={e => setExtra('nickname', e.target.value)}
+              placeholder="플랫폼에서 사용할 닉네임 (미입력 시 실명 사용)"
+              style={styles.input}
+            />
+
+            {/* 학과 */}
             <label style={styles.label}>학과</label>
             <input
               value={extraInfo.department}
@@ -255,30 +271,59 @@ export default function LinkPage() {
               style={styles.input}
             />
 
-            <label style={styles.label}>학번</label>
-            <input
-              value={extraInfo.student_id}
-              onChange={e => setExtra('student_id', e.target.value)}
-              placeholder="예) 20210001"
-              style={styles.input}
-            />
+            {/* 학번 + 학년 */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={styles.label}>학번</label>
+                <input
+                  value={extraInfo.student_id}
+                  onChange={e => setExtra('student_id', e.target.value)}
+                  placeholder="예) 20210001"
+                  style={styles.input}
+                />
+              </div>
+              <div style={{ width: '130px' }}>
+                <label style={styles.label}>학년</label>
+                <select
+                  value={extraInfo.school_year}
+                  onChange={e => setExtra('school_year', e.target.value)}
+                  style={styles.select}
+                >
+                  <option value="">선택 안 함</option>
+                  {SCHOOL_YEAR_OPTIONS.map(o => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-            <label style={styles.label}>학년</label>
-            <select
-              value={extraInfo.school_year}
-              onChange={e => setExtra('school_year', e.target.value)}
-              style={styles.select}
-            >
-              <option value="">선택 안 함</option>
-              {SCHOOL_YEAR_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+            {/* 선호 장르 */}
+            <label style={styles.label}>
+              선호 장르
+              <span style={styles.optionalBadge}>복수 선택 가능</span>
+            </label>
+            <div style={styles.tagGroup}>
+              {GENRE_OPTIONS.map(genre => (
+                <button
+                  key={genre}
+                  type="button"
+                  onClick={() => toggleGenre(genre)}
+                  style={{
+                    ...styles.tag,
+                    ...(extraInfo.genre_preference.includes(genre)
+                      ? styles.tagActive
+                      : {}),
+                  }}
+                >
+                  {genre}
+                </button>
               ))}
-            </select>
+            </div>
 
             {error && <p style={styles.error}>{error}</p>}
 
             <button
-              style={{ ...styles.btn, ...styles.btnPrimary, marginTop: '20px' }}
+              style={{ ...styles.btn, ...styles.btnPrimary, marginTop: '24px' }}
               onClick={handleConfirm}
               disabled={loading}
             >
@@ -302,16 +347,12 @@ export default function LinkPage() {
               이름과 기수를 다시 확인해 주세요.<br />
               운영진이 아직 정보를 등록하지 않았을 수 있습니다.
             </p>
-            <button
-              style={{ ...styles.btn, ...styles.btnSecondary }}
-              onClick={() => setStep('search')}
-            >
+            <button style={{ ...styles.btn, ...styles.btnSecondary }}
+              onClick={() => setStep('search')}>
               다시 검색하기
             </button>
-            <button
-              style={{ ...styles.btn, ...styles.btnPrimary }}
-              onClick={() => router.push('/apply')}
-            >
+            <button style={{ ...styles.btn, ...styles.btnPrimary }}
+              onClick={() => router.push('/apply')}>
               신규 가입 신청하기
             </button>
             <p style={{ fontSize: '12px', color: '#aaa', textAlign: 'center', marginTop: '12px' }}>
@@ -365,11 +406,18 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '24px',
   },
   label: {
-    display: 'block',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
     fontSize: '13px',
     fontWeight: 500,
     color: '#444',
     marginBottom: '6px',
+  },
+  optionalBadge: {
+    fontSize: '11px',
+    color: '#aaa',
+    fontWeight: 400,
   },
   input: {
     display: 'block',
@@ -393,6 +441,26 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#fff',
     outline: 'none',
     boxSizing: 'border-box' as const,
+  },
+  tagGroup: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: '8px',
+    marginBottom: '16px',
+  },
+  tag: {
+    padding: '6px 14px',
+    fontSize: '13px',
+    border: '1px solid #e0e0e0',
+    borderRadius: '20px',
+    background: '#fff',
+    cursor: 'pointer',
+    color: '#555',
+  },
+  tagActive: {
+    background: '#4A90E2',
+    borderColor: '#4A90E2',
+    color: '#fff',
   },
   btn: {
     display: 'block',
