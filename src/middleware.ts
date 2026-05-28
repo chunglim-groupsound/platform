@@ -12,7 +12,7 @@ const PUBLIC_PATHS = ['/login', '/auth']
 const PENDING_ALLOWED_PATHS = ['/apply', '/link', '/status', '/auth']
 
 // INTERVIEWING 상태에서 접근 가능한 경로
-const INTERVIEWING_ALLOWED_PATHS = ['/notices', '/timetable', '/status', '/auth']
+const INTERVIEWING_ALLOWED_PATHS = ['/notices', '/home', '/timetable', '/status', '/auth']
 
 // 운영진 전용 경로
 const ADMIN_PATHS = ['/admin']
@@ -91,7 +91,7 @@ export async function middleware(request: NextRequest) {
   if (status === 'INTERVIEWING') {
     const isAllowed = INTERVIEWING_ALLOWED_PATHS.some(p => pathname.startsWith(p))
     if (!isAllowed) {
-      return NextResponse.redirect(new URL('/timetable', request.url))
+      return NextResponse.redirect(new URL('/home', request.url))
     }
     return response
   }
@@ -99,7 +99,7 @@ export async function middleware(request: NextRequest) {
   // ── 6. 운영진 전용 경로 접근 제어 ────────────────────────────
   if (ADMIN_PATHS.some(p => pathname.startsWith(p))) {
     if (!['ADMIN', 'SUPER_ADMIN'].includes(role)) {
-      return NextResponse.redirect(new URL('/timetable', request.url))
+      return NextResponse.redirect(new URL('/home', request.url))
     }
   }
 

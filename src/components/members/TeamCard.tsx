@@ -1,0 +1,78 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+
+interface TeamCardProps {
+  team: {
+    id: string
+    name: string
+    current_song: string | null
+    description: string | null
+    leader: { id: string; name: string; nickname: string | null } | null
+    member_count: number
+    session_summary: Record<string, number>
+  }
+}
+
+export function TeamCard({ team }: TeamCardProps) {
+  const router = useRouter()
+  const leaderName = team.leader
+    ? (team.leader.nickname ?? team.leader.name)
+    : '미정'
+
+  const sessionText = Object.entries(team.session_summary)
+    .map(([s, n]) => `${s} ${n}`)
+    .join(' · ')
+
+  return (
+    <div
+      onClick={() => router.push(`/members/teams/${team.id}`)}
+      style={{
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        background: '#fff',
+        padding: '18px',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        transition: 'box-shadow 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)')}
+      onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
+    >
+      <div style={{ fontWeight: 700, fontSize: '1rem' }}>{team.name}</div>
+
+      <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>
+        팀장: {leaderName} · {team.member_count}명
+      </div>
+
+      {sessionText && (
+        <div style={{ fontSize: '0.8rem', color: '#4b5563' }}>{sessionText}</div>
+      )}
+
+      {team.current_song && (
+        <div style={{
+          fontSize: '0.82rem',
+          background: '#f0f9ff',
+          color: '#0369a1',
+          padding: '4px 10px',
+          borderRadius: '6px',
+          display: 'inline-block',
+          width: 'fit-content',
+        }}>
+          ♪ {team.current_song}
+        </div>
+      )}
+
+      {team.description && (
+        <div style={{
+          fontSize: '0.8rem', color: '#6b7280',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {team.description}
+        </div>
+      )}
+    </div>
+  )
+}

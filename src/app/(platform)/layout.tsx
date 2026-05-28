@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '@/components/LogoutButton'
+import { NavLinks } from '@/components/layout/NavLinks'
 
 export default async function PlatformLayout({
   children,
@@ -38,28 +39,19 @@ export default async function PlatformLayout({
         <div style={styles.headerInner}>
 
           {/* 로고 */}
-          <Link href="/timetable" style={styles.logoLink}>
+          <Link href="/home" style={styles.logoLink}>
             <Image
               src="/icon.svg"
               alt="청림그룹사운드 로고"
               width={28}
-              height={40}
-              style={{ filter: 'invert(1)', flexShrink: 0 }}
+              height={28}
+              style={{ width: '28px', height: 'auto', filter: 'invert(1)', flexShrink: 0 }}
             />
             <span style={styles.logoText}>청림그룹사운드</span>
           </Link>
 
           {/* 네비게이션 */}
-          <nav style={styles.nav}>
-            <Link href="/timetable" style={styles.navLink}>타임테이블</Link>
-            <Link href="/members"   style={styles.navLink}>부원</Link>
-            <Link href="/notices"   style={styles.navLink}>공지</Link>
-            {isAdmin && (
-              <Link href="/admin/applications" style={{ ...styles.navLink, ...styles.navAdmin }}>
-                운영
-              </Link>
-            )}
-          </nav>
+          <NavLinks isAdmin={isAdmin} />
 
           {/* 유저 + 로그아웃 */}
           <div style={styles.userArea}>
@@ -121,24 +113,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 700,
     color: '#ffffff',
     letterSpacing: '-0.3px',
-  },
-  nav: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    flex: 1,
-  },
-  navLink: {
-    padding: '6px 12px',
-    fontSize: '14px',
-    fontWeight: 500,
-    color: 'rgba(255,255,255,0.65)',
-    textDecoration: 'none',
-    borderRadius: '6px',
-    transition: 'color 0.15s, background 0.15s',
-  },
-  navAdmin: {
-    color: '#93c5fd',
   },
   userArea: {
     display: 'flex',

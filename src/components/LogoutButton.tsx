@@ -12,7 +12,9 @@ export default function LogoutButton() {
 
   const handleLogout = async () => {
     setLoading(true)
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'local' })
+    localStorage.clear()
+    router.refresh()
     router.replace('/login')
   }
 
