@@ -15,7 +15,7 @@ export default function LogoutButton() {
     await supabase.auth.signOut({ scope: 'local' })
     localStorage.clear()
     router.refresh()
-    router.replace('/login')
+    router.replace('/')
   }
 
   return (

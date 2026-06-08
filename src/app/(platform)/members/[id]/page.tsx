@@ -22,7 +22,7 @@ export default async function MemberDetailPage({
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) redirect('/')
 
   const { data: me } = await supabase
     .from('users')

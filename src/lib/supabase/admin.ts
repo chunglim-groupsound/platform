@@ -9,7 +9,7 @@ export const supabaseAdmin = createClient(
 )
 
 // 로그인 없이 접근 가능한 경로
-const PUBLIC_PATHS = ['/login', '/auth', '/status']
+const PUBLIC_PATHS = ['/', '/auth', '/status']
 
 // 운영진 전용 경로
 const ADMIN_PATHS = ['/admin']
@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p))
     if (!isPublic) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
     }
     return response
   }

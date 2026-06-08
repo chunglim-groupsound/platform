@@ -103,6 +103,13 @@ export type Database = {
             foreignKeyName: "interview_preferences_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -131,6 +138,13 @@ export type Database = {
           slot_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "interview_slots_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "interview_slots_created_by_fkey"
             columns: ["created_by"]
@@ -195,41 +209,6 @@ export type Database = {
           },
         ]
       }
-      recruitment_periods: {
-        Row: {
-          close_at: string
-          created_at: string
-          created_by: string | null
-          id: string
-          is_open: boolean
-          open_at: string
-        }
-        Insert: {
-          close_at: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          is_open?: boolean
-          open_at: string
-        }
-        Update: {
-          close_at?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          is_open?: boolean
-          open_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "recruitment_periods_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       member_history: {
         Row: {
           changed_by: string | null
@@ -283,6 +262,48 @@ export type Database = {
           {
             foreignKeyName: "member_history_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruitment_periods: {
+        Row: {
+          close_at: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_open: boolean
+          open_at: string
+        }
+        Insert: {
+          close_at: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_open?: boolean
+          open_at: string
+        }
+        Update: {
+          close_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_open?: boolean
+          open_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruitment_periods_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruitment_periods_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]

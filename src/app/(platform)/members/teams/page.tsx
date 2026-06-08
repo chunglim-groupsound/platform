@@ -7,7 +7,7 @@ export default async function TeamsPage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) redirect('/')
 
   const { data: profile } = await supabase
     .from('users')
