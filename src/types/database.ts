@@ -395,6 +395,106 @@ export type Database = {
           },
         ]
       }
+      team_invitations: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string
+          invitee_id: string
+          message: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by: string
+          invitee_id: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string
+          invitee_id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invitations_invitee_id_fkey"
+            columns: ["invitee_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_join_requests: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          id: string
+          message: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_join_requests_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_join_requests_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teams: {
         Row: {
           created_at: string
@@ -402,6 +502,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          is_recruiting: boolean
           leader_id: string | null
           name: string
           updated_at: string
@@ -412,6 +513,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_recruiting?: boolean
           leader_id?: string | null
           name: string
           updated_at?: string
@@ -422,6 +524,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_recruiting?: boolean
           leader_id?: string | null
           name?: string
           updated_at?: string
@@ -583,6 +686,7 @@ export type Database = {
     }
     Enums: {
       interview_result: "PENDING" | "PASS" | "FAIL"
+      request_status: "PENDING" | "ACCEPTED" | "REJECTED"
       member_role:
         | "SUPER_ADMIN"
         | "ADMIN"
@@ -724,6 +828,7 @@ export const Constants = {
   public: {
     Enums: {
       interview_result: ["PENDING", "PASS", "FAIL"],
+      request_status: ["PENDING", "ACCEPTED", "REJECTED"],
       member_role: [
         "SUPER_ADMIN",
         "ADMIN",

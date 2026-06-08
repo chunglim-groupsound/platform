@@ -112,5 +112,18 @@ export async function GET(
     filtered.activated_at         = target.activated_at
   }
 
+  // 소속 팀 목록 (PROBATION 이상 조회 가능)
+  const { data: teamMemberships } = await supabase
+    .from('team_members')
+    .select('team_id, teams!team_id ( id, name, leader_id )')
+    .eq('user_id', id)
+
+  const teams = (teamMemberships ?? []).map((tm: Record<string, unknown>) => {
+    const t = tm.teams as { id: string; name: string; leader_id: string | null } | null
+    return t ? { id: t.id, name: t.name, is_leader: t.leader_id === id } : null
+  }).filter(Boolean)
+
+  filtered.teams = teams
+
   return NextResponse.json(filtered)
 }

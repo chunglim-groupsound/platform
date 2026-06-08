@@ -25,7 +25,7 @@ export async function GET(
   const { data: team, error } = await supabase
     .from('teams')
     .select(`
-      id, name, current_song, description, is_active, created_at, updated_at,
+      id, name, current_song, description, is_active, is_recruiting, created_at, updated_at,
       leader_id,
       leader:users!leader_id ( id, name, nickname, phone, privacy_settings ),
       team_members (
@@ -79,10 +79,10 @@ export async function PATCH(
     return NextResponse.json({ error: '잘못된 요청입니다' }, { status: 400 })
   }
 
-  // 팀장은 current_song, description만 수정 가능
-  // 운영진은 모든 항목 수정 가능
-  const leaderFields = new Set(['current_song', 'description'])
-  const adminFields  = new Set(['name', 'leader_id', 'is_active', 'current_song', 'description'])
+  // 팀장: current_song, description, is_recruiting 수정 가능
+  // 운영진: 모든 항목 수정 가능
+  const leaderFields = new Set(['current_song', 'description', 'is_recruiting'])
+  const adminFields  = new Set(['name', 'leader_id', 'is_active', 'is_recruiting', 'current_song', 'description'])
 
   const patch: Record<string, unknown> = {}
   const fieldSet = isAdmin ? adminFields : leaderFields

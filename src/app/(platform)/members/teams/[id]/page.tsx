@@ -2,6 +2,9 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { TeamMemberList } from '@/components/members/TeamMemberList'
+import { RecruitingToggle } from '@/components/members/RecruitingToggle'
+import { JoinRequestSection } from '@/components/members/JoinRequestSection'
+import { JoinRequestsPanel } from '@/components/members/JoinRequestsPanel'
 import type { MemberCardData } from '@/types/app'
 
 interface LeaderRow extends MemberCardData { privacy_settings: Record<string, string> }
@@ -10,9 +13,16 @@ interface TeamMemberRow {
   session_in_team: string[] | null
   user: MemberCardData
 }
+interface JoinRequestRow {
+  id: string
+  message: string | null
+  status: string
+  created_at: string
+  applicant: MemberCardData
+}
 interface TeamRow {
   id: string; name: string; current_song: string | null; description: string | null
-  is_active: boolean; leader_id: string | null
+  is_active: boolean; is_recruiting: boolean; leader_id: string | null
   leader: LeaderRow | null
   team_members: TeamMemberRow[]
 }
@@ -40,7 +50,7 @@ export default async function TeamDetailPage({
   const { data: rawTeam } = await supabase
     .from('teams')
     .select(`
-      id, name, current_song, description, is_active, leader_id,
+      id, name, current_song, description, is_active, is_recruiting, leader_id,
       leader:users!leader_id (
         id, name, nickname, profile_image_url,
         session, role, status, is_whitelist,
@@ -66,9 +76,42 @@ export default async function TeamDetailPage({
   const isLeader = team.leader_id === profile?.id
   const canEdit  = isAdmin || isLeader
 
-  // team_members에 이미 팀장이 포함됐는지 확인
+  // 팀원 여부 확인
+  const myId = profile?.id ?? ''
   const memberUserIds = new Set(team.team_members.map(tm => tm.user.id))
   const leaderInList  = team.leader && memberUserIds.has(team.leader.id)
+  const isMember      = memberUserIds.has(myId) || team.leader_id === myId
+
+  // ACTIVE/INACTIVE 부원만 가입 신청 가능
+  const canApply = ['ACTIVE', 'INACTIVE'].includes(profile?.status ?? '') && !isMember && !isAdmin
+
+  // 내가 신청한 건이 있는지 확인
+  let myJoinRequest: { id: string; status: string } | null = null
+  if (canApply || isMember) {
+    const { data: req } = await supabase
+      .from('team_join_requests')
+      .select('id, status')
+      .eq('team_id', id)
+      .eq('applicant_id', myId)
+      .maybeSingle()
+    myJoinRequest = req ?? null
+  }
+
+  // 팀장/운영진: 가입 신청 목록
+  let joinRequests: JoinRequestRow[] = []
+  if (canEdit) {
+    const { data: reqs } = await supabase
+      .from('team_join_requests')
+      .select(`
+        id, message, status, created_at,
+        applicant:users!applicant_id ( id, name, nickname, profile_image_url, session, role, status, is_whitelist )
+      `)
+      .eq('team_id', id)
+      .eq('status', 'PENDING')
+      .order('created_at', { ascending: false })
+
+    joinRequests = (reqs ?? []) as unknown as JoinRequestRow[]
+  }
 
   // 팀장을 맨 앞에 prepend (중복 방지)
   const members = [
@@ -98,14 +141,26 @@ export default async function TeamDetailPage({
         marginTop: '20px', background: '#f9fafb', borderRadius: '16px', padding: '20px',
         display: 'flex', flexDirection: 'column', gap: '8px',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>{team.name}</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>{team.name}</h1>
+            <span style={{
+              padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600,
+              background: team.is_recruiting ? '#dcfce7' : '#f3f4f6',
+              color:      team.is_recruiting ? '#15803d' : '#6b7280',
+              border:     `1px solid ${team.is_recruiting ? '#bbf7d0' : '#e5e7eb'}`,
+              whiteSpace: 'nowrap', flexShrink: 0,
+            }}>
+              {team.is_recruiting ? '모집 중' : '모집 완료'}
+            </span>
+          </div>
           {canEdit && (
             <Link
               href={`/members/teams/${id}/edit`}
               style={{
                 padding: '5px 12px', borderRadius: '7px', fontSize: '0.82rem',
                 border: '1px solid #d1d5db', background: '#fff', textDecoration: 'none', color: '#374151',
+                flexShrink: 0,
               }}
             >
               수정
@@ -127,14 +182,35 @@ export default async function TeamDetailPage({
             {team.description}
           </p>
         )}
+
+        {/* 팀장/운영진: 모집 상태 토글 */}
+        {canEdit && (
+          <RecruitingToggle
+            teamId={id}
+            isRecruiting={team.is_recruiting}
+          />
+        )}
       </div>
+
+      {/* 가입 신청 버튼 (일반 부원) */}
+      {canApply && (
+        <JoinRequestSection
+          teamId={id}
+          myRequest={myJoinRequest}
+        />
+      )}
 
       <div style={{ marginTop: '24px' }}>
         <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '12px' }}>
           팀원 ({members.length}명)
         </h2>
-        <TeamMemberList members={members} myId={profile?.id ?? ''} />
+        <TeamMemberList members={members} myId={myId} />
       </div>
+
+      {/* 팀장/운영진: 가입 신청 목록 */}
+      {canEdit && joinRequests.length > 0 && (
+        <JoinRequestsPanel teamId={id} requests={joinRequests} />
+      )}
 
       <div style={{ marginTop: '28px' }}>
         <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '12px' }}>합주 예약 현황</h2>

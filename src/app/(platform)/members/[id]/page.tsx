@@ -4,6 +4,7 @@ import { canView } from '@/lib/member/privacy'
 import Image from 'next/image'
 import Link from 'next/link'
 import { WhitelistBadge } from '@/components/members/WhitelistBadge'
+import { InviteButton } from '@/components/members/InviteButton'
 
 const ROLE_LABEL: Record<string, string> = {
   SUPER_ADMIN: '최고관리자',
@@ -49,6 +50,28 @@ export default async function MemberDetailPage({
 
   const privacy = (target.privacy_settings ?? {}) as Record<string, string>
   const isSelf = false // 본인은 위에서 redirect됨
+
+  // 소속 팀 조회
+  const { data: teamMemberships } = await supabase
+    .from('team_members')
+    .select('team_id, teams!team_id ( id, name, leader_id )')
+    .eq('user_id', id)
+
+  interface TeamRef { id: string; name: string; leader_id: string | null }
+  const memberTeams = (teamMemberships ?? []).map((tm: Record<string, unknown>) => {
+    const t = tm.teams as TeamRef | null
+    return t ? { id: t.id, name: t.name, is_leader: t.leader_id === id } : null
+  }).filter((t): t is { id: string; name: string; is_leader: boolean } => t !== null)
+
+  // 내가 팀장인 팀 목록 (초대 드롭다운용)
+  const { data: myLedTeams } = await supabase
+    .from('teams')
+    .select('id, name')
+    .eq('leader_id', me?.id ?? '')
+    .eq('is_active', true)
+
+  const canInvite = !!myLedTeams && myLedTeams.length > 0 &&
+    ['ACTIVE', 'INACTIVE'].includes(me?.status ?? '')
 
   return (
     <main style={{ padding: '24px 20px', maxWidth: '600px', margin: '0 auto' }}>
@@ -146,6 +169,45 @@ export default async function MemberDetailPage({
           </div>
         )}
       </div>
+
+      {/* 소속 팀 섹션 */}
+      <div style={{ marginTop: '24px' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '10px' }}>소속 팀</h2>
+        {memberTeams.length === 0 ? (
+          <p style={{ fontSize: '0.88rem', color: '#9ca3af' }}>소속 팀 없음</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {memberTeams.map(t => (
+              <Link
+                key={t.id}
+                href={`/members/teams/${t.id}`}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  padding: '8px 12px', borderRadius: '8px', border: '1px solid #e5e7eb',
+                  background: '#fff', textDecoration: 'none', color: '#111827',
+                }}
+              >
+                <span style={{ flex: 1, fontSize: '0.9rem' }}>{t.name}</span>
+                {t.is_leader && (
+                  <span style={{
+                    padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem',
+                    fontWeight: 700, background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d',
+                  }}>
+                    팀장
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 초대 버튼 (내가 팀장인 경우) */}
+      {canInvite && (
+        <div style={{ marginTop: '20px' }}>
+          <InviteButton targetId={id} myTeams={myLedTeams!} />
+        </div>
+      )}
     </main>
   )
 }
