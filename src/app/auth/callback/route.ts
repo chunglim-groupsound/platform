@@ -10,14 +10,14 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=no_code`)
+    return NextResponse.redirect(`${origin}/?error=no_code`)
   }
 
   const supabase = await createClient()
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    return NextResponse.redirect(`${origin}/login?error=auth_failed`)
+    return NextResponse.redirect(`${origin}/?error=auth_failed`)
   }
 
   const { data: { user } } = await supabase.auth.getUser()
