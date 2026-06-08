@@ -74,7 +74,7 @@ export default async function StatusPage({ searchParams }: Props) {
     WITHDRAWN:    '계정 접근이 제한되었습니다.',
   }
 
-  const statusMessage = confirmedSlotAt
+  const statusMessage = (confirmedSlotAt && isInterviewing)
     ? '면접 일정이 확정되었습니다. 아래 일정을 확인해 주세요.'
     : (STATUS_MESSAGES[status] ?? '신청 상태를 확인 중입니다.')
 
@@ -84,8 +84,8 @@ export default async function StatusPage({ searchParams }: Props) {
         <h2 style={titleStyle}>{profile?.name}님</h2>
         <p style={descStyle}>{statusMessage}</p>
 
-        {/* 확정 슬롯 표시 */}
-        {confirmedSlotAt && (
+        {/* 확정 슬롯 표시 — INTERVIEWING 상태일 때만 */}
+        {confirmedSlotAt && isInterviewing && (
           <div style={confirmedBoxStyle}>
             <p style={{ fontSize: '12px', color: '#1d4ed8', marginBottom: '6px', fontWeight: 600, letterSpacing: '0.02em' }}>
               확정된 면접 일정
