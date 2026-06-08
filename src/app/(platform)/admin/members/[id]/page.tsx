@@ -1,6 +1,7 @@
 // src/app/(platform)/admin/members/[id]/page.tsx
 // 운영진 회원 상세 페이지 — 학과·학번·학년 표시 추가
 
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { WarningSection } from '@/components/admin/WarningSection'
 import { WithdrawSection } from '@/components/admin/WithdrawSection'
@@ -52,7 +53,10 @@ export default async function MemberDetailPage({
   }
 
   return (
-    <div style={{ padding: '32px', maxWidth: '700px' }}>
+    <div style={{ maxWidth: '700px' }}>
+      <Link href="/admin/members" style={{ fontSize: '13px', color: '#6b7280', textDecoration: 'none', display: 'inline-block', marginBottom: '20px' }}>
+        ← 부원 목록
+      </Link>
 
       {/* ── 기본 정보 ── */}
       <section style={styles.section}>
