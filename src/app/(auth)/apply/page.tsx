@@ -44,6 +44,15 @@ export default function ApplyPage() {
   const router  = useRouter()
   const supabase = createClient()
 
+  const [recruitOpen, setRecruitOpen] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    fetch('/api/settings/recruitment')
+      .then(r => r.json())
+      .then(d => setRecruitOpen(d.is_open ?? false))
+      .catch(() => setRecruitOpen(false))
+  }, [])
+
   const [form, setForm] = useState<ApplyForm>({
     name:              '',
     nickname:          '',
@@ -166,6 +175,31 @@ export default function ApplyPage() {
   // ─────────────────────────────────────────────
   // 렌더링
   // ─────────────────────────────────────────────
+  if (recruitOpen === null) {
+    return (
+      <main style={styles.container}>
+        <div style={{ ...styles.card, textAlign: 'center', color: '#999', padding: '60px 40px' }}>
+          로딩 중...
+        </div>
+      </main>
+    )
+  }
+
+  if (!recruitOpen) {
+    return (
+      <main style={styles.container}>
+        <div style={{ ...styles.card, textAlign: 'center' }}>
+          <p style={{ fontSize: '32px', marginBottom: '16px' }}>🎸</p>
+          <h2 style={{ ...styles.title, marginBottom: '12px' }}>현재 모집 기간이 아닙니다</h2>
+          <p style={{ fontSize: '14px', color: '#999', lineHeight: 1.7 }}>
+            신규 부원 모집 기간이 아닙니다.<br />
+            모집 기간에 다시 방문해주세요.
+          </p>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main style={styles.container}>
       <div style={styles.card}>

@@ -75,7 +75,18 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/status', request.url))
     }
 
-    // 신청서 미제출 → 연동 확인 페이지로 (기존 부원 여부 확인)
+    // 신청서 미제출 → 모집 기간 확인 후 분기
+    const { data: period } = await supabase
+      .from('recruitment_periods')
+      .select('is_open')
+      .maybeSingle()
+
+    if (!period?.is_open) {
+      // 모집 기간 아님 → 안내 페이지
+      return NextResponse.redirect(new URL('/status?reason=not_open', request.url))
+    }
+
+    // 모집 기간 중 → 연동 확인 페이지로 (기존 부원 여부 확인)
     return NextResponse.redirect(new URL('/link', request.url))
   }
 
