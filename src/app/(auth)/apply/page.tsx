@@ -55,10 +55,12 @@ export default function ApplyPage() {
       .catch(() => setRecruitOpen(false))
   }, [])
 
+  const currentGeneration = String(new Date().getFullYear() - 1982)
+
   const [form, setForm] = useState<ApplyForm>({
     name:              '',
     nickname:          '',
-    generation:        '',
+    generation:        currentGeneration,
     session:           [],
     profile_image_url: '',
     genre_preference:  [],
@@ -273,14 +275,16 @@ export default function ApplyPage() {
             </div>
           </Field>
 
-          <Field label="기수" required>
-            <input
-              type="number"
-              value={form.generation}
-              onChange={e => setField('generation', e.target.value)}
-              placeholder="예) 15"
-              style={{ ...styles.input, width: '120px' }}
-            />
+          <Field label="기수" required hint="현재 연도 기준 자동 계산">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input
+                type="number"
+                value={form.generation}
+                readOnly
+                style={{ ...styles.input, width: '80px', backgroundColor: '#f5f5f5', color: '#555', cursor: 'default' }}
+              />
+              <span style={{ fontSize: '13px', color: '#999' }}>{form.generation}기 ({new Date().getFullYear()}년 기준)</span>
+            </div>
           </Field>
 
           <Field label="세션" required hint="복수 선택 가능">
