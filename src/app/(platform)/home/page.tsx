@@ -69,7 +69,7 @@ export default async function TimetablePage() {
       color: '#f0fdf4',
     },
     {
-      href: '/members/teams',
+      href: '/teams',
       emoji: '🎸',
       title: '팀 목록',
       desc: '합주 팀 구성 및 현재 연습 곡 확인',

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export function NewTeamForm() {
+export function NewTeamForm({ redirectBase = '/teams' }: { redirectBase?: string }) {
   const router = useRouter()
   const [name, setName]               = useState('')
   const [description, setDescription] = useState('')
@@ -11,7 +11,7 @@ export function NewTeamForm() {
   const [error, setError]             = useState('')
   const [loading, setLoading]         = useState(false)
 
-  async function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!name.trim()) { setError('팀명을 입력해주세요'); return }
     setError('')
@@ -28,7 +28,7 @@ export function NewTeamForm() {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? '오류가 발생했습니다'); return }
-      router.push(`/members/teams/${data.team.id}`)
+      router.push(`${redirectBase}/${data.team.id}`)
     } finally {
       setLoading(false)
     }
@@ -84,7 +84,7 @@ export function NewTeamForm() {
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
         <button
           type="button"
-          onClick={() => router.push('/members/teams')}
+          onClick={() => router.push(redirectBase)}
           style={{
             padding: '8px 18px', borderRadius: '8px', fontSize: '0.88rem',
             border: '1px solid #d1d5db', background: '#fff', color: '#374151', cursor: 'pointer',

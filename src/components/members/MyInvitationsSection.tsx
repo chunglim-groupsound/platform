@@ -51,7 +51,7 @@ export function MyInvitationsSection({ invitations }: Props) {
               <div>
                 {inv.team && (
                   <Link
-                    href={`/members/teams/${inv.team.id}`}
+                    href={`/teams/${inv.team.id}`}
                     style={{ fontWeight: 600, fontSize: '0.9rem', color: '#4f46e5', textDecoration: 'none' }}
                   >
                     {inv.team.name}

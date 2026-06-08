@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { ProfileForm } from '@/components/members/ProfileForm'
+import Image from 'next/image'
+import Link from 'next/link'
+import { WhitelistBadge } from '@/components/members/WhitelistBadge'
 import { MyInvitationsSection } from '@/components/members/MyInvitationsSection'
 import { MyJoinRequestsSection } from '@/components/members/MyJoinRequestsSection'
 
@@ -8,23 +10,22 @@ function isKakaoUrl(url: string | null): boolean {
   return !!url && url.includes('kakaocdn.net')
 }
 
-interface TeamRef { id: string; name: string; leader_id: string | null }
-interface InviterRef { id: string; name: string; nickname: string | null }
-
-interface RawInvitation {
-  id: string
-  message: string | null
-  status: string
-  created_at: string
-  team: TeamRef | null
-  inviter: InviterRef | null
+const ROLE_LABEL: Record<string, string> = {
+  SUPER_ADMIN: '최고관리자',
+  ADMIN: '운영진',
+  TEAM_LEADER: '팀장',
+  MEMBER: '일반 부원',
+  PROBATION_MEMBER: '수습 부원',
 }
 
+interface TeamRef { id: string; name: string; leader_id: string | null }
+interface InviterRef { id: string; name: string; nickname: string | null }
+interface RawInvitation {
+  id: string; message: string | null; status: string; created_at: string
+  team: TeamRef | null; inviter: InviterRef | null
+}
 interface RawJoinRequest {
-  id: string
-  message: string | null
-  status: string
-  created_at: string
+  id: string; message: string | null; status: string; created_at: string
   team: TeamRef | null
 }
 
@@ -53,7 +54,7 @@ export default async function MyProfilePage() {
   const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
   if (!allowed.includes(profile.status)) redirect('/status')
 
-  // 카카오 모드로 설정된 경우, 로그인 시 갱신된 최신 URL로 자동 반영
+  // 카카오 URL 자동 동기화
   let profileImageUrl = profile.profile_image_url
   if (kakaoAvatarUrl && isKakaoUrl(profile.profile_image_url) && profile.profile_image_url !== kakaoAvatarUrl) {
     const { error } = await supabase
@@ -63,16 +64,18 @@ export default async function MyProfilePage() {
     if (!error) profileImageUrl = kakaoAvatarUrl
   }
 
-  const typedProfile = {
-    ...profile,
-    profile_image_url: profileImageUrl,
-    privacy_settings: (profile.privacy_settings ?? {}) as Record<string, string>,
-    session: profile.session ?? [],
-    genre_preference: profile.genre_preference ?? [],
-  }
-
-  // ACTIVE/INACTIVE 부원만 초대/신청 표시
   const isFullMember = ['ACTIVE', 'INACTIVE'].includes(profile.status)
+
+  // 소속 팀 조회
+  const { data: teamMemberships } = await supabase
+    .from('team_members')
+    .select('team_id, teams!team_id ( id, name, leader_id )')
+    .eq('user_id', profile.id)
+
+  const memberTeams = (teamMemberships ?? []).map((tm: Record<string, unknown>) => {
+    const t = tm.teams as TeamRef | null
+    return t ? { id: t.id, name: t.name, is_leader: t.leader_id === profile.id } : null
+  }).filter((t): t is { id: string; name: string; is_leader: boolean } => t !== null)
 
   let invitations: RawInvitation[] = []
   let joinRequests: RawJoinRequest[] = []
@@ -106,22 +109,156 @@ export default async function MyProfilePage() {
   }
 
   return (
-    <main>
-      <div style={{ padding: '20px 20px 0', maxWidth: '600px', margin: '0 auto' }}>
+    <main style={{ padding: '24px 20px', maxWidth: '600px', margin: '0 auto' }}>
+      {/* 헤더 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h1 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>내 프로필</h1>
+        <Link href="/members/me/edit" style={{
+          padding: '6px 14px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600,
+          border: '1px solid #d1d5db', background: '#fff', textDecoration: 'none', color: '#374151',
+        }}>
+          수정
+        </Link>
       </div>
-      <ProfileForm profile={typedProfile} kakaoAvatarUrl={kakaoAvatarUrl} />
 
-      {isFullMember && (
-        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 20px 40px' }}>
-          {invitations.length > 0 && (
-            <MyInvitationsSection invitations={invitations} />
-          )}
-          {joinRequests.length > 0 && (
-            <MyJoinRequestsSection requests={joinRequests} />
+      {/* 프로필 카드 */}
+      <div style={{
+        background: '#f9fafb', borderRadius: '16px',
+        padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+      }}>
+        <div style={{ position: 'relative', width: 80, height: 80 }}>
+          {profileImageUrl ? (
+            <Image
+              src={profileImageUrl}
+              alt={profile.name}
+              fill
+              style={{ borderRadius: '50%', objectFit: 'cover' }}
+            />
+          ) : (
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%',
+              background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '2rem', color: '#6b7280',
+            }}>
+              {profile.name[0]}
+            </div>
           )}
         </div>
+
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: 800, fontSize: '1.2rem' }}>
+            {profile.nickname ?? profile.name}
+          </div>
+          {profile.nickname && (
+            <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>{profile.name}</div>
+          )}
+          {profile.generation != null && (
+            <div style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '2px' }}>{profile.generation}기</div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <span style={{
+            padding: '3px 10px', borderRadius: '9999px',
+            background: '#e0f2fe', color: '#075985', fontSize: '0.78rem', fontWeight: 600,
+          }}>
+            {ROLE_LABEL[profile.role] ?? profile.role}
+          </span>
+          {profile.is_whitelist && <WhitelistBadge />}
+        </div>
+
+        {(profile.session ?? []).length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
+            {profile.session!.map((s: string) => (
+              <span key={s} style={{
+                padding: '3px 10px', borderRadius: '9999px',
+                background: '#eff6ff', color: '#1d4ed8', fontSize: '0.78rem',
+              }}>
+                {s}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 상세 정보 */}
+      <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '0' }}>
+        {profile.department && <Row label="학과" value={profile.department} />}
+        {profile.school_year != null && <Row label="학년" value={`${profile.school_year}학년`} />}
+        {profile.student_id && <Row label="학번" value={profile.student_id} />}
+        {profile.phone && (
+          <div style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
+            <span style={{ width: '80px', fontSize: '0.85rem', color: '#6b7280', flexShrink: 0 }}>연락처</span>
+            <a href={`tel:${profile.phone}`} style={{ fontSize: '0.9rem', color: '#2563eb' }}>
+              {profile.phone}
+            </a>
+          </div>
+        )}
+        {(profile.genre_preference ?? []).length > 0 && (
+          <div style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
+            <span style={{ width: '80px', fontSize: '0.85rem', color: '#6b7280', flexShrink: 0 }}>선호 장르</span>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+              {profile.genre_preference!.map((g: string) => (
+                <span key={g} style={{
+                  padding: '2px 8px', borderRadius: '9999px',
+                  background: '#f3f4f6', color: '#374151', fontSize: '0.78rem',
+                }}>
+                  {g}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 소속 팀 */}
+      <div style={{ marginTop: '24px' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '10px' }}>소속 팀</h2>
+        {memberTeams.length === 0 ? (
+          <p style={{ fontSize: '0.88rem', color: '#9ca3af' }}>소속 팀 없음</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {memberTeams.map(t => (
+              <Link
+                key={t.id}
+                href={`/teams/${t.id}`}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  padding: '8px 12px', borderRadius: '8px', border: '1px solid #e5e7eb',
+                  background: '#fff', textDecoration: 'none', color: '#111827',
+                }}
+              >
+                <span style={{ flex: 1, fontSize: '0.9rem' }}>{t.name}</span>
+                {t.is_leader && (
+                  <span style={{
+                    padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem',
+                    fontWeight: 700, background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d',
+                  }}>
+                    팀장
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 받은 초대 / 내 신청 */}
+      {isFullMember && (
+        <>
+          {invitations.length > 0 && <MyInvitationsSection invitations={invitations} />}
+          {joinRequests.length > 0 && <MyJoinRequestsSection requests={joinRequests} />}
+        </>
       )}
     </main>
+  )
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
+      <span style={{ width: '80px', fontSize: '0.85rem', color: '#6b7280', flexShrink: 0 }}>{label}</span>
+      <span style={{ fontSize: '0.9rem', color: '#111827' }}>{value}</span>
+    </div>
   )
 }

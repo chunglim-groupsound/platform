@@ -13,9 +13,10 @@ interface TeamCardProps {
     member_count: number
     session_summary: Record<string, number>
   }
+  baseUrl?: string
 }
 
-export function TeamCard({ team }: TeamCardProps) {
+export function TeamCard({ team, baseUrl = '/teams' }: TeamCardProps) {
   const router = useRouter()
   const leaderName = team.leader
     ? (team.leader.nickname ?? team.leader.name)
@@ -27,7 +28,7 @@ export function TeamCard({ team }: TeamCardProps) {
 
   return (
     <div
-      onClick={() => router.push(`/members/teams/${team.id}`)}
+      onClick={() => router.push(`${baseUrl}/${team.id}`)}
       style={{
         borderRadius: '12px',
         border: '1px solid #e5e7eb',

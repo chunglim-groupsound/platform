@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { PrivacySettings } from './PrivacySettings'
 
@@ -59,7 +60,8 @@ function toFormState(p: ProfileData): FormState {
   }
 }
 
-export function ProfileForm({ profile, kakaoAvatarUrl }: { profile: ProfileData; kakaoAvatarUrl: string | null }) {
+export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { profile: ProfileData; kakaoAvatarUrl: string | null; redirectAfterSave?: string }) {
+  const router = useRouter()
   const [form, setForm] = useState<FormState>(() => toFormState(profile))
   const [original] = useState<FormState>(() => toFormState(profile))
   const [saving, setSaving] = useState(false)
@@ -118,6 +120,9 @@ export function ProfileForm({ profile, kakaoAvatarUrl }: { profile: ProfileData;
       })
       if (res.ok) {
         setToast({ msg: '저장되었습니다', type: 'ok' })
+        if (redirectAfterSave) {
+          setTimeout(() => router.push(redirectAfterSave), 800)
+        }
       } else {
         const data = await res.json()
         setToast({ msg: data.error ?? '저장에 실패했습니다', type: 'err' })

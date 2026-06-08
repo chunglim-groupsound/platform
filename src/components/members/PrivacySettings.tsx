@@ -7,6 +7,7 @@ const SCOPE_OPTIONS = [
 ]
 
 const PRIVACY_FIELDS: { key: string; label: string; allowedScopes: string[]; defaultScope: string }[] = [
+  { key: 'name',        label: '실명',   allowedScopes: ['all', 'member', 'admin'], defaultScope: 'member' },
   { key: 'generation',  label: '기수',   allowedScopes: ['all', 'member', 'admin'], defaultScope: 'member' },
   { key: 'phone',       label: '연락처', allowedScopes: ['member', 'admin'],        defaultScope: 'admin' },
   { key: 'department',  label: '학과',   allowedScopes: ['all', 'member', 'admin'], defaultScope: 'member' },

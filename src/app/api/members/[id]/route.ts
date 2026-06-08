@@ -70,7 +70,6 @@ export async function GET(
   //    민감 필드만 조건부 제거, 나머지는 항상 반환
   const filtered: Record<string, unknown> = {
     id:                target.id,
-    name:              target.name,
     nickname:          target.nickname,
     profile_image_url: target.profile_image_url,
     session:           target.session,
@@ -79,6 +78,11 @@ export async function GET(
     role:              target.role,
     is_whitelist:      target.is_whitelist,
     created_at:        target.created_at,
+  }
+
+  // name (실명) — 기본값 member
+  if (canView(privacy.name ?? 'member', isSelf, isMember, isAdmin)) {
+    filtered.name = target.name
   }
 
   // generation

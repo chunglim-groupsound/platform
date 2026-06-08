@@ -103,11 +103,20 @@ export default async function MemberDetailPage({
         </div>
 
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontWeight: 800, fontSize: '1.2rem' }}>
-            {target.nickname ?? target.name}
-          </div>
-          {target.nickname && (
-            <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>{target.name}</div>
+          {/* 실명 공개 범위 적용 */}
+          {canView(privacy.name ?? 'member', 'member', isSelf, isMember, isAdmin) ? (
+            <>
+              <div style={{ fontWeight: 800, fontSize: '1.2rem' }}>
+                {target.nickname ?? target.name}
+              </div>
+              {target.nickname && (
+                <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>{target.name}</div>
+              )}
+            </>
+          ) : (
+            <div style={{ fontWeight: 800, fontSize: '1.2rem' }}>
+              {target.nickname ?? '(이름 비공개)'}
+            </div>
           )}
           {canView(privacy.generation, 'member', isSelf, isMember, isAdmin) && target.generation != null && (
             <div style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '2px' }}>{target.generation}기</div>
@@ -180,7 +189,7 @@ export default async function MemberDetailPage({
             {memberTeams.map(t => (
               <Link
                 key={t.id}
-                href={`/members/teams/${t.id}`}
+                href={`/teams/${t.id}`}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
                   padding: '8px 12px', borderRadius: '8px', border: '1px solid #e5e7eb',

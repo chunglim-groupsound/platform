@@ -53,7 +53,7 @@ export function MyJoinRequestsSection({ requests }: Props) {
               <div>
                 {req.team && (
                   <Link
-                    href={`/members/teams/${req.team.id}`}
+                    href={`/teams/${req.team.id}`}
                     style={{ fontWeight: 600, fontSize: '0.9rem', color: '#4f46e5', textDecoration: 'none' }}
                   >
                     {req.team.name}
