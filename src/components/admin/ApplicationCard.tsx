@@ -49,6 +49,8 @@ export default function ApplicationCard({ application }: Props) {
   const [loading, setLoading] = useState<'schedule' | 'pass' | 'fail' | null>(null)
   const [isScheduled, setIsScheduled] = useState(!!application.confirmed_slot_id)
   const [done, setDone] = useState(false)
+  const [resultPending, setResultPending] = useState<'PASS' | 'FAIL' | null>(null)
+  const [resultReason, setResultReason] = useState('')
 
   const member = application.users
 
@@ -88,11 +90,9 @@ export default function ApplicationCard({ application }: Props) {
   }
 
   // ── 면접 결과 처리 ──────────────────────────
-  const handleResult = async (result: 'PASS' | 'FAIL') => {
-    const label = result === 'PASS' ? '합격' : '불합격'
-    if (!confirm(`${member?.name}님을 ${label} 처리하시겠습니까?`)) return
-
-    setLoading(result === 'PASS' ? 'pass' : 'fail')
+  const handleResultConfirm = async () => {
+    if (!resultPending) return
+    setLoading(resultPending === 'PASS' ? 'pass' : 'fail')
 
     const res = await fetch('/api/admin/applications/result', {
       method: 'POST',
@@ -100,20 +100,18 @@ export default function ApplicationCard({ application }: Props) {
       body: JSON.stringify({
         applicationId: application.id,
         userId: member?.id,
-        result,
+        result: resultPending,
         adminNote,
+        reason: resultReason.trim() || undefined,
       }),
     })
 
     setLoading(null)
+    setResultPending(null)
+    setResultReason('')
 
     if (res.ok) {
       setDone(true)
-      alert(
-        result === 'PASS'
-          ? `${member?.name}님이 유예 부원으로 전환되었습니다.`
-          : `${member?.name}님이 불합격 처리되었습니다.`
-      )
     } else {
       const { error } = await res.json()
       alert('오류: ' + error)
@@ -234,39 +232,93 @@ export default function ApplicationCard({ application }: Props) {
       </div>
 
       {/* ── 합격 / 불합격 ── */}
-      {!isScheduled && (
+      {!isScheduled && !resultPending && (
         <p style={{ fontSize: '12px', color: '#dc2626', marginBottom: '8px' }}>
           면접 슬롯을 먼저 확정해야 합격 처리가 가능합니다.
         </p>
       )}
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <button
-          onClick={() => handleResult('PASS')}
-          disabled={!!loading || !isScheduled}
-          style={{
-            padding: '9px 22px', borderRadius: '7px',
-            background: (!isScheduled || loading) ? '#d1d5db' : '#16a34a',
-            color: '#fff', border: 'none',
-            cursor: (!isScheduled || !!loading) ? 'not-allowed' : 'pointer',
-            fontWeight: 600, fontSize: '13px',
-          }}
-        >
-          {loading === 'pass' ? '처리 중...' : '합격'}
-        </button>
-        <button
-          onClick={() => handleResult('FAIL')}
-          disabled={!!loading}
-          style={{
-            padding: '9px 22px', borderRadius: '7px',
-            background: loading ? '#d1d5db' : '#dc2626',
-            color: '#fff', border: 'none',
-            cursor: !!loading ? 'not-allowed' : 'pointer',
-            fontWeight: 600, fontSize: '13px',
-          }}
-        >
-          {loading === 'fail' ? '처리 중...' : '불합격'}
-        </button>
-      </div>
+
+      {resultPending ? (
+        /* 인라인 확인 폼 */
+        <div style={{
+          padding: '14px 16px',
+          border: `1.5px solid ${resultPending === 'PASS' ? '#86efac' : '#fca5a5'}`,
+          borderRadius: '8px',
+          backgroundColor: resultPending === 'PASS' ? '#f0fdf4' : '#fff5f5',
+        }}>
+          <p style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px',
+            color: resultPending === 'PASS' ? '#15803d' : '#b91c1c' }}>
+            {member?.name}님을 {resultPending === 'PASS' ? '합격' : '불합격'} 처리합니다
+          </p>
+          <textarea
+            value={resultReason}
+            onChange={e => setResultReason(e.target.value)}
+            placeholder={resultPending === 'PASS' ? '합격 사유 (선택)' : '불합격 사유 (선택)'}
+            rows={2}
+            style={{
+              width: '100%', padding: '8px 10px', fontSize: '13px',
+              border: '1px solid #e5e7eb', borderRadius: '6px',
+              resize: 'vertical', outline: 'none', boxSizing: 'border-box' as const,
+              marginBottom: '10px', lineHeight: 1.5,
+            }}
+          />
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={handleResultConfirm}
+              disabled={!!loading}
+              style={{
+                padding: '7px 18px', borderRadius: '6px', fontSize: '13px', fontWeight: 600,
+                background: resultPending === 'PASS' ? '#16a34a' : '#dc2626',
+                color: '#fff', border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1,
+              }}
+            >
+              {loading ? '처리 중...' : '확인'}
+            </button>
+            <button
+              onClick={() => { setResultPending(null); setResultReason('') }}
+              disabled={!!loading}
+              style={{
+                padding: '7px 18px', borderRadius: '6px', fontSize: '13px',
+                background: '#fff', color: '#6b7280',
+                border: '1px solid #d1d5db', cursor: 'pointer',
+              }}
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => setResultPending('PASS')}
+            disabled={!!loading || !isScheduled}
+            style={{
+              padding: '9px 22px', borderRadius: '7px',
+              background: (!isScheduled || loading) ? '#d1d5db' : '#16a34a',
+              color: '#fff', border: 'none',
+              cursor: (!isScheduled || !!loading) ? 'not-allowed' : 'pointer',
+              fontWeight: 600, fontSize: '13px',
+            }}
+          >
+            합격
+          </button>
+          <button
+            onClick={() => setResultPending('FAIL')}
+            disabled={!!loading}
+            style={{
+              padding: '9px 22px', borderRadius: '7px',
+              background: loading ? '#d1d5db' : '#dc2626',
+              color: '#fff', border: 'none',
+              cursor: !!loading ? 'not-allowed' : 'pointer',
+              fontWeight: 600, fontSize: '13px',
+            }}
+          >
+            불합격
+          </button>
+        </div>
+      )}
 
     </div>
   )

@@ -3,6 +3,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { WarningSection } from '@/components/admin/WarningSection'
+import { WithdrawSection } from '@/components/admin/WithdrawSection'
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING:      '신청 대기',
@@ -164,6 +165,13 @@ export default async function MemberDetailPage({
 
       {/* ── 경고 이력 ── */}
       <WarningSection memberId={params.id} />
+
+      {/* ── 탈퇴 처리 ── */}
+      <WithdrawSection
+        memberId={params.id}
+        memberName={member.name}
+        currentStatus={member.status}
+      />
 
       {/* ── 상태 이력 타임라인 ── */}
       <section style={styles.section}>
