@@ -1,7 +1,21 @@
+'use client'
+
 import Image from 'next/image'
-import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LandingPage() {
+  const supabase = createClient()
+
+  const handleKakaoLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        queryParams: { prompt: 'login' },
+      },
+    })
+  }
+
   return (
     <main style={{
       minHeight: '100vh',
@@ -31,8 +45,8 @@ export default function LandingPage() {
             청림그룹사운드
           </span>
         </div>
-        <Link
-          href="/login"
+        <button
+          onClick={handleKakaoLogin}
           style={{
             padding: '8px 20px',
             backgroundColor: 'rgba(255,255,255,0.08)',
@@ -41,12 +55,12 @@ export default function LandingPage() {
             fontSize: '13px',
             fontWeight: 500,
             color: '#ffffff',
-            textDecoration: 'none',
+            cursor: 'pointer',
             letterSpacing: '-0.1px',
           }}
         >
           로그인
-        </Link>
+        </button>
       </header>
 
       {/* 히어로 섹션 */}
@@ -100,8 +114,8 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <Link
-          href="/login"
+        <button
+          onClick={handleKakaoLogin}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -112,13 +126,14 @@ export default function LandingPage() {
             fontSize: '15px',
             fontWeight: 600,
             color: '#191600',
-            textDecoration: 'none',
+            border: 'none',
+            cursor: 'pointer',
             letterSpacing: '-0.2px',
           }}
         >
           <KakaoIcon />
           카카오로 시작하기
-        </Link>
+        </button>
       </section>
 
       {/* 활동 소개 섹션 */}
