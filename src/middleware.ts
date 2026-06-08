@@ -6,13 +6,13 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // 로그인 없이 접근 가능한 경로
-const PUBLIC_PATHS = ['/login', '/auth']
+const PUBLIC_PATHS = ['/', '/login', '/auth']
 
 // 로그인은 됐지만 미승인 상태에서도 접근 가능한 경로
-const PENDING_ALLOWED_PATHS = ['/apply', '/link', '/status', '/auth']
+const PENDING_ALLOWED_PATHS = ['/', '/apply', '/link', '/status', '/auth']
 
 // INTERVIEWING 상태에서 접근 가능한 경로
-const INTERVIEWING_ALLOWED_PATHS = ['/notices', '/home', '/timetable', '/status', '/auth']
+const INTERVIEWING_ALLOWED_PATHS = ['/', '/notices', '/home', '/timetable', '/status', '/auth']
 
 // 운영진 전용 경로
 const ADMIN_PATHS = ['/admin']
@@ -81,7 +81,7 @@ export async function middleware(request: NextRequest) {
 
   // ── 4. WITHDRAWN 처리 ─────────────────────────────────────────
   if (status === 'WITHDRAWN') {
-    if (!pathname.startsWith('/status') && !pathname.startsWith('/auth')) {
+    if (pathname !== '/' && !pathname.startsWith('/status') && !pathname.startsWith('/auth')) {
       return NextResponse.redirect(new URL('/status', request.url))
     }
     return response
