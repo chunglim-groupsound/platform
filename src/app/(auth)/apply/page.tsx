@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import InterviewSlotPicker from '@/components/InterviewSlotPicker'
 
 // ─────────────────────────────────────────────
 // 상수
@@ -44,10 +45,22 @@ export default function ApplyPage() {
   const router  = useRouter()
   const supabase = createClient()
 
+  const [recruitOpen, setRecruitOpen] = useState<boolean | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/settings/recruitment')
+      .then(r => r.json())
+      .then(d => setRecruitOpen(d.is_open ?? false))
+      .catch(() => setRecruitOpen(false))
+  }, [])
+
+  const currentGeneration = String(new Date().getFullYear() - 1982)
+
   const [form, setForm] = useState<ApplyForm>({
     name:              '',
     nickname:          '',
-    generation:        '',
+    generation:        currentGeneration,
     session:           [],
     profile_image_url: '',
     genre_preference:  [],
@@ -160,12 +173,51 @@ export default function ApplyPage() {
       return
     }
 
-    router.push('/status')
+    setSubmitted(true)
   }
 
   // ─────────────────────────────────────────────
   // 렌더링
   // ─────────────────────────────────────────────
+  if (recruitOpen === null) {
+    return (
+      <main style={styles.container}>
+        <div style={{ ...styles.card, textAlign: 'center', color: '#999', padding: '60px 40px' }}>
+          로딩 중...
+        </div>
+      </main>
+    )
+  }
+
+  if (!recruitOpen) {
+    return (
+      <main style={styles.container}>
+        <div style={{ ...styles.card, textAlign: 'center' }}>
+          <p style={{ fontSize: '32px', marginBottom: '16px' }}>🎸</p>
+          <h2 style={{ ...styles.title, marginBottom: '12px' }}>현재 모집 기간이 아닙니다</h2>
+          <p style={{ fontSize: '14px', color: '#999', lineHeight: 1.7 }}>
+            신규 부원 모집 기간이 아닙니다.<br />
+            모집 기간에 다시 방문해주세요.
+          </p>
+        </div>
+      </main>
+    )
+  }
+
+  if (submitted) {
+    return (
+      <main style={styles.container}>
+        <div style={styles.card}>
+          <h2 style={{ ...styles.title, marginBottom: '8px' }}>신청서가 제출되었습니다</h2>
+          <p style={{ fontSize: '14px', color: '#999', marginBottom: '28px' }}>
+            희망 면접 일정을 선택해주세요. 나중에 /status 페이지에서도 변경할 수 있습니다.
+          </p>
+          <InterviewSlotPicker onSubmitSuccess={() => router.push('/status')} />
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main style={styles.container}>
       <div style={styles.card}>
@@ -223,14 +275,16 @@ export default function ApplyPage() {
             </div>
           </Field>
 
-          <Field label="기수" required>
-            <input
-              type="number"
-              value={form.generation}
-              onChange={e => setField('generation', e.target.value)}
-              placeholder="예) 15"
-              style={{ ...styles.input, width: '120px' }}
-            />
+          <Field label="기수" required hint="현재 연도 기준 자동 계산">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input
+                type="number"
+                value={form.generation}
+                readOnly
+                style={{ ...styles.input, width: '80px', backgroundColor: '#f5f5f5', color: '#555', cursor: 'default' }}
+              />
+              <span style={{ fontSize: '13px', color: '#999' }}>{form.generation}기 ({new Date().getFullYear()}년 기준)</span>
+            </div>
           </Field>
 
           <Field label="세션" required hint="복수 선택 가능">

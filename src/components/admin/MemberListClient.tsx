@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 // 상태별 한국어 라벨
 const STATUS_LABELS: Record<string, string> = {
@@ -62,7 +63,11 @@ export default function MemberListClient({ members }: { members: any[] }) {
         <tbody>
           {filtered.map(member => (
             <tr key={member.id}>
-              <td>{member.name}</td>
+              <td>
+                <Link href={`/admin/members/${member.id}`} style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500 }}>
+                  {member.name}
+                </Link>
+              </td>
               <td>{member.generation}기</td>
               <td>{member.session?.join(', ')}</td>
               <td>{STATUS_LABELS[member.status]}</td>

@@ -1,24 +1,182 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import InterviewSlotPicker from '@/components/InterviewSlotPicker'
 
-export default async function StatusPage() {
+interface Props {
+  searchParams: Promise<{ reason?: string }>
+}
+
+export default async function StatusPage({ searchParams }: Props) {
+  const { reason } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('status, name')
-    .eq('id', user!.id)
-    .single()
-
-  const messages: Record<string, string> = {
-    PENDING: '가입 신청이 접수되었습니다. 운영진 검토 후 면접 일정을 안내드립니다.',
-    WITHDRAWN: '접근이 제한된 계정입니다. 운영진에게 문의해 주세요.',
+  if (reason === 'not_open') {
+    return (
+      <main style={containerStyle}>
+        <div style={cardStyle}>
+          <p style={{ fontSize: '32px', marginBottom: '16px' }}>🎸</p>
+          <h2 style={titleStyle}>현재 모집 기간이 아닙니다</h2>
+          <p style={descStyle}>
+            신규 부원 모집 기간이 아닙니다.<br />
+            다음 모집 공고를 기다려주세요.
+          </p>
+        </div>
+      </main>
+    )
   }
 
+  const { data: profile } = await supabase
+    .from('users')
+    .select('id, status, name')
+    .or(`id.eq.${user!.id},linked_auth_id.eq.${user!.id}`)
+    .maybeSingle()
+
+  // 확정 슬롯 조회 — 2단계로 분리 (RLS 우회: 슬롯은 admin 클라이언트로 조회)
+  const { data: application } = await supabase
+    .from('join_applications')
+    .select('id, confirmed_slot_id')
+    .eq('user_id', profile?.id ?? user!.id)
+    .maybeSingle()
+
+  let confirmedSlotAt: string | null = null
+  if (application?.confirmed_slot_id) {
+    const { data: slot } = await supabaseAdmin
+      .from('interview_slots')
+      .select('slot_at')
+      .eq('id', application.confirmed_slot_id)
+      .single()
+    confirmedSlotAt = slot?.slot_at ?? null
+  }
+
+  const status = (profile?.status ?? 'PENDING') as 'PENDING' | 'INTERVIEWING' | 'WITHDRAWN' | string
+  const isPending      = status === 'PENDING'
+  const isInterviewing = status === 'INTERVIEWING'
+  const isWithdrawn    = status === 'WITHDRAWN'
+
+  // WITHDRAWN 사유 조회 (member_history 최신 WITHDRAWN 전이의 reason)
+  let withdrawnReason: string | null = null
+  if (isWithdrawn) {
+    const { data: hist } = await supabase
+      .from('member_history')
+      .select('reason')
+      .eq('user_id', profile?.id ?? user!.id)
+      .eq('to_status', 'WITHDRAWN')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    withdrawnReason = hist?.reason ?? null
+  }
+
+  const STATUS_MESSAGES: Record<string, string> = {
+    PENDING:      '가입 신청이 접수되었습니다. 운영진 검토 후 면접 일정을 안내드립니다.',
+    INTERVIEWING: '면접 일정이 곧 안내됩니다.',
+    WITHDRAWN:    '계정 접근이 제한되었습니다.',
+  }
+
+  const statusMessage = (confirmedSlotAt && isInterviewing)
+    ? '면접 일정이 확정되었습니다. 아래 일정을 확인해 주세요.'
+    : (STATUS_MESSAGES[status] ?? '신청 상태를 확인 중입니다.')
+
   return (
-    <main>
-      <h2>{profile?.name}님</h2>
-      <p>{messages[profile?.status ?? 'PENDING']}</p>
+    <main style={containerStyle}>
+      <div style={{ ...cardStyle, maxWidth: isPending || isInterviewing ? '520px' : '480px' }}>
+        <h2 style={titleStyle}>{profile?.name}님</h2>
+        <p style={descStyle}>{statusMessage}</p>
+
+        {/* 확정 슬롯 표시 — INTERVIEWING 상태일 때만 */}
+        {confirmedSlotAt && isInterviewing && (
+          <div style={confirmedBoxStyle}>
+            <p style={{ fontSize: '12px', color: '#1d4ed8', marginBottom: '6px', fontWeight: 600, letterSpacing: '0.02em' }}>
+              확정된 면접 일정
+            </p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#111827', marginBottom: '0' }}>
+              {new Date(confirmedSlotAt).toLocaleString('ko-KR', {
+                month: 'long', day: 'numeric', weekday: 'short',
+                hour: '2-digit', minute: '2-digit',
+              })}
+            </p>
+          </div>
+        )}
+
+        {/* WITHDRAWN 사유 표시 */}
+        {isWithdrawn && (
+          <div style={{
+            background: '#fef2f2', border: '1px solid #fecaca',
+            borderRadius: '10px', padding: '16px 20px', marginBottom: '16px', textAlign: 'left',
+          }}>
+            <p style={{ fontSize: '12px', color: '#dc2626', fontWeight: 600, marginBottom: '6px' }}>
+              제한 사유
+            </p>
+            <p style={{ fontSize: '14px', color: '#7f1d1d', margin: 0, lineHeight: 1.6 }}>
+              {withdrawnReason ?? '운영진에게 직접 문의해 주세요.'}
+            </p>
+          </div>
+        )}
+
+        {/* PENDING 상태 + 신청서 있음 + 확정 슬롯 없음 → 희망 일정 선택 */}
+        {isPending && application && !confirmedSlotAt && (
+          <div style={slotSectionStyle}>
+            <h3 style={slotTitleStyle}>희망 면접 일정 선택</h3>
+            <InterviewSlotPicker />
+          </div>
+        )}
+      </div>
     </main>
   )
+}
+
+const containerStyle: React.CSSProperties = {
+  minHeight: '100vh',
+  backgroundColor: '#f4f5f7',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '40px 20px',
+}
+
+const cardStyle: React.CSSProperties = {
+  background: '#fff',
+  borderRadius: '12px',
+  padding: '48px 40px',
+  width: '100%',
+  textAlign: 'center',
+  boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+}
+
+const titleStyle: React.CSSProperties = {
+  fontSize: '20px',
+  fontWeight: 600,
+  marginBottom: '12px',
+  color: '#111827',
+}
+
+const descStyle: React.CSSProperties = {
+  fontSize: '14px',
+  color: '#6b7280',
+  lineHeight: 1.7,
+  marginBottom: '24px',
+}
+
+const confirmedBoxStyle: React.CSSProperties = {
+  background: '#eff6ff',
+  border: '1px solid #bfdbfe',
+  borderRadius: '10px',
+  padding: '16px 20px',
+  marginBottom: '24px',
+  textAlign: 'center',
+}
+
+const slotSectionStyle: React.CSSProperties = {
+  marginTop: '8px',
+  textAlign: 'left',
+  borderTop: '1px solid #f3f4f6',
+  paddingTop: '24px',
+}
+
+const slotTitleStyle: React.CSSProperties = {
+  fontSize: '15px',
+  fontWeight: 600,
+  color: '#111827',
+  marginBottom: '14px',
 }

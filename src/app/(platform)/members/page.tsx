@@ -22,7 +22,7 @@ export default function MembersPage() {
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return router.push('/login')
+      if (!user) return router.push('/')
       const { data: profile } = await supabase
         .from('users')
         .select('id, role')

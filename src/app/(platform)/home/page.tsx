@@ -20,7 +20,7 @@ export default async function TimetablePage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) redirect('/')
 
   const { data: profile } = await supabase
     .from('users')
@@ -28,7 +28,7 @@ export default async function TimetablePage() {
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
     .maybeSingle()
 
-  if (!profile) redirect('/login')
+  if (!profile) redirect('/')
 
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(profile.role)
 

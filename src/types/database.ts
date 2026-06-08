@@ -62,38 +62,137 @@ export type Database = {
           },
         ]
       }
+      interview_preferences: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          slot_id: string
+          user_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          slot_id: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          slot_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_preferences_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "join_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_preferences_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "interview_slots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_slots: {
+        Row: {
+          capacity: number
+          created_at: string
+          created_by: string | null
+          id: string
+          slot_at: string
+        }
+        Insert: {
+          capacity?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          slot_at: string
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          slot_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_slots_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_slots_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       join_applications: {
         Row: {
           admin_note: string | null
+          confirmed_slot_id: string | null
           created_at: string
           id: string
           interview_result: Database["public"]["Enums"]["interview_result"]
-          interview_scheduled_at: string | null
           motivation: string | null
           self_intro: string | null
           user_id: string
         }
         Insert: {
           admin_note?: string | null
+          confirmed_slot_id?: string | null
           created_at?: string
           id?: string
           interview_result?: Database["public"]["Enums"]["interview_result"]
-          interview_scheduled_at?: string | null
           motivation?: string | null
           self_intro?: string | null
           user_id: string
         }
         Update: {
           admin_note?: string | null
+          confirmed_slot_id?: string | null
           created_at?: string
           id?: string
           interview_result?: Database["public"]["Enums"]["interview_result"]
-          interview_scheduled_at?: string | null
           motivation?: string | null
           self_intro?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "join_applications_confirmed_slot_id_fkey"
+            columns: ["confirmed_slot_id"]
+            isOneToOne: false
+            referencedRelation: "interview_slots"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "join_applications_user_id_fkey"
             columns: ["user_id"]
@@ -105,6 +204,45 @@ export type Database = {
             foreignKeyName: "join_applications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_warnings: {
+        Row: {
+          created_at: string
+          id: string
+          issued_by: string | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_warnings_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_warnings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -163,6 +301,48 @@ export type Database = {
           {
             foreignKeyName: "member_history_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruitment_periods: {
+        Row: {
+          close_at: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_open: boolean
+          open_at: string
+        }
+        Insert: {
+          close_at: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_open?: boolean
+          open_at: string
+        }
+        Update: {
+          close_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_open?: boolean
+          open_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruitment_periods_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruitment_periods_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]

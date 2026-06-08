@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // ─────────────────────────────────────────────
 // 타입 정의
@@ -9,7 +9,7 @@ interface Application {
   id: string
   motivation: string | null
   self_intro: string | null
-  interview_scheduled_at: string | null
+  confirmed_slot_id: string | null
   interview_result: 'PENDING' | 'PASS' | 'FAIL'
   admin_note: string | null
   created_at: string
@@ -22,29 +22,51 @@ interface Application {
   } | null
 }
 
+interface Slot {
+  id: string
+  slot_at: string
+}
+
 interface Props {
   application: Application
+}
+
+function formatSlot(iso: string) {
+  return new Date(iso).toLocaleString('ko-KR', {
+    month: 'long', day: 'numeric', weekday: 'short',
+    hour: '2-digit', minute: '2-digit',
+  })
 }
 
 // ─────────────────────────────────────────────
 // ApplicationCard
 // ─────────────────────────────────────────────
 export default function ApplicationCard({ application }: Props) {
-  const [scheduleInput, setScheduleInput] = useState(
-    application.interview_scheduled_at
-      ? new Date(application.interview_scheduled_at).toISOString().slice(0, 16)
-      : ''
-  )
+  const [slots, setSlots] = useState<Slot[]>([])
+  const [preferences, setPreferences] = useState<string[]>([]) // slot_id 목록
+  const [selectedSlotId, setSelectedSlotId] = useState<string>(application.confirmed_slot_id ?? '')
   const [adminNote, setAdminNote] = useState(application.admin_note ?? '')
   const [loading, setLoading] = useState<'schedule' | 'pass' | 'fail' | null>(null)
+  const [isScheduled, setIsScheduled] = useState(!!application.confirmed_slot_id)
   const [done, setDone] = useState(false)
-  const [isScheduled, setIsScheduled] = useState(!!application.interview_scheduled_at)
+  const [resultPending, setResultPending] = useState<'PASS' | 'FAIL' | null>(null)
+  const [resultReason, setResultReason] = useState('')
 
   const member = application.users
 
-  // ── 면접 일정 입력 ──────────────────────────
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/admin/interview-slots').then(r => r.json()),
+      fetch(`/api/admin/applications/${application.id}/preferences`).then(r => r.json()).catch(() => []),
+    ]).then(([slotsData, prefData]) => {
+      setSlots(Array.isArray(slotsData) ? slotsData : [])
+      setPreferences(Array.isArray(prefData) ? prefData : [])
+    })
+  }, [application.id])
+
+  // ── 슬롯 확정 ──────────────────────────────
   const handleSchedule = async () => {
-    if (!scheduleInput) return alert('면접 일시를 입력해주세요.')
+    if (!selectedSlotId) return alert('면접 슬롯을 선택해주세요.')
     setLoading('schedule')
 
     const res = await fetch('/api/admin/applications/schedule', {
@@ -53,26 +75,24 @@ export default function ApplicationCard({ application }: Props) {
       body: JSON.stringify({
         applicationId: application.id,
         userId: member?.id,
-        interviewScheduledAt: new Date(scheduleInput).toISOString(),
+        slotId: selectedSlotId,
       }),
     })
 
     setLoading(null)
     if (res.ok) {
       setIsScheduled(true)
-      alert(`${member?.name}님께 면접 일정이 전달되었습니다.`)
+      alert(`${member?.name}님 면접 슬롯이 확정되었습니다.`)
     } else {
       const { error } = await res.json()
       alert('오류: ' + error)
     }
   }
 
-  // ── 면접 결과 처리 (합격 / 불합격) ──────────
-  const handleResult = async (result: 'PASS' | 'FAIL') => {
-    const label = result === 'PASS' ? '합격' : '불합격'
-    if (!confirm(`${member?.name}님을 ${label} 처리하시겠습니까?`)) return
-
-    setLoading(result === 'PASS' ? 'pass' : 'fail')
+  // ── 면접 결과 처리 ──────────────────────────
+  const handleResultConfirm = async () => {
+    if (!resultPending) return
+    setLoading(resultPending === 'PASS' ? 'pass' : 'fail')
 
     const res = await fetch('/api/admin/applications/result', {
       method: 'POST',
@@ -80,139 +100,252 @@ export default function ApplicationCard({ application }: Props) {
       body: JSON.stringify({
         applicationId: application.id,
         userId: member?.id,
-        result,
+        result: resultPending,
         adminNote,
+        reason: resultReason.trim() || undefined,
       }),
     })
 
     setLoading(null)
+    setResultPending(null)
+    setResultReason('')
 
     if (res.ok) {
       setDone(true)
-      alert(
-        result === 'PASS'
-          ? `${member?.name}님이 유예 부원으로 전환되었습니다.`
-          : `${member?.name}님이 불합격 처리되었습니다.`
-      )
     } else {
       const { error } = await res.json()
       alert('오류: ' + error)
     }
   }
 
-  // 처리 완료된 카드는 접힌 상태로 표시
   if (done) {
     return (
-      <div style={{ padding: '12px', border: '1px solid #ccc', opacity: 0.5 }}>
-        <span>✅ {member?.name} — 처리 완료</span>
+      <div style={{ padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '8px', opacity: 0.5, marginBottom: '12px' }}>
+        <span style={{ fontSize: '14px', color: '#6b7280' }}>✅ {member?.name} — 처리 완료</span>
       </div>
     )
   }
 
   return (
-    <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '16px' }}>
+    <div style={cardStyle}>
 
       {/* ── 신청자 기본 정보 ── */}
-      <div style={{ marginBottom: '12px' }}>
-        <strong style={{ fontSize: '18px' }}>{member?.name}</strong>
-        <span style={{ marginLeft: '8px', color: '#666' }}>
+      <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' as const }}>
+        <strong style={{ fontSize: '17px', color: '#111827' }}>{member?.name}</strong>
+        <span style={{ fontSize: '13px', color: '#6b7280' }}>
           {member?.generation}기 · {member?.session?.join(', ')}
         </span>
-        <span style={{ marginLeft: '8px', fontSize: '12px', color: '#999' }}>
+        <span style={{ fontSize: '12px', color: '#9ca3af', marginLeft: 'auto' }}>
           신청일: {new Date(application.created_at).toLocaleDateString('ko-KR')}
         </span>
       </div>
 
-      {/* ── 지원 동기 ── */}
+      {/* ── 지원 동기 / 자기소개 ── */}
       {application.motivation && (
-        <div style={{ marginBottom: '10px' }}>
-          <p style={{ fontWeight: 'bold', marginBottom: '4px' }}>지원 동기</p>
-          <p style={{ whiteSpace: 'pre-wrap', background: '#f9f9f9', padding: '8px', borderRadius: '4px' }}>
-            {application.motivation}
-          </p>
-        </div>
+        <Detail label="지원 동기" text={application.motivation} />
       )}
-
-      {/* ── 자기소개 ── */}
       {application.self_intro && (
-        <div style={{ marginBottom: '10px' }}>
-          <p style={{ fontWeight: 'bold', marginBottom: '4px' }}>자기소개</p>
-          <p style={{ whiteSpace: 'pre-wrap', background: '#f9f9f9', padding: '8px', borderRadius: '4px' }}>
-            {application.self_intro}
-          </p>
-        </div>
+        <Detail label="자기소개" text={application.self_intro} />
       )}
 
-      <hr style={{ margin: '16px 0' }} />
+      <hr style={{ margin: '16px 0', borderColor: '#f3f4f6' }} />
 
-      {/* ── 면접 일정 입력 ── */}
+      {/* ── 면접 슬롯 확정 ── */}
       <div style={{ marginBottom: '16px' }}>
-        <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>면접 일정</p>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <input
-            type="datetime-local"
-            value={scheduleInput}
-            onChange={e => setScheduleInput(e.target.value)}
-            style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
-          <button
-            onClick={handleSchedule}
-            disabled={loading === 'schedule'}
-            style={{ padding: '6px 14px', borderRadius: '4px', background: '#4A90E2', color: '#fff', border: 'none', cursor: 'pointer' }}
-          >
-            {loading === 'schedule' ? '처리 중...' : '일정 저장 · 안내 발송'}
-          </button>
-        </div>
-        {application.interview_scheduled_at && (
-          <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-            현재 일정: {new Date(application.interview_scheduled_at).toLocaleString('ko-KR')}
-          </p>
+        <p style={labelStyle}>
+          면접 슬롯 확정
+          {preferences.length > 0 && (
+            <span style={{ fontWeight: 400, color: '#6b7280', marginLeft: '6px' }}>
+              (신청자 희망 {preferences.length}개)
+            </span>
+          )}
+        </p>
+
+        {slots.length === 0 ? (
+          <p style={{ fontSize: '13px', color: '#9ca3af' }}>생성된 슬롯이 없습니다.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '10px' }}>
+            {slots.map(slot => {
+              const isPref = preferences.includes(slot.id)
+              const isConfirmed = selectedSlotId === slot.id
+              return (
+                <label
+                  key={slot.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '9px 12px',
+                    border: `1.5px solid ${isConfirmed ? '#4A90E2' : '#e5e7eb'}`,
+                    borderRadius: '7px',
+                    backgroundColor: isConfirmed ? '#eff6ff' : '#fff',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    color: '#111827',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name={`slot-${application.id}`}
+                    value={slot.id}
+                    checked={isConfirmed}
+                    onChange={() => setSelectedSlotId(slot.id)}
+                    style={{ accentColor: '#4A90E2' }}
+                  />
+                  {formatSlot(slot.slot_at)}
+                  {isPref && (
+                    <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#4A90E2', fontWeight: 600 }}>
+                      희망
+                    </span>
+                  )}
+                </label>
+              )
+            })}
+          </div>
         )}
+
+        <button
+          onClick={handleSchedule}
+          disabled={loading === 'schedule' || !selectedSlotId}
+          style={{
+            padding: '8px 18px', borderRadius: '7px',
+            background: (!selectedSlotId || loading === 'schedule') ? '#d1d5db' : '#4A90E2',
+            color: '#fff', border: 'none',
+            cursor: !selectedSlotId ? 'not-allowed' : 'pointer',
+            fontSize: '13px', fontWeight: 600,
+          }}
+        >
+          {loading === 'schedule' ? '처리 중...' : isScheduled ? '슬롯 재확정' : '슬롯 확정'}
+        </button>
       </div>
 
       {/* ── 운영진 메모 ── */}
       <div style={{ marginBottom: '16px' }}>
-        <p style={{ fontWeight: 'bold', marginBottom: '4px' }}>운영진 메모 (내부 전용)</p>
+        <p style={labelStyle}>운영진 메모 (내부 전용)</p>
         <textarea
           value={adminNote}
           onChange={e => setAdminNote(e.target.value)}
           placeholder="면접 시 참고 내용, 특이사항 등"
-          rows={3}
-          style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', resize: 'vertical' }}
+          rows={2}
+          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #e5e7eb', resize: 'vertical' as const, fontSize: '13px', boxSizing: 'border-box' as const }}
         />
       </div>
 
-      {/* ── 합격 / 불합격 버튼 ── */}
-      {!isScheduled && (
-        <p style={{ fontSize: '12px', color: '#E74C3C', marginBottom: '8px' }}>
-          면접 일정을 먼저 저장해야 합격 처리가 가능합니다.
+      {/* ── 합격 / 불합격 ── */}
+      {!isScheduled && !resultPending && (
+        <p style={{ fontSize: '12px', color: '#dc2626', marginBottom: '8px' }}>
+          면접 슬롯을 먼저 확정해야 합격 처리가 가능합니다.
         </p>
       )}
-      <div style={{ display: 'flex', gap: '10px' }}>
-        <button
-          onClick={() => handleResult('PASS')}
-          disabled={!!loading || !isScheduled}
-          style={{
-            padding: '10px 24px', borderRadius: '4px',
-            background: (!isScheduled || loading === 'pass') ? '#aaa' : '#27AE60',
-            color: '#fff', border: 'none', cursor: !isScheduled ? 'not-allowed' : 'pointer', fontWeight: 'bold'
-          }}
-        >
-          {loading === 'pass' ? '처리 중...' : '✅ 합격'}
-        </button>
-        <button
-          onClick={() => handleResult('FAIL')}
-          disabled={!!loading}
-          style={{
-            padding: '10px 24px', borderRadius: '4px',
-            background: loading === 'fail' ? '#aaa' : '#E74C3C',
-            color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold'
-          }}
-        >
-          {loading === 'fail' ? '처리 중...' : '❌ 불합격'}
-        </button>
-      </div>
+
+      {resultPending ? (
+        /* 인라인 확인 폼 */
+        <div style={{
+          padding: '14px 16px',
+          border: `1.5px solid ${resultPending === 'PASS' ? '#86efac' : '#fca5a5'}`,
+          borderRadius: '8px',
+          backgroundColor: resultPending === 'PASS' ? '#f0fdf4' : '#fff5f5',
+        }}>
+          <p style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px',
+            color: resultPending === 'PASS' ? '#15803d' : '#b91c1c' }}>
+            {member?.name}님을 {resultPending === 'PASS' ? '합격' : '불합격'} 처리합니다
+          </p>
+          <textarea
+            value={resultReason}
+            onChange={e => setResultReason(e.target.value)}
+            placeholder={resultPending === 'PASS' ? '합격 사유 (선택)' : '불합격 사유 (선택)'}
+            rows={2}
+            style={{
+              width: '100%', padding: '8px 10px', fontSize: '13px',
+              border: '1px solid #e5e7eb', borderRadius: '6px',
+              resize: 'vertical', outline: 'none', boxSizing: 'border-box' as const,
+              marginBottom: '10px', lineHeight: 1.5,
+            }}
+          />
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={handleResultConfirm}
+              disabled={!!loading}
+              style={{
+                padding: '7px 18px', borderRadius: '6px', fontSize: '13px', fontWeight: 600,
+                background: resultPending === 'PASS' ? '#16a34a' : '#dc2626',
+                color: '#fff', border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1,
+              }}
+            >
+              {loading ? '처리 중...' : '확인'}
+            </button>
+            <button
+              onClick={() => { setResultPending(null); setResultReason('') }}
+              disabled={!!loading}
+              style={{
+                padding: '7px 18px', borderRadius: '6px', fontSize: '13px',
+                background: '#fff', color: '#6b7280',
+                border: '1px solid #d1d5db', cursor: 'pointer',
+              }}
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => setResultPending('PASS')}
+            disabled={!!loading || !isScheduled}
+            style={{
+              padding: '9px 22px', borderRadius: '7px',
+              background: (!isScheduled || loading) ? '#d1d5db' : '#16a34a',
+              color: '#fff', border: 'none',
+              cursor: (!isScheduled || !!loading) ? 'not-allowed' : 'pointer',
+              fontWeight: 600, fontSize: '13px',
+            }}
+          >
+            합격
+          </button>
+          <button
+            onClick={() => setResultPending('FAIL')}
+            disabled={!!loading}
+            style={{
+              padding: '9px 22px', borderRadius: '7px',
+              background: loading ? '#d1d5db' : '#dc2626',
+              color: '#fff', border: 'none',
+              cursor: !!loading ? 'not-allowed' : 'pointer',
+              fontWeight: 600, fontSize: '13px',
+            }}
+          >
+            불합격
+          </button>
+        </div>
+      )}
 
     </div>
   )
+}
+
+function Detail({ label, text }: { label: string; text: string }) {
+  return (
+    <div style={{ marginBottom: '10px' }}>
+      <p style={labelStyle}>{label}</p>
+      <p style={{ whiteSpace: 'pre-wrap', background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>
+        {text}
+      </p>
+    </div>
+  )
+}
+
+const cardStyle: React.CSSProperties = {
+  padding: '20px 24px',
+  border: '1px solid #e5e7eb',
+  borderRadius: '10px',
+  marginBottom: '14px',
+  backgroundColor: '#fff',
+}
+
+const labelStyle: React.CSSProperties = {
+  fontSize: '13px',
+  fontWeight: 600,
+  color: '#374151',
+  marginBottom: '8px',
 }

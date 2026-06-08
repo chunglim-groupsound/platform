@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '권한 없음' }, { status: 403 })
   }
 
-  const { applicationId, userId, result, adminNote } = await request.json()
+  const { applicationId, userId, result, adminNote, reason } = await request.json()
 
   if (!['PASS', 'FAIL'].includes(result)) {
     return NextResponse.json({ error: '올바르지 않은 결과값' }, { status: 400 })
@@ -47,13 +47,14 @@ export async function POST(request: Request) {
   //    합격: INTERVIEWING → PROBATION
   //    불합격: INTERVIEWING → WITHDRAWN
   const toStatus = result === 'PASS' ? 'PROBATION' : 'WITHDRAWN'
+  const defaultReason = result === 'PASS' ? '면접 합격' : '면접 불합격'
 
   try {
     await transitionMemberStatus({
       userId,
       toStatus,
       changedBy: user.id,
-      reason: result === 'PASS' ? '면접 합격' : '면접 불합격',
+      reason: reason?.trim() || defaultReason,
     })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 400 })
