@@ -38,28 +38,37 @@ export default async function StatusPage({ searchParams }: Props) {
     .eq('user_id', profile?.id ?? user!.id)
     .maybeSingle()
 
-  const confirmedSlotAt = (application?.interview_slots as { slot_at: string } | null)?.slot_at ?? null
+  const rawSlot = application?.interview_slots
+  const confirmedSlotAt: string | null =
+    Array.isArray(rawSlot) ? (rawSlot[0]?.slot_at ?? null) : ((rawSlot as unknown as { slot_at: string } | null)?.slot_at ?? null)
 
-  const messages: Record<string, string> = {
-    PENDING:   '가입 신청이 접수되었습니다. 운영진 검토 후 면접 일정을 안내드립니다.',
-    WITHDRAWN: '접근이 제한된 계정입니다. 운영진에게 문의해 주세요.',
+  const status = (profile?.status ?? 'PENDING') as 'PENDING' | 'INTERVIEWING' | 'WITHDRAWN' | string
+  const isPending      = status === 'PENDING'
+  const isInterviewing = status === 'INTERVIEWING'
+
+  const STATUS_MESSAGES: Record<string, string> = {
+    PENDING:      '가입 신청이 접수되었습니다. 운영진 검토 후 면접 일정을 안내드립니다.',
+    INTERVIEWING: '면접 일정이 곧 안내됩니다.',
+    WITHDRAWN:    '접근이 제한된 계정입니다. 운영진에게 문의해 주세요.',
   }
 
-  const isPending = profile?.status === 'PENDING'
+  const statusMessage = confirmedSlotAt
+    ? '면접 일정이 확정되었습니다. 아래 일정을 확인해 주세요.'
+    : (STATUS_MESSAGES[status] ?? '신청 상태를 확인 중입니다.')
 
   return (
     <main style={containerStyle}>
-      <div style={{ ...cardStyle, maxWidth: isPending ? '520px' : '480px' }}>
+      <div style={{ ...cardStyle, maxWidth: isPending || isInterviewing ? '520px' : '480px' }}>
         <h2 style={titleStyle}>{profile?.name}님</h2>
-        <p style={descStyle}>{messages[profile?.status ?? 'PENDING']}</p>
+        <p style={descStyle}>{statusMessage}</p>
 
         {/* 확정 슬롯 표시 */}
         {confirmedSlotAt && (
           <div style={confirmedBoxStyle}>
-            <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', fontWeight: 500 }}>
+            <p style={{ fontSize: '12px', color: '#1d4ed8', marginBottom: '6px', fontWeight: 600, letterSpacing: '0.02em' }}>
               확정된 면접 일정
             </p>
-            <p style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#111827', marginBottom: '0' }}>
               {new Date(confirmedSlotAt).toLocaleString('ko-KR', {
                 month: 'long', day: 'numeric', weekday: 'short',
                 hour: '2-digit', minute: '2-digit',
@@ -68,7 +77,7 @@ export default async function StatusPage({ searchParams }: Props) {
           </div>
         )}
 
-        {/* PENDING 상태 + 신청서 있을 때만 슬롯 선택 UI 표시 */}
+        {/* PENDING 상태 + 신청서 있음 + 확정 슬롯 없음 → 희망 일정 선택 */}
         {isPending && application && !confirmedSlotAt && (
           <div style={slotSectionStyle}>
             <h3 style={slotTitleStyle}>희망 면접 일정 선택</h3>
