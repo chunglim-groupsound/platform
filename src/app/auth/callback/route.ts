@@ -20,17 +20,14 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`)
   }
 
-  // 로그인 성공 — 현재 유저 확인
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
-    // last_active_at 갱신
-    // linked_auth_id 또는 id 기준으로 레코드 찾아서 업데이트
     await supabaseAdmin
       .from('users')
       .update({ last_active_at: new Date().toISOString() })
       .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
   }
 
-  return NextResponse.redirect(`${origin}/timetable`)
+  return NextResponse.redirect(`${origin}/home`)
 }
