@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import InterviewSlotPicker from '@/components/InterviewSlotPicker'
 
 interface Props {
@@ -31,16 +32,22 @@ export default async function StatusPage({ searchParams }: Props) {
     .or(`id.eq.${user!.id},linked_auth_id.eq.${user!.id}`)
     .maybeSingle()
 
-  // 확정 슬롯 조회
+  // 확정 슬롯 조회 — 2단계로 분리 (RLS 우회: 슬롯은 admin 클라이언트로 조회)
   const { data: application } = await supabase
     .from('join_applications')
-    .select('id, confirmed_slot_id, interview_slots(slot_at)')
+    .select('id, confirmed_slot_id')
     .eq('user_id', profile?.id ?? user!.id)
     .maybeSingle()
 
-  const rawSlot = application?.interview_slots
-  const confirmedSlotAt: string | null =
-    Array.isArray(rawSlot) ? (rawSlot[0]?.slot_at ?? null) : ((rawSlot as unknown as { slot_at: string } | null)?.slot_at ?? null)
+  let confirmedSlotAt: string | null = null
+  if (application?.confirmed_slot_id) {
+    const { data: slot } = await supabaseAdmin
+      .from('interview_slots')
+      .select('slot_at')
+      .eq('id', application.confirmed_slot_id)
+      .single()
+    confirmedSlotAt = slot?.slot_at ?? null
+  }
 
   const status = (profile?.status ?? 'PENDING') as 'PENDING' | 'INTERVIEWING' | 'WITHDRAWN' | string
   const isPending      = status === 'PENDING'
