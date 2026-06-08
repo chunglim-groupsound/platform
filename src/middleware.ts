@@ -9,10 +9,10 @@ import type { NextRequest } from 'next/server'
 const PUBLIC_PATHS = ['/', '/auth']
 
 // 로그인은 됐지만 미승인 상태에서도 접근 가능한 경로
-const PENDING_ALLOWED_PATHS = ['/', '/apply', '/link', '/status', '/auth']
+const PENDING_ALLOWED_PATHS = ['/apply', '/link', '/status', '/auth']
 
 // INTERVIEWING 상태에서 접근 가능한 경로
-const INTERVIEWING_ALLOWED_PATHS = ['/', '/notices', '/home', '/timetable', '/status', '/auth']
+const INTERVIEWING_ALLOWED_PATHS = ['/notices', '/home', '/timetable', '/status', '/auth']
 
 // 운영진 전용 경로
 const ADMIN_PATHS = ['/admin']
