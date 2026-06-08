@@ -45,11 +45,26 @@ export default async function StatusPage({ searchParams }: Props) {
   const status = (profile?.status ?? 'PENDING') as 'PENDING' | 'INTERVIEWING' | 'WITHDRAWN' | string
   const isPending      = status === 'PENDING'
   const isInterviewing = status === 'INTERVIEWING'
+  const isWithdrawn    = status === 'WITHDRAWN'
+
+  // WITHDRAWN 사유 조회 (member_history 최신 WITHDRAWN 전이의 reason)
+  let withdrawnReason: string | null = null
+  if (isWithdrawn) {
+    const { data: hist } = await supabase
+      .from('member_history')
+      .select('reason')
+      .eq('user_id', profile?.id ?? user!.id)
+      .eq('to_status', 'WITHDRAWN')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    withdrawnReason = hist?.reason ?? null
+  }
 
   const STATUS_MESSAGES: Record<string, string> = {
     PENDING:      '가입 신청이 접수되었습니다. 운영진 검토 후 면접 일정을 안내드립니다.',
     INTERVIEWING: '면접 일정이 곧 안내됩니다.',
-    WITHDRAWN:    '접근이 제한된 계정입니다. 운영진에게 문의해 주세요.',
+    WITHDRAWN:    '계정 접근이 제한되었습니다.',
   }
 
   const statusMessage = confirmedSlotAt
@@ -73,6 +88,21 @@ export default async function StatusPage({ searchParams }: Props) {
                 month: 'long', day: 'numeric', weekday: 'short',
                 hour: '2-digit', minute: '2-digit',
               })}
+            </p>
+          </div>
+        )}
+
+        {/* WITHDRAWN 사유 표시 */}
+        {isWithdrawn && (
+          <div style={{
+            background: '#fef2f2', border: '1px solid #fecaca',
+            borderRadius: '10px', padding: '16px 20px', marginBottom: '16px', textAlign: 'left',
+          }}>
+            <p style={{ fontSize: '12px', color: '#dc2626', fontWeight: 600, marginBottom: '6px' }}>
+              제한 사유
+            </p>
+            <p style={{ fontSize: '14px', color: '#7f1d1d', margin: 0, lineHeight: 1.6 }}>
+              {withdrawnReason ?? '운영진에게 직접 문의해 주세요.'}
             </p>
           </div>
         )}

@@ -2,6 +2,7 @@
 // 운영진 회원 상세 페이지 — 학과·학번·학년 표시 추가
 
 import { createClient } from '@/lib/supabase/server'
+import { WarningSection } from '@/components/admin/WarningSection'
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING:      '신청 대기',
@@ -160,6 +161,9 @@ export default async function MemberDetailPage({
           </div>
         </section>
       )}
+
+      {/* ── 경고 이력 ── */}
+      <WarningSection memberId={params.id} />
 
       {/* ── 상태 이력 타임라인 ── */}
       <section style={styles.section}>
