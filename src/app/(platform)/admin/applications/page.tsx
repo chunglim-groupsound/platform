@@ -9,7 +9,7 @@ export default async function ApplicationsPage() {
     .from('join_applications')
     .select(`
       id, motivation, self_intro,
-      interview_scheduled_at, interview_result,
+      confirmed_slot_id, interview_result,
       admin_note, created_at,
       users (id, name, generation, session, status)
     `)
@@ -25,9 +25,10 @@ export default async function ApplicationsPage() {
         const formattedApplication = {
           ...app,
           interview_result: app.interview_result as 'PENDING' | 'PASS' | 'FAIL',
-          users: Array.isArray(app.users) 
-            ? app.users[0] 
-            : (app.users ? app.users : null)
+          confirmed_slot_id: app.confirmed_slot_id ?? null,
+          users: Array.isArray(app.users)
+            ? app.users[0]
+            : (app.users ? app.users : null),
         }
 
         return (

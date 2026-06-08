@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import InterviewSlotPicker from '@/components/InterviewSlotPicker'
 
 // ─────────────────────────────────────────────
 // 상수
@@ -45,6 +46,7 @@ export default function ApplyPage() {
   const supabase = createClient()
 
   const [recruitOpen, setRecruitOpen] = useState<boolean | null>(null)
+  const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
     fetch('/api/settings/recruitment')
@@ -169,7 +171,7 @@ export default function ApplyPage() {
       return
     }
 
-    router.push('/status')
+    setSubmitted(true)
   }
 
   // ─────────────────────────────────────────────
@@ -195,6 +197,20 @@ export default function ApplyPage() {
             신규 부원 모집 기간이 아닙니다.<br />
             모집 기간에 다시 방문해주세요.
           </p>
+        </div>
+      </main>
+    )
+  }
+
+  if (submitted) {
+    return (
+      <main style={styles.container}>
+        <div style={styles.card}>
+          <h2 style={{ ...styles.title, marginBottom: '8px' }}>신청서가 제출되었습니다</h2>
+          <p style={{ fontSize: '14px', color: '#999', marginBottom: '28px' }}>
+            희망 면접 일정을 선택해주세요. 나중에 /status 페이지에서도 변경할 수 있습니다.
+          </p>
+          <InterviewSlotPicker onSubmitSuccess={() => router.push('/status')} />
         </div>
       </main>
     )
