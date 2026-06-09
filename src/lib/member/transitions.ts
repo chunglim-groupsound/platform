@@ -4,8 +4,7 @@ import type { Database } from '@/types/database'
 type UsersUpdate = Database['public']['Tables']['users']['Update']
 type MemberStatus = Database['public']['Enums']['member_status']
 
-// 허용된 상태 전이 경로 정의
-const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+export const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   PENDING:      ['INTERVIEWING', 'WITHDRAWN'],
   INTERVIEWING: ['PROBATION', 'WITHDRAWN'],
   PROBATION:    ['ACTIVE', 'WITHDRAWN'],

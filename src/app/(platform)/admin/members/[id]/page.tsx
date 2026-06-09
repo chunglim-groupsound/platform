@@ -1,27 +1,9 @@
-// src/app/(platform)/admin/members/[id]/page.tsx
-// 운영진 회원 상세 페이지 — 학과·학번·학년 표시 추가
-
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { WarningSection } from '@/components/admin/WarningSection'
 import { WithdrawSection } from '@/components/admin/WithdrawSection'
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING:      '신청 대기',
-  INTERVIEWING: '면접 중',
-  PROBATION:    '유예',
-  ACTIVE:       '정식',
-  INACTIVE:     '휴면',
-  WITHDRAWN:    '탈퇴',
-}
-
-const ROLE_LABELS: Record<string, string> = {
-  SUPER_ADMIN:      '개발 담당',
-  ADMIN:            '운영진',
-  TEAM_LEADER:      '팀장',
-  MEMBER:           '정식 부원',
-  PROBATION_MEMBER: '유예 부원',
-}
+import { STATUS_LABELS, ROLE_LABELS } from '@/lib/constants'
+import { calcProbationDday, calcProbationEndDate } from '@/lib/member/probation'
 
 export default async function MemberDetailPage({
   params,
@@ -108,19 +90,11 @@ export default async function MemberDetailPage({
             />
             <InfoRow
               label="만료 예정"
-              value={new Date(
-                new Date(member.probation_started_at).getTime() + 30 * 24 * 60 * 60 * 1000
-              ).toLocaleDateString('ko-KR')}
+              value={calcProbationEndDate(member.probation_started_at).toLocaleDateString('ko-KR')}
             />
             <InfoRow
               label="잔여일"
-              value={(() => {
-                const end = new Date(
-                  new Date(member.probation_started_at).getTime() + 30 * 24 * 60 * 60 * 1000
-                )
-                const diff = Math.ceil((end.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-                return diff > 0 ? `D-${diff}` : '만료'
-              })()}
+              value={calcProbationDday(member.probation_started_at)}
             />
           </div>
         </section>
