@@ -5,15 +5,7 @@ import type { NextRequest } from 'next/server'
 import { isAdminRole, hasActiveMemberAccess, canCreateTeam } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
 import { calcSessionSummary, calcMemberCount } from '@/lib/team/utils'
-
-interface TeamLeader { id: string; name: string; nickname: string | null; session: string[] | null }
-interface TeamMemberRow { user_id: string; session_in_team: string[] | null }
-interface TeamRow {
-  id: string; name: string; current_song: string | null; description: string | null
-  is_active: boolean; is_recruiting: boolean; created_at: string; updated_at: string; leader_id: string | null
-  leader: TeamLeader | null
-  team_members: TeamMemberRow[]
-}
+import type { TeamListItem } from '@/types/team'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -46,7 +38,7 @@ export async function GET(request: NextRequest) {
   const { data: rawTeams, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const teams = (rawTeams ?? []) as unknown as TeamRow[]
+  const teams = (rawTeams ?? []) as TeamListItem[]
 
   const result = teams.map(t => {
     const members = t.team_members ?? []

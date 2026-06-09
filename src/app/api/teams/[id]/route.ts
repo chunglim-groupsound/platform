@@ -3,6 +3,9 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
+import type { Database } from '@/types/database'
+
+type TeamsUpdate = Database['public']['Tables']['teams']['Update']
 
 async function resolveTeamAccess(userId: string, teamId: string) {
   const [{ data: callerProfile }, { data: team }] = await Promise.all([
@@ -102,7 +105,7 @@ export async function PATCH(
 
   const { error: updateError } = await supabaseAdmin
     .from('teams')
-    .update(patch)
+    .update(patch as TeamsUpdate)
     .eq('id', id)
 
   if (updateError) {

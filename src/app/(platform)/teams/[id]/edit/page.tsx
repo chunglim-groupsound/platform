@@ -49,7 +49,7 @@ export default async function EditTeamPage({
   if (!isAdmin && !isLeader && !isViceLeader) redirect(`/teams/${id}`)
 
   // 팀원 목록 (드롭다운용)
-  const rawMembers = (team.team_members ?? []) as unknown as TeamMemberRow[]
+  const rawMembers = (team.team_members ?? []) as TeamMemberRow[]
   const teamMembers = rawMembers
     .map(tm => {
       const u = tm.user

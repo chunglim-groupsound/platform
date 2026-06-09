@@ -5,6 +5,7 @@ import { TeamCard } from '@/components/teams/TeamCard'
 import Link from 'next/link'
 import { isAdminRole, hasActiveMemberAccess, canCreateTeam } from '@/lib/constants'
 import { calcSessionSummary, calcMemberCount } from '@/lib/team/utils'
+import type { TeamListItem } from '@/types/team'
 
 interface Props {
   searchParams: Promise<{ recruiting?: string; inactive?: string; myteam?: string }>
@@ -28,15 +29,6 @@ export default async function TeamsPage({ searchParams }: Props) {
   const isAdmin   = isAdminRole(profile?.role)
   const canCreate = canCreateTeam(profile?.status)
 
-  interface LeaderData { id: string; name: string; nickname: string | null; session: string[] | null }
-  interface MemberData { user_id: string; session_in_team: string[] }
-  interface TeamData {
-    id: string; name: string; current_song: string | null; description: string | null
-    is_active: boolean; is_recruiting: boolean; leader_id: string | null
-    leader: LeaderData | null
-    team_members: MemberData[]
-  }
-
   let query = supabaseAdmin
     .from('teams')
     .select(`
@@ -54,7 +46,7 @@ export default async function TeamsPage({ searchParams }: Props) {
   if (recruiting === 'false') query = query.eq('is_recruiting', false)
 
   const { data: rawTeams } = await query
-  let teams = (rawTeams ?? []) as unknown as TeamData[]
+  let teams = (rawTeams ?? []) as TeamListItem[]
 
   // "내 팀" 필터: DB 조회 후 클라이언트에서 직접 비교
   // profile.id 와 auth uid 둘 다 확인 (linked_auth_id 유저 호환)

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import type { RequestStatus } from '@/types/app'
 
 // PATCH /api/members/me/invitations/[invitationId] — 초대 수락/거절 (본인)
 
@@ -43,7 +44,7 @@ export async function PATCH(
 
   const { error: updateError } = await supabaseAdmin
     .from('team_invitations')
-    .update({ status: body.status })
+    .update({ status: body.status as RequestStatus })
     .eq('id', invitationId)
 
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })

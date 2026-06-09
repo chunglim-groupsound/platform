@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { isAdminRole } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
+import type { RequestStatus } from '@/types/app'
 
 // PATCH /api/teams/[id]/join-requests/[requestId] — 수락/거절 (팀장/운영진)
 // DELETE /api/teams/[id]/join-requests/[requestId] — 신청 취소 (본인)
@@ -52,7 +53,7 @@ export async function PATCH(
 
   const { error: updateError } = await supabaseAdmin
     .from('team_join_requests')
-    .update({ status: body.status })
+    .update({ status: body.status as RequestStatus })
     .eq('id', requestId)
 
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })

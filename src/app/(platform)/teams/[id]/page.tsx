@@ -10,18 +10,7 @@ import { ActivationPanel } from '@/components/teams/ActivationPanel'
 import { LeaveTeamButton } from '@/components/teams/LeaveTeamButton'
 import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 import type { MemberCardData } from '@/types/app'
-
-interface LeaderRow extends MemberCardData { privacy_settings: Record<string, string> }
-interface TeamMemberRow { id: string; session_in_team: string[] | null; user: MemberCardData }
-interface JoinRequestRow {
-  id: string; message: string | null; status: string; created_at: string; applicant: MemberCardData
-}
-interface TeamRow {
-  id: string; name: string; current_song: string | null; description: string | null
-  is_active: boolean; is_recruiting: boolean; leader_id: string | null; vice_leader_id: string | null
-  activation_requested: boolean
-  leader: LeaderRow | null; team_members: TeamMemberRow[]
-}
+import type { TeamDetailRow, TeamDetailJoinRequestRow } from '@/types/team'
 
 export default async function TeamDetailPage({
   params,
@@ -66,7 +55,7 @@ export default async function TeamDetailPage({
 
   if (!rawTeam) notFound()
 
-  const team = rawTeam as unknown as TeamRow
+  const team = rawTeam as TeamDetailRow
   // profile.id 와 auth.uid 모두 확인 (linked_auth_id 유저, 구버전 데이터 호환)
   const myIds        = [...new Set([profile?.id, user.id].filter(Boolean) as string[])]
   const myId         = profile?.id ?? user.id ?? ''
@@ -94,7 +83,7 @@ export default async function TeamDetailPage({
   const isMember = isMemberByRoster
   const canApply = ['ACTIVE', 'INACTIVE'].includes(profile?.status ?? '') && !isMember
 
-  let joinRequests: JoinRequestRow[] = []
+  let joinRequests: TeamDetailJoinRequestRow[] = []
   if (canEdit) {
     const { data: reqs } = await supabaseAdmin
       .from('team_join_requests')
@@ -105,7 +94,7 @@ export default async function TeamDetailPage({
       .eq('team_id', id)
       .eq('status', 'PENDING')
       .order('created_at', { ascending: false })
-    joinRequests = (reqs ?? []) as unknown as JoinRequestRow[]
+    joinRequests = (reqs ?? []) as TeamDetailJoinRequestRow[]
   }
 
   const members = [

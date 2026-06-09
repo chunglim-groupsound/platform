@@ -4,6 +4,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import type { Database } from '@/types/database'
+
+type UsersUpdate = Database['public']['Tables']['users']['Update']
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -52,7 +55,7 @@ export async function POST(request: Request) {
   //    - activated_at: 이미 ACTIVE면 지금 시각으로 채움
   //    - privacy_agreed_at: 연동 시점에 동의한 것으로 처리
   //    - last_active_at: 연동 시점 기록
-  const updatePayload: Record<string, unknown> = {
+  const updatePayload: UsersUpdate = {
     linked_auth_id:    user.id,
     kakao_id:          realKakaoId,
     privacy_agreed_at: now,

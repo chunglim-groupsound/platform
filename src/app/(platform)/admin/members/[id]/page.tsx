@@ -44,7 +44,7 @@ export default async function MemberDetailPage({
 
   const { data: application } = await supabase
     .from('join_applications')
-    .select('*')
+    .select('*, confirmed_slot:interview_slots!confirmed_slot_id(slot_at)')
     .eq('user_id', params.id)
     .maybeSingle()
 
@@ -155,8 +155,8 @@ export default async function MemberDetailPage({
           <div style={styles.infoGrid}>
             <InfoRow
               label="면접 일정"
-              value={application.interview_scheduled_at
-                ? new Date(application.interview_scheduled_at).toLocaleString('ko-KR')
+              value={application.confirmed_slot?.slot_at
+                ? new Date(application.confirmed_slot.slot_at).toLocaleString('ko-KR')
                 : '미정'}
             />
             <InfoRow

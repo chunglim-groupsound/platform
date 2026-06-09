@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isAdminRole, hasActiveMemberAccess, ACTIVE_STATUSES } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
+import type { MemberStatus, MemberRole } from '@/types/app'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -34,13 +35,13 @@ export async function GET(request: NextRequest) {
 
   // 상태 필터: 운영진은 지정 가능, 일반은 ACTIVE/INACTIVE/PROBATION 고정
   if (isAdmin && statusParam) {
-    query = query.eq('status', statusParam)
+    query = query.eq('status', statusParam as MemberStatus)
   } else {
     query = query.in('status', [...ACTIVE_STATUSES])
   }
 
   if (generation) query = query.eq('generation', Number(generation))
-  if (role)       query = query.eq('role', role)
+  if (role)       query = query.eq('role', role as MemberRole)
   if (isWhitelist === 'true') query = query.eq('is_whitelist', true)
 
   // 세션 필터: OR 조건
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
 
   const members = (rows ?? []).map((row) =>
     maskMember(
-      { ...row, isLeader: leaderIds.has(row.id) } as Record<string, unknown>,
+      { ...row, isLeader: leaderIds.has(row.id) },
       row.id === callerId, isMember, isAdmin
     )
   )

@@ -63,7 +63,7 @@ export default async function HomePage() {
     .eq('is_active', true)
     .order('created_at', { ascending: true })
 
-  const activeTeams = ((rawTeams ?? []) as unknown as ActiveTeam[])
+  const activeTeams = ((rawTeams ?? []) as ActiveTeam[])
     .filter(t => t.team_members.length > 0)
 
   const teamCount = activeTeams.length

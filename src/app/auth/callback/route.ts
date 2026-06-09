@@ -4,6 +4,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import type { Database } from '@/types/database'
+
+type UsersUpdate = Database['public']['Tables']['users']['Update']
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -43,7 +46,7 @@ export async function GET(request: Request) {
 
       await supabaseAdmin
         .from('users')
-        .update(update)
+        .update(update as UsersUpdate)
         .eq('id', profile.id)
     }
   }

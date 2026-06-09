@@ -132,8 +132,8 @@ export default async function MyProfilePage() {
         .order('created_at', { ascending: false }),
     ])
 
-    invitations  = (invRes.data  ?? []) as unknown as RawInvitation[]
-    joinRequests = (reqRes.data ?? []) as unknown as RawJoinRequest[]
+    invitations  = (invRes.data  ?? []) as RawInvitation[]
+    joinRequests = (reqRes.data ?? []) as RawJoinRequest[]
   }
 
   return (

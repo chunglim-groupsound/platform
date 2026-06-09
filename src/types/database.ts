@@ -497,6 +497,7 @@ export type Database = {
       }
       teams: {
         Row: {
+          activation_requested: boolean
           created_at: string
           current_song: string | null
           description: string | null
@@ -506,8 +507,10 @@ export type Database = {
           leader_id: string | null
           name: string
           updated_at: string
+          vice_leader_id: string | null
         }
         Insert: {
+          activation_requested?: boolean
           created_at?: string
           current_song?: string | null
           description?: string | null
@@ -517,8 +520,10 @@ export type Database = {
           leader_id?: string | null
           name: string
           updated_at?: string
+          vice_leader_id?: string | null
         }
         Update: {
+          activation_requested?: boolean
           created_at?: string
           current_song?: string | null
           description?: string | null
@@ -528,6 +533,7 @@ export type Database = {
           leader_id?: string | null
           name?: string
           updated_at?: string
+          vice_leader_id?: string | null
         }
         Relationships: [
           {
@@ -540,6 +546,13 @@ export type Database = {
           {
             foreignKeyName: "teams_leader_id_fkey"
             columns: ["leader_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_vice_leader_id_fkey"
+            columns: ["vice_leader_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]

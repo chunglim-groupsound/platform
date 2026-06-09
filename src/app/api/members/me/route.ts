@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-
 import { hasActiveMemberAccess } from '@/lib/constants'
+import type { Database } from '@/types/database'
+
+type UsersUpdate = Database['public']['Tables']['users']['Update']
 
 const ALLOWED_FIELDS = [
   'nickname', 'profile_image_url', 'session', 'genre_preference',
@@ -119,7 +121,7 @@ export async function PATCH(request: Request) {
 
   const { data: updated, error: updateError } = await supabase
     .from('users')
-    .update(patch)
+    .update(patch as UsersUpdate)
     .eq('id', profile.id)
     .select()
     .single()

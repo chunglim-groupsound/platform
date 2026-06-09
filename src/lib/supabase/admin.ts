@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isAdminRole } from '@/lib/constants'
 
-export const supabaseAdmin = createClient(
+export const supabaseAdmin = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
@@ -14,9 +15,6 @@ const PUBLIC_PATHS = ['/', '/auth', '/status']
 
 // 운영진 전용 경로
 const ADMIN_PATHS = ['/admin']
-
-// PROBATION 유저가 접근 가능한 경로 (읽기 전용)
-const PROBATION_ALLOWED = ['/timetable', '/members', '/notices']
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request })
