@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { EditTeamForm } from '@/components/members/EditTeamForm'
+import { EditTeamForm } from '@/components/teams/EditTeamForm'
 import Link from 'next/link'
 
 interface TeamMemberUser { id: string; name: string; nickname: string | null }

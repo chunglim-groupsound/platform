@@ -5,7 +5,7 @@ import { canView } from '@/lib/member/privacy'
 import Image from 'next/image'
 import Link from 'next/link'
 import { WhitelistBadge } from '@/components/members/WhitelistBadge'
-import { InviteButton } from '@/components/members/InviteButton'
+import { InviteButton } from '@/components/teams/InviteButton'
 
 const ROLE_LABEL: Record<string, string> = {
   SUPER_ADMIN: '최고관리자',

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { TeamCard } from '@/components/members/TeamCard'
+import { TeamCard } from '@/components/teams/TeamCard'
 import Link from 'next/link'
 
 interface Props {
