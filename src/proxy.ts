@@ -52,25 +52,17 @@ export async function proxy(request: NextRequest) {
     const isAllowed = PENDING_ALLOWED_PATHS.some(p => pathname.startsWith(p))
     if (isAllowed) return response
 
-    const { data: application } = await supabase
-      .from('join_applications')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle()
+    const [{ data: application }, { data: period }] = await Promise.all([
+      supabase.from('join_applications').select('id').eq('user_id', user.id).maybeSingle(),
+      supabase.from('recruitment_periods').select('is_open').maybeSingle(),
+    ])
 
     if (application) {
       return NextResponse.redirect(new URL('/status', request.url))
     }
-
-    const { data: period } = await supabase
-      .from('recruitment_periods')
-      .select('is_open')
-      .maybeSingle()
-
     if (!period?.is_open) {
       return NextResponse.redirect(new URL('/status?reason=not_open', request.url))
     }
-
     return NextResponse.redirect(new URL('/link', request.url))
   }
 
