@@ -1,6 +1,6 @@
 # 청림그룹사운드 플랫폼 — TODO
 
-> 최종 업데이트: 2026-06-10 (버그/정책 2건, 세션 연차 완료)
+> 최종 업데이트: 2026-06-10 (스타일 — 테마 시스템 + ThemeSwitcher 완료)
 
 ---
 
@@ -31,8 +31,8 @@
 
 ### 스타일
 
-- [ ] **globals.css 테마 세팅** — `@theme` 블록으로 CSS 변수 → Tailwind 토큰 등록, 테마별(`default` / `dark` 등) 색상 정의
-- [ ] **ThemeSwitcher 컴포넌트** — `<html data-theme>` 토글 + localStorage 저장
+- [x] **globals.css 테마 세팅** — Tailwind v4 `@theme inline`으로 토큰 등록, Worn Denim(기본) · Slate Stage 두 테마 정의 (`data-theme` 속성으로 전환)
+- [x] **ThemeSwitcher 컴포넌트** — `src/components/layout/ThemeSwitcher.tsx`, 헤더 우측 컬러 스와치 UI, `localStorage` + `data-theme` 동기화, 새로고침 플래시 방지(`next/script beforeInteractive`)
 - [ ] **전체 디자인 적용** — 인라인 `style={{}}` → Tailwind 클래스로 전체 마이그레이션
 
 ---

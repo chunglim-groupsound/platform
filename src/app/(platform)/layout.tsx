@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '@/components/LogoutButton'
 import { NavLinks } from '@/components/layout/NavLinks'
+import { ThemeSwitcher } from '@/components/layout/ThemeSwitcher'
 import { isAdminRole } from '@/lib/constants'
 
 export default async function PlatformLayout({
@@ -53,7 +54,7 @@ export default async function PlatformLayout({
           {/* 네비게이션 */}
           <NavLinks isAdmin={isAdmin} />
 
-          {/* 유저 + 로그아웃 */}
+          {/* 유저 + 테마 + 로그아웃 */}
           <div style={styles.userArea}>
             {profile && (
               <span style={styles.userInfo}>
@@ -63,6 +64,7 @@ export default async function PlatformLayout({
                 </span>
               </span>
             )}
+            <ThemeSwitcher />
             <LogoutButton />
           </div>
 
@@ -83,14 +85,14 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: '#f4f5f7',
+    backgroundColor: 'var(--background)',
   },
   header: {
     position: 'sticky' as const,
     top: 0,
     zIndex: 100,
-    backgroundColor: '#111827',
-    borderBottom: '1px solid rgba(255,255,255,0.06)',
+    backgroundColor: 'var(--surface)',
+    borderBottom: '1px solid var(--border-subtle)',
   },
   headerInner: {
     maxWidth: '1200px',

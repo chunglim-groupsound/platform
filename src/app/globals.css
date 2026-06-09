@@ -1,13 +1,70 @@
 @import "tailwindcss";
 
+/* ── Tailwind v4: runtime theme tokens ──────────────────────────────────
+   @theme inline emits these as actual CSS custom properties so that
+   var(--color-*) keeps working AND theme-switching updates Tailwind classes
+   ─────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  --color-background:        var(--background);
+  --color-surface:           var(--surface);
+  --color-surface-elevated:  var(--surface-elevated);
+  --color-border:            var(--border);
+  --color-border-subtle:     var(--border-subtle);
+  --color-foreground:        var(--foreground);
+  --color-muted-foreground:  var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-accent:            var(--accent);
+  --color-accent-hover:      var(--accent-hover);
+  --color-accent-muted:      var(--accent-muted);
+  --color-accent-foreground: var(--accent-foreground);
+}
+
+/* ── Worn Denim (default) ─── 네이비 · 스틸블루 ──────────────────────── */
+:root,
+[data-theme="worn-denim"] {
+  --background:        #1B2A45;
+  --surface:           #1F3158;
+  --surface-elevated:  #243966;
+  --border:            #2D4475;
+  --border-subtle:     rgba(255, 255, 255, 0.06);
+  --foreground:        #EDF2FF;
+  --muted-foreground:  #7FA3CC;
+  --subtle-foreground: #4A6B96;
+  --accent:            #5B8EC7;
+  --accent-hover:      #7AABDB;
+  --accent-muted:      #1E3A5F;
+  --accent-foreground: #EDF2FF;
+
+  /* legacy aliases — 기존 var(--color-bg) 등 사용처 호환 */
+  --color-bg:             var(--background);
+  --color-text:           var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+}
+
+/* ── Slate Stage ──────────── 차콜 · 실버 ───────────────────────────── */
+[data-theme="slate-stage"] {
+  --background:        #18191D;
+  --surface:           #22252B;
+  --surface-elevated:  #2A2D36;
+  --border:            #36393F;
+  --border-subtle:     rgba(255, 255, 255, 0.05);
+  --foreground:        #F0F2F5;
+  --muted-foreground:  #9CA3AF;
+  --subtle-foreground: #6B7280;
+  --accent:            #8B9AB0;
+  --accent-hover:      #A3B4C8;
+  --accent-muted:      #2A2F3A;
+  --accent-foreground: #F0F2F5;
+
+  /* legacy aliases */
+  --color-bg:             var(--background);
+  --color-text:           var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+}
+
+/* ── 기타 전역 ─────────────────────────────────────────────────────── */
 :root {
   --font-body: var(--font-noto-kr), 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-  --color-bg: #f4f5f7;
-  --color-surface: #ffffff;
-  --color-border: #e5e7eb;
-  --color-text: #111827;
-  --color-text-secondary: #6b7280;
-  --color-accent: #4A90E2;
 }
 
 * {
@@ -19,8 +76,8 @@ html {
 }
 
 body {
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.6;
