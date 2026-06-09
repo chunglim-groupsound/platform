@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { TeamCard } from '@/components/teams/TeamCard'
 import Link from 'next/link'
 import { isAdminRole, hasActiveMemberAccess, canCreateTeam } from '@/lib/constants'
-import { calcSessionSummary, calcMemberCount } from '@/lib/team/utils'
+import { filterMyTeams, toTeamCardData } from '@/lib/team/utils'
 import type { TeamListItem } from '@/types/team'
 
 interface Props {
@@ -48,31 +48,11 @@ export default async function TeamsPage({ searchParams }: Props) {
   const { data: rawTeams } = await query
   let teams = (rawTeams ?? []) as TeamListItem[]
 
-  // "내 팀" 필터: DB 조회 후 클라이언트에서 직접 비교
-  // profile.id 와 auth uid 둘 다 확인 (linked_auth_id 유저 호환)
   if (myteam === 'true') {
-    const meIds = new Set([profile?.id, user.id].filter(Boolean))
-    teams = teams.filter(t =>
-      meIds.has(t.leader_id ?? '') ||
-      t.team_members.some(m => meIds.has(m.user_id))
-    )
+    teams = filterMyTeams(teams, [profile?.id, user.id])
   }
 
-  const teamList = teams.map(t => {
-    const members = t.team_members ?? []
-    const leader  = t.leader
-    return {
-      id:              t.id,
-      name:            t.name,
-      current_song:    t.current_song,
-      description:     t.description,
-      is_active:       t.is_active,
-      is_recruiting:   t.is_recruiting,
-      leader,
-      member_count:    calcMemberCount(leader, members),
-      session_summary: calcSessionSummary(leader, members),
-    }
-  })
+  const teamList = teams.map(toTeamCardData)
 
   const tabStyle = (active: boolean) => ({
     padding: '5px 14px', borderRadius: '9999px', fontSize: '0.83rem',

@@ -1,3 +1,5 @@
+import type { TeamListItem, TeamCardData } from '@/types/team'
+
 interface LeaderLike {
   id: string
   session?: string[] | null
@@ -8,10 +10,6 @@ interface MemberLike {
   session_in_team?: string[] | null
 }
 
-/**
- * 팀의 세션별 인원 수를 집계합니다.
- * 리더가 team_members에 포함된 경우 중복 집계를 방지합니다.
- */
 export function calcSessionSummary(
   leader: LeaderLike | null,
   members: MemberLike[]
@@ -34,14 +32,37 @@ export function calcSessionSummary(
   return counts
 }
 
-/**
- * 팀의 실제 인원 수를 반환합니다.
- * 리더가 team_members에 포함되지 않은 경우 1을 추가합니다.
- */
 export function calcMemberCount(
   leader: LeaderLike | null,
   members: MemberLike[]
 ): number {
   const memberIds = new Set(members.map(m => m.user_id))
   return members.length + (leader && !memberIds.has(leader.id) ? 1 : 0)
+}
+
+export function filterMyTeams(
+  teams: TeamListItem[],
+  meIds: (string | undefined | null)[]
+): TeamListItem[] {
+  const idSet = new Set(meIds.filter(Boolean) as string[])
+  return teams.filter(t =>
+    idSet.has(t.leader_id ?? '') ||
+    t.team_members.some(m => idSet.has(m.user_id))
+  )
+}
+
+export function toTeamCardData(team: TeamListItem): TeamCardData {
+  const members = team.team_members ?? []
+  const leader  = team.leader
+  return {
+    id:              team.id,
+    name:            team.name,
+    current_song:    team.current_song,
+    description:     team.description,
+    is_active:       team.is_active,
+    is_recruiting:   team.is_recruiting,
+    leader,
+    member_count:    calcMemberCount(leader, members),
+    session_summary: calcSessionSummary(leader, members),
+  }
 }

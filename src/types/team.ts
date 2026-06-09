@@ -20,6 +20,18 @@ export type TeamListItem = Pick<
   team_members: TeamListMemberEntry[]
 }
 
+export type TeamCardData = {
+  id: string
+  name: string
+  current_song: string | null
+  description: string | null
+  is_active: boolean
+  is_recruiting: boolean
+  leader: { id: string; name: string; nickname: string | null } | null
+  member_count: number
+  session_summary: Record<string, number>
+}
+
 // --- 팀 상세 조회용 (teams/[id]/page.tsx) ---
 
 export type TeamDetailLeaderRow = MemberCardData & {
