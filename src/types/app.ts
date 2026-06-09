@@ -47,7 +47,7 @@ export interface TeamMember {
 
 export interface MemberCardData {
   id: string
-  name: string
+  name: string | null
   nickname: string | null
   profile_image_url: string | null
   status: MemberStatus
@@ -58,4 +58,5 @@ export interface MemberCardData {
   phone: string | null
   department: string | null
   school_year: number | null
+  isLeader?: boolean
 }

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
   const includeInactive = request.nextUrl.searchParams.get('include_inactive') === 'true' && isAdmin
   const recruitingFilter = request.nextUrl.searchParams.get('recruiting') // 'true' | 'false' | null
 
-  let query = supabase
+  let query = supabaseAdmin
     .from('teams')
     .select(`
       id, name, current_song, description, is_active, is_recruiting, created_at, updated_at,
@@ -126,16 +127,17 @@ export async function POST(request: NextRequest) {
 
   const userId = callerProfile!.id
 
-  // 팀 생성
-  const { data: newTeam, error: insertError } = await supabase
+  // 팀 생성 (RLS 정책 없이 서버에서 직접 처리 — 권한 검증은 위에서 완료)
+  const { data: newTeam, error: insertError } = await supabaseAdmin
     .from('teams')
     .insert({
       name,
       description:   body.description?.trim() || null,
       current_song:  body.current_song?.trim() || null,
-      leader_id:     userId,
-      is_active:     true,
-      is_recruiting: true,
+      leader_id:            userId,
+      is_active:            false,
+      is_recruiting:        true,
+      activation_requested: false,
     })
     .select('id')
     .single()
@@ -145,7 +147,7 @@ export async function POST(request: NextRequest) {
   }
 
   // 팀장을 team_members에 추가
-  await supabase.from('team_members').insert({
+  await supabaseAdmin.from('team_members').insert({
     team_id: newTeam.id,
     user_id: userId,
   })

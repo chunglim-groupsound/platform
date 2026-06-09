@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 // PATCH /api/teams/[id]/join-requests/[requestId] — 수락/거절 (팀장/운영진)
@@ -22,14 +23,16 @@ export async function PATCH(
 
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(callerProfile?.role ?? '')
 
-  const { data: team } = await supabase
+  const { data: team } = await supabaseAdmin
     .from('teams')
-    .select('leader_id')
+    .select('leader_id, vice_leader_id')
     .eq('id', teamId)
     .single()
 
-  const isLeader = team?.leader_id === callerProfile?.id
-  if (!isAdmin && !isLeader) {
+  const myId         = callerProfile?.id ?? ''
+  const isLeader     = team?.leader_id      === myId
+  const isViceLeader = team?.vice_leader_id === myId
+  if (!isAdmin && !isLeader && !isViceLeader) {
     return NextResponse.json({ error: '수락/거절 권한이 없습니다' }, { status: 403 })
   }
 
@@ -42,7 +45,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'status는 ACCEPTED 또는 REJECTED여야 합니다' }, { status: 400 })
   }
 
-  const { data: joinRequest } = await supabase
+  const { data: joinRequest } = await supabaseAdmin
     .from('team_join_requests')
     .select('id, applicant_id, status')
     .eq('id', requestId)
@@ -52,7 +55,7 @@ export async function PATCH(
   if (!joinRequest) return NextResponse.json({ error: '신청을 찾을 수 없습니다' }, { status: 404 })
   if (joinRequest.status !== 'PENDING') return NextResponse.json({ error: '이미 처리된 신청입니다' }, { status: 409 })
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await supabaseAdmin
     .from('team_join_requests')
     .update({ status: body.status })
     .eq('id', requestId)
@@ -61,7 +64,7 @@ export async function PATCH(
 
   // 수락 시 team_members에 추가
   if (body.status === 'ACCEPTED') {
-    const { error: memberError } = await supabase
+    const { error: memberError } = await supabaseAdmin
       .from('team_members')
       .insert({ team_id: teamId, user_id: joinRequest.applicant_id })
 
@@ -89,7 +92,7 @@ export async function DELETE(
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
     .maybeSingle()
 
-  const { data: joinRequest } = await supabase
+  const { data: joinRequest } = await supabaseAdmin
     .from('team_join_requests')
     .select('id, applicant_id')
     .eq('id', requestId)
@@ -101,7 +104,7 @@ export async function DELETE(
     return NextResponse.json({ error: '취소 권한이 없습니다' }, { status: 403 })
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('team_join_requests')
     .delete()
     .eq('id', requestId)

@@ -70,7 +70,19 @@ export function JoinRequestSection({ teamId, myRequest }: Props) {
           </button>
         </div>
       ) : isRejected ? (
-        <span style={{ fontSize: '0.88rem', color: '#9ca3af' }}>가입 신청이 거절되었습니다.</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.88rem', color: '#9ca3af' }}>가입 신청이 거절되었습니다.</span>
+          <button
+            onClick={cancel}
+            disabled={loading}
+            style={{
+              padding: '4px 12px', borderRadius: '7px', fontSize: '0.82rem',
+              border: '1px solid #6366f1', background: '#f5f3ff', color: '#4f46e5', cursor: 'pointer',
+            }}
+          >
+            다시 신청하기
+          </button>
+        </div>
       ) : showForm ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <textarea

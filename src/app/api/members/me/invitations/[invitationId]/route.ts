@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 // PATCH /api/members/me/invitations/[invitationId] — 초대 수락/거절 (본인)
@@ -30,7 +31,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'status는 ACCEPTED 또는 REJECTED여야 합니다' }, { status: 400 })
   }
 
-  const { data: invitation } = await supabase
+  const { data: invitation } = await supabaseAdmin
     .from('team_invitations')
     .select('id, team_id, invitee_id, status')
     .eq('id', invitationId)
@@ -40,7 +41,7 @@ export async function PATCH(
   if (invitation.invitee_id !== callerProfile.id) return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
   if (invitation.status !== 'PENDING') return NextResponse.json({ error: '이미 처리된 초대입니다' }, { status: 409 })
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await supabaseAdmin
     .from('team_invitations')
     .update({ status: body.status })
     .eq('id', invitationId)
@@ -49,7 +50,7 @@ export async function PATCH(
 
   // 수락 시 team_members에 추가
   if (body.status === 'ACCEPTED') {
-    const { error: memberError } = await supabase
+    const { error: memberError } = await supabaseAdmin
       .from('team_members')
       .insert({ team_id: invitation.team_id, user_id: callerProfile.id })
 

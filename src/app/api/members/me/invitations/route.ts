@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 // GET /api/members/me/invitations — 내가 받은 팀 초대 목록
@@ -17,7 +18,7 @@ export async function GET() {
 
   if (!callerProfile) return NextResponse.json({ error: '프로필 없음' }, { status: 404 })
 
-  const { data: invitations, error } = await supabase
+  const { data: invitations, error } = await supabaseAdmin
     .from('team_invitations')
     .select(`
       id, message, status, created_at, updated_at,

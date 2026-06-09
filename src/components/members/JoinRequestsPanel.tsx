@@ -48,7 +48,10 @@ export function JoinRequestsPanel({ teamId, requests: initial }: Props) {
             display: 'flex', flexDirection: 'column', gap: '8px',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+              <span
+                onClick={() => router.push(`/members/${req.applicant.id}`)}
+                style={{ fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: '#d1d5db' }}
+              >
                 {req.applicant.nickname ?? req.applicant.name}
               </span>
               <div style={{ display: 'flex', gap: '6px' }}>

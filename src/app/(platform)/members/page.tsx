@@ -49,7 +49,7 @@ export default function MembersPage() {
     if (filter.q) {
       const q = filter.q.toLowerCase()
       result = result.filter(m =>
-        m.name.toLowerCase().includes(q) ||
+        (m.name ?? '').toLowerCase().includes(q) ||
         (m.nickname ?? '').toLowerCase().includes(q) ||
         String(m.generation ?? '').includes(q)
       )
@@ -60,7 +60,9 @@ export default function MembersPage() {
     if (filter.generation) {
       result = result.filter(m => m.generation === Number(filter.generation))
     }
-    if (filter.role) {
+    if (filter.role === 'TEAM_LEADER') {
+      result = result.filter(m => m.isLeader)
+    } else if (filter.role) {
       result = result.filter(m => m.role === filter.role)
     }
     if (filter.isWhitelist) {

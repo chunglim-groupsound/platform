@@ -25,7 +25,8 @@ export function maskMember(
   const privacy = (raw.privacy_settings ?? {}) as Record<string, string>
   return {
     id:                raw.id as string,
-    name:              raw.name as string,
+    name: canView(privacy.name, 'member', isSelf, isMember, isAdmin)
+      ? (raw.name as string) : null,
     nickname:          raw.nickname as string | null,
     profile_image_url: raw.profile_image_url as string | null,
     status:            raw.status as MemberCardData['status'],
@@ -40,5 +41,6 @@ export function maskMember(
       ? (raw.department as string | null) : null,
     school_year: canView(privacy.school_year, 'member', isSelf, isMember, isAdmin)
       ? (raw.school_year as number | null) : null,
+    isLeader: (raw.isLeader as boolean | undefined) ?? false,
   }
 }

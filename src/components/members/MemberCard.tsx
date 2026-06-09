@@ -19,8 +19,8 @@ interface MemberCardProps {
 
 export function MemberCard({ member, isMe, onClick, variant = 'grid' }: MemberCardProps) {
   const displayName = member.nickname
-    ? `${member.nickname} (${member.name})`
-    : member.name
+    ? (member.name ? `${member.nickname} (${member.name})` : member.nickname)
+    : (member.name ?? '비공개')
 
   const roleLabel = ROLE_LABEL[member.role]
 
@@ -43,7 +43,7 @@ export function MemberCard({ member, isMe, onClick, variant = 'grid' }: MemberCa
           {member.profile_image_url ? (
             <Image
               src={member.profile_image_url}
-              alt={member.name}
+              alt={member.name ?? '비공개'}
               fill
               style={{ borderRadius: '50%', objectFit: 'cover' }}
             />
@@ -53,7 +53,7 @@ export function MemberCard({ member, isMe, onClick, variant = 'grid' }: MemberCa
               background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '1rem', color: '#6b7280',
             }}>
-              {member.name[0]}
+              {(member.name ?? '?')[0]}
             </div>
           )}
         </div>
@@ -89,7 +89,7 @@ export function MemberCard({ member, isMe, onClick, variant = 'grid' }: MemberCa
         {member.profile_image_url ? (
           <Image
             src={member.profile_image_url}
-            alt={member.name}
+            alt={member.name ?? '비공개'}
             fill
             style={{ borderRadius: '50%', objectFit: 'cover' }}
           />
@@ -99,7 +99,7 @@ export function MemberCard({ member, isMe, onClick, variant = 'grid' }: MemberCa
             background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '1.5rem', color: '#6b7280',
           }}>
-            {member.name[0]}
+            {(member.name ?? '?')[0]}
           </div>
         )}
       </div>
