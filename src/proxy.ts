@@ -1,10 +1,10 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isAdminRole, INTERVIEWING_ALLOWED_PATHS } from '@/lib/constants'
 
 const PUBLIC_PATHS = ['/', '/auth']
 const PENDING_ALLOWED_PATHS = ['/apply', '/link', '/status', '/auth']
-const INTERVIEWING_ALLOWED_PATHS = ['/notices', '/home', '/timetable', '/status', '/auth']
 const ADMIN_PATHS = ['/admin']
 
 export async function proxy(request: NextRequest) {
@@ -93,7 +93,7 @@ export async function proxy(request: NextRequest) {
 
   // ── 6. 운영진 전용 경로 접근 제어 ────────────────────────────
   if (ADMIN_PATHS.some(p => pathname.startsWith(p))) {
-    if (!['ADMIN', 'SUPER_ADMIN'].includes(role)) {
+    if (!isAdminRole(role)) {
       return NextResponse.redirect(new URL('/home', request.url))
     }
   }

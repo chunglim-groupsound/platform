@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { isAdminRole } from '@/lib/constants'
 
 // DELETE /api/admin/interview-slots/[id] — 슬롯 삭제 (선택자 없을 때만)
 export async function DELETE(
@@ -13,7 +14,7 @@ export async function DELETE(
   if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
 
   const { data: caller } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(caller?.role ?? '')) {
+  if (!isAdminRole(caller?.role)) {
     return NextResponse.json({ error: '권한 없음' }, { status: 403 })
   }
 

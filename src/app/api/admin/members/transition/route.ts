@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { transitionMemberStatus } from '@/lib/member/transitions'
 import { NextResponse } from 'next/server'
+import { isAdminRole } from '@/lib/constants'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     .eq('id', user.id)
     .single()
 
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(caller?.role ?? '')) {
+  if (!isAdminRole(caller?.role)) {
     return NextResponse.json({ error: '권한 없음' }, { status: 403 })
   }
 

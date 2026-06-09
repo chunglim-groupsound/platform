@@ -7,6 +7,7 @@ import { MemberCard } from '@/components/members/MemberCard'
 import { MemberFilter, type FilterState } from '@/components/members/MemberFilter'
 import { AdminSection } from '@/components/members/AdminSection'
 import type { MemberCardData } from '@/types/app'
+import { isAdminRole } from '@/lib/constants'
 
 export default function MembersPage() {
   const router = useRouter()
@@ -29,7 +30,7 @@ export default function MembersPage() {
         .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
         .maybeSingle()
       setMyId(profile?.id ?? user.id)
-      setIsAdmin(['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? ''))
+      setIsAdmin(isAdminRole(profile?.role))
     })
   }, [router])
 

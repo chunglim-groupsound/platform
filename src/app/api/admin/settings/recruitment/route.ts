@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { isAdminRole } from '@/lib/constants'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -7,7 +8,7 @@ async function requireAdmin() {
   if (!user) return { error: NextResponse.json({ error: '인증 필요' }, { status: 401 }), supabase: null }
 
   const { data: caller } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(caller?.role ?? '')) {
+  if (!isAdminRole(caller?.role)) {
     return { error: NextResponse.json({ error: '권한 없음' }, { status: 403 }), supabase: null }
   }
 

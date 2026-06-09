@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { WhitelistBadge } from '@/components/members/WhitelistBadge'
 import { InviteButton } from '@/components/teams/InviteButton'
+import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 
 const ROLE_LABEL: Record<string, string> = {
   SUPER_ADMIN: '최고관리자',
@@ -44,8 +45,8 @@ export default async function MemberDetailPage({
 
   if (me?.id === id) redirect('/members/me')
 
-  const isAdmin  = ['ADMIN', 'SUPER_ADMIN'].includes(me?.role ?? '')
-  const isMember = ['ACTIVE', 'INACTIVE', 'PROBATION'].includes(me?.status ?? '')
+  const isAdmin  = isAdminRole(me?.role)
+  const isMember = hasActiveMemberAccess(me?.status)
 
   const { data: target } = await supabase
     .from('users')

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '@/components/LogoutButton'
 import { NavLinks } from '@/components/layout/NavLinks'
+import { isAdminRole } from '@/lib/constants'
 
 export default async function PlatformLayout({
   children,
@@ -29,7 +30,7 @@ export default async function PlatformLayout({
     PROBATION_MEMBER: '유예 부원',
   }
 
-  const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? '')
+  const isAdmin = isAdminRole(profile?.role)
 
   return (
     <div style={styles.wrapper}>

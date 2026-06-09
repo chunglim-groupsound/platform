@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { TeamCard } from '@/components/teams/TeamCard'
 import Link from 'next/link'
+import { isAdminRole, hasActiveMemberAccess, canCreateTeam } from '@/lib/constants'
+import { calcSessionSummary, calcMemberCount } from '@/lib/team/utils'
 
 interface Props {
   searchParams: Promise<{ recruiting?: string; inactive?: string; myteam?: string }>
@@ -21,11 +23,10 @@ export default async function TeamsPage({ searchParams }: Props) {
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
     .maybeSingle()
 
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(profile?.status ?? '')) redirect('/timetable')
+  if (!hasActiveMemberAccess(profile?.status)) redirect('/timetable')
 
-  const isAdmin   = ['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? '')
-  const canCreate = ['ACTIVE', 'INACTIVE'].includes(profile?.status ?? '')
+  const isAdmin   = isAdminRole(profile?.role)
+  const canCreate = canCreateTeam(profile?.status)
 
   interface LeaderData { id: string; name: string; nickname: string | null; session: string[] | null }
   interface MemberData { user_id: string; session_in_team: string[] }
@@ -66,18 +67,8 @@ export default async function TeamsPage({ searchParams }: Props) {
   }
 
   const teamList = teams.map(t => {
-    const members   = t.team_members ?? []
-    const leader    = t.leader
-    const memberIds = new Set(members.map(m => m.user_id))
-
-    const sessionCounts: Record<string, number> = {}
-    if (leader && !memberIds.has(leader.id)) {
-      for (const s of leader.session ?? []) sessionCounts[s] = (sessionCounts[s] ?? 0) + 1
-    }
-    for (const m of members) {
-      for (const s of m.session_in_team ?? []) sessionCounts[s] = (sessionCounts[s] ?? 0) + 1
-    }
-
+    const members = t.team_members ?? []
+    const leader  = t.leader
     return {
       id:              t.id,
       name:            t.name,
@@ -86,8 +77,8 @@ export default async function TeamsPage({ searchParams }: Props) {
       is_active:       t.is_active,
       is_recruiting:   t.is_recruiting,
       leader,
-      member_count:    members.length + (leader && !memberIds.has(leader.id) ? 1 : 0),
-      session_summary: sessionCounts,
+      member_count:    calcMemberCount(leader, members),
+      session_summary: calcSessionSummary(leader, members),
     }
   })
 

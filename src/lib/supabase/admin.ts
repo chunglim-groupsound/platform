@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isAdminRole } from '@/lib/constants'
 
 export const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,7 +85,7 @@ export async function middleware(request: NextRequest) {
 
   // 5. 운영진 전용 경로 접근 제어
   if (ADMIN_PATHS.some(p => pathname.startsWith(p))) {
-    if (!['ADMIN', 'SUPER_ADMIN'].includes(role)) {
+    if (!isAdminRole(role)) {
       return NextResponse.redirect(new URL('/timetable', request.url))
     }
   }

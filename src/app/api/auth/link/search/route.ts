@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { ACTIVE_STATUSES } from '@/lib/constants'
 
 export async function POST(request: Request) {
   try {
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       .eq('generation', generation)
       .like('kakao_id', 'imported_%')
       .is('linked_auth_id', null)
-      .in('status', ['ACTIVE', 'INACTIVE', 'PROBATION'])
+      .in('status', [...ACTIVE_STATUSES])
 
     if (searchError) {
       console.error('search error:', searchError)

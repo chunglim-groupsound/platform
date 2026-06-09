@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { isAdminRole } from '@/lib/constants'
+import { getCurrentSession } from '@/lib/auth/session'
 
 // POST /api/teams/[id]/invitations — 팀원 초대 발송 (팀장/운영진)
 
@@ -10,17 +12,11 @@ export async function POST(
 ) {
   const { id: teamId } = await params
   const supabase = await createClient()
+  const session = await getCurrentSession(supabase)
+  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
-
-  const { data: callerProfile } = await supabase
-    .from('users')
-    .select('id, role')
-    .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
-    .maybeSingle()
-
-  const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(callerProfile?.role ?? '')
+  const { profile: callerProfile, myId } = session
+  const isAdmin = isAdminRole(callerProfile?.role)
 
   const { data: team } = await supabaseAdmin
     .from('teams')
@@ -28,7 +24,6 @@ export async function POST(
     .eq('id', teamId)
     .single()
 
-  const myId         = callerProfile?.id ?? ''
   const isLeader     = team?.leader_id      === myId
   const isViceLeader = team?.vice_leader_id === myId
   if (!isAdmin && !isLeader && !isViceLeader) {

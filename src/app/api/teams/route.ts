@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isAdminRole, hasActiveMemberAccess, canCreateTeam } from '@/lib/constants'
+import { getCurrentSession } from '@/lib/auth/session'
+import { calcSessionSummary, calcMemberCount } from '@/lib/team/utils'
 
 interface TeamLeader { id: string; name: string; nickname: string | null; session: string[] | null }
 interface TeamMemberRow { user_id: string; session_in_team: string[] | null }
@@ -14,19 +17,12 @@ interface TeamRow {
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
+  const session = await getCurrentSession(supabase)
+  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
-
-  const { data: callerProfile } = await supabase
-    .from('users')
-    .select('role, status')
-    .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
-    .maybeSingle()
-
-  const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(callerProfile?.role ?? '')
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(callerProfile?.status ?? '')) {
+  const { profile: callerProfile } = session
+  const isAdmin = isAdminRole(callerProfile?.role)
+  if (!hasActiveMemberAccess(callerProfile?.status)) {
     return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 })
   }
 
@@ -53,25 +49,8 @@ export async function GET(request: NextRequest) {
   const teams = (rawTeams ?? []) as unknown as TeamRow[]
 
   const result = teams.map(t => {
-    const members   = t.team_members ?? []
-    const leader    = t.leader
-    const memberIds = new Set(members.map(m => m.user_id))
-
-    const sessionCounts: Record<string, number> = {}
-
-    if (leader && !memberIds.has(leader.id)) {
-      for (const s of leader.session ?? []) {
-        sessionCounts[s] = (sessionCounts[s] ?? 0) + 1
-      }
-    }
-    for (const m of members) {
-      for (const s of m.session_in_team ?? []) {
-        sessionCounts[s] = (sessionCounts[s] ?? 0) + 1
-      }
-    }
-
-    const memberCount = members.length + (leader && !memberIds.has(leader.id) ? 1 : 0)
-
+    const members = t.team_members ?? []
+    const leader  = t.leader
     return {
       id:              t.id,
       name:            t.name,
@@ -80,8 +59,8 @@ export async function GET(request: NextRequest) {
       is_active:       t.is_active,
       is_recruiting:   t.is_recruiting,
       leader,
-      member_count:    memberCount,
-      session_summary: sessionCounts,
+      member_count:    calcMemberCount(leader, members),
+      session_summary: calcSessionSummary(leader, members),
     }
   })
 
@@ -90,19 +69,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
+  const session = await getCurrentSession(supabase)
+  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
-
-  const { data: callerProfile } = await supabase
-    .from('users')
-    .select('id, role, status')
-    .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
-    .maybeSingle()
+  const { profile: callerProfile, myId: userId } = session
 
   // ACTIVE, INACTIVE 부원만 팀 생성 가능
-  const canCreate = ['ACTIVE', 'INACTIVE'].includes(callerProfile?.status ?? '')
-  if (!canCreate) {
+  if (!canCreateTeam(callerProfile?.status)) {
     return NextResponse.json({ error: '정식 부원(ACTIVE/INACTIVE)만 팀을 만들 수 있습니다' }, { status: 403 })
   }
 
@@ -124,8 +97,6 @@ export async function POST(request: NextRequest) {
     .maybeSingle()
 
   if (existing) return NextResponse.json({ error: '이미 존재하는 팀명입니다' }, { status: 409 })
-
-  const userId = callerProfile!.id
 
   // 팀 생성 (RLS 정책 없이 서버에서 직접 처리 — 권한 검증은 위에서 완료)
   const { data: newTeam, error: insertError } = await supabaseAdmin

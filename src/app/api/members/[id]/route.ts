@@ -3,6 +3,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { isAdminRole, canCreateTeam } from '@/lib/constants'
 
 // privacy_settings 공개 범위 판단
 function canView(
@@ -38,8 +39,8 @@ export async function GET(
     .or(`id.eq.${caller.id},linked_auth_id.eq.${caller.id}`)
     .maybeSingle()
 
-  const isAdmin  = ['ADMIN', 'SUPER_ADMIN'].includes(callerProfile?.role   ?? '')
-  const isMember = ['ACTIVE', 'INACTIVE'].includes(callerProfile?.status ?? '')
+  const isAdmin  = isAdminRole(callerProfile?.role)
+  const isMember = canCreateTeam(callerProfile?.status)
 
   // 3. 대상 회원 조회
   const { data: target } = await supabase

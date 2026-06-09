@@ -3,24 +3,17 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { maskMember } from '@/lib/member/privacy'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isAdminRole, hasActiveMemberAccess, ACTIVE_STATUSES } from '@/lib/constants'
+import { getCurrentSession } from '@/lib/auth/session'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
+  const session = await getCurrentSession(supabase)
+  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
 
-  const { data: { user: caller } } = await supabase.auth.getUser()
-  if (!caller) {
-    return NextResponse.json({ error: '인증 필요' }, { status: 401 })
-  }
-
-  const { data: callerProfile } = await supabase
-    .from('users')
-    .select('id, role, status')
-    .or(`id.eq.${caller.id},linked_auth_id.eq.${caller.id}`)
-    .maybeSingle()
-
-  const isAdmin  = ['ADMIN', 'SUPER_ADMIN'].includes(callerProfile?.role ?? '')
-  const isMember = ['ACTIVE', 'INACTIVE', 'PROBATION'].includes(callerProfile?.status ?? '')
-  const callerId = callerProfile?.id ?? caller.id
+  const { profile: callerProfile, myId: callerId } = session
+  const isAdmin  = isAdminRole(callerProfile?.role)
+  const isMember = hasActiveMemberAccess(callerProfile?.status)
 
   const sp = request.nextUrl.searchParams
   const sessions    = sp.getAll('session')
@@ -43,7 +36,7 @@ export async function GET(request: NextRequest) {
   if (isAdmin && statusParam) {
     query = query.eq('status', statusParam)
   } else {
-    query = query.in('status', ['ACTIVE', 'INACTIVE', 'PROBATION'])
+    query = query.in('status', [...ACTIVE_STATUSES])
   }
 
   if (generation) query = query.eq('generation', Number(generation))
@@ -80,7 +73,7 @@ export async function GET(request: NextRequest) {
     )
   )
 
-  const admins = members.filter(m => ['ADMIN', 'SUPER_ADMIN'].includes(m.role) && m.status === 'ACTIVE')
+  const admins = members.filter(m => isAdminRole(m.role) && m.status === 'ACTIVE')
 
   return NextResponse.json({ members, admins, total: members.length })
 }

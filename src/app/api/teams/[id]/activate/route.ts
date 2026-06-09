@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { isAdminRole } from '@/lib/constants'
 
 // POST /api/teams/[id]/activate — 팀 활성화 신청 (팀장/부팀장)
 // DELETE /api/teams/[id]/activate — 신청 취소 (팀장/부팀장)
@@ -19,7 +20,7 @@ async function resolveAccess(userId: string, teamId: string) {
       .single(),
   ])
   const myId         = callerProfile?.id ?? ''
-  const isAdmin      = ['ADMIN', 'SUPER_ADMIN'].includes(callerProfile?.role ?? '')
+  const isAdmin      = isAdminRole(callerProfile?.role)
   const isLeader     = team?.leader_id      === myId
   const isViceLeader = team?.vice_leader_id === myId
   return { callerProfile, team, isAdmin, isLeader, isViceLeader }

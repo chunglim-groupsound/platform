@@ -4,12 +4,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { transitionMemberStatus } from '@/lib/member/transitions'
 import { NextResponse } from 'next/server'
+import { isAdminRole } from '@/lib/constants'
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
   const { data } = await supabase.from('users').select('id, role').eq('id', user.id).single()
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(data?.role ?? '')) return null
+  if (!isAdminRole(data?.role)) return null
   return data
 }
 

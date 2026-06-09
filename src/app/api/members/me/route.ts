@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+import { hasActiveMemberAccess } from '@/lib/constants'
+
 const ALLOWED_FIELDS = [
   'nickname', 'profile_image_url', 'session', 'genre_preference',
   'phone', 'department', 'student_id', 'school_year',
@@ -35,8 +37,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: '인증 필요' }, { status: 401 })
   }
 
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(profile.status)) {
+  if (!hasActiveMemberAccess(profile.status)) {
     return NextResponse.json({ error: '수정 권한이 없습니다' }, { status: 403 })
   }
 

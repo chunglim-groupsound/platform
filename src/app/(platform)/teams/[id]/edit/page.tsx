@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { EditTeamForm } from '@/components/teams/EditTeamForm'
 import Link from 'next/link'
+import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 
 interface TeamMemberUser { id: string; name: string; nickname: string | null }
 interface TeamMemberRow  { user_id: string; user: TeamMemberUser | null }
@@ -24,7 +25,7 @@ export default async function EditTeamPage({
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
     .maybeSingle()
 
-  if (!['PROBATION', 'ACTIVE', 'INACTIVE'].includes(profile?.status ?? '')) redirect('/timetable')
+  if (!hasActiveMemberAccess(profile?.status)) redirect('/timetable')
 
   const { data: team } = await supabaseAdmin
     .from('teams')
@@ -41,7 +42,7 @@ export default async function EditTeamPage({
   if (!team) notFound()
 
   const myId         = profile?.id ?? ''
-  const isAdmin      = ['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? '')
+  const isAdmin      = isAdminRole(profile?.role)
   const isLeader     = team.leader_id      === myId
   const isViceLeader = team.vice_leader_id === myId
 

@@ -8,6 +8,7 @@ import { JoinRequestSection } from '@/components/teams/JoinRequestSection'
 import { JoinRequestsPanel } from '@/components/teams/JoinRequestsPanel'
 import { ActivationPanel } from '@/components/teams/ActivationPanel'
 import { LeaveTeamButton } from '@/components/teams/LeaveTeamButton'
+import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 import type { MemberCardData } from '@/types/app'
 
 interface LeaderRow extends MemberCardData { privacy_settings: Record<string, string> }
@@ -40,8 +41,7 @@ export default async function TeamDetailPage({
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
     .maybeSingle()
 
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(profile?.status ?? '')) redirect('/timetable')
+  if (!hasActiveMemberAccess(profile?.status)) redirect('/timetable')
 
   const { data: rawTeam } = await supabaseAdmin
     .from('teams')
@@ -70,7 +70,7 @@ export default async function TeamDetailPage({
   // profile.id 와 auth.uid 모두 확인 (linked_auth_id 유저, 구버전 데이터 호환)
   const myIds        = [...new Set([profile?.id, user.id].filter(Boolean) as string[])]
   const myId         = profile?.id ?? user.id ?? ''
-  const isAdmin      = ['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? '')
+  const isAdmin      = isAdminRole(profile?.role)
   const isLeader     = myIds.some(id => team.leader_id      === id)
   const isViceLeader = myIds.some(id => team.vice_leader_id === id)
   const canEdit      = isAdmin || isLeader || isViceLeader

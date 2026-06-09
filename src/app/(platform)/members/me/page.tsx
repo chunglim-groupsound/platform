@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { WhitelistBadge } from '@/components/members/WhitelistBadge'
 import { MyInvitationsSection } from '@/components/members/MyInvitationsSection'
 import { MyJoinRequestsSection } from '@/components/members/MyJoinRequestsSection'
+import { hasActiveMemberAccess } from '@/lib/constants'
 
 function isKakaoUrl(url: string | null): boolean {
   return !!url && url.includes('kakaocdn.net')
@@ -59,8 +60,7 @@ export default async function MyProfilePage() {
 
   if (!profile) redirect('/')
 
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(profile.status)) redirect('/status')
+  if (!hasActiveMemberAccess(profile.status)) redirect('/status')
 
   // 카카오 URL 자동 동기화
   let profileImageUrl = profile.profile_image_url

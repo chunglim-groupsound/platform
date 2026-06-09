@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
+import { getCurrentSession } from '@/lib/auth/session'
 
 async function resolveTeamAccess(userId: string, teamId: string) {
   const [{ data: callerProfile }, { data: team }] = await Promise.all([
@@ -16,7 +18,7 @@ async function resolveTeamAccess(userId: string, teamId: string) {
       .single(),
   ])
   const myId       = callerProfile?.id ?? ''
-  const isAdmin    = ['ADMIN', 'SUPER_ADMIN'].includes(callerProfile?.role ?? '')
+  const isAdmin    = isAdminRole(callerProfile?.role)
   const isLeader   = team?.leader_id     === myId
   const isViceLeader = team?.vice_leader_id === myId
   return { callerProfile, team, isAdmin, isLeader, isViceLeader, myId }
@@ -28,18 +30,10 @@ export async function GET(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  const session = await getCurrentSession(supabase)
+  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
-
-  const { data: callerProfile } = await supabase
-    .from('users')
-    .select('id, role, status')
-    .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
-    .maybeSingle()
-
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(callerProfile?.status ?? '')) {
+  if (!hasActiveMemberAccess(session.profile?.status)) {
     return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 })
   }
 
@@ -70,11 +64,10 @@ export async function PATCH(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  const session = await getCurrentSession(supabase)
+  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
-
-  const { isAdmin, isLeader, isViceLeader } = await resolveTeamAccess(user.id, id)
+  const { isAdmin, isLeader, isViceLeader } = await resolveTeamAccess(session.user.id, id)
 
   if (!isAdmin && !isLeader && !isViceLeader) {
     return NextResponse.json({ error: '수정 권한이 없습니다' }, { status: 403 })
@@ -125,11 +118,10 @@ export async function DELETE(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  const session = await getCurrentSession(supabase)
+  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
-
-  const { isAdmin, isLeader, isViceLeader } = await resolveTeamAccess(user.id, id)
+  const { isAdmin, isLeader, isViceLeader } = await resolveTeamAccess(session.user.id, id)
 
   if (!isAdmin && !isLeader && !isViceLeader) {
     return NextResponse.json({ error: '삭제 권한이 없습니다' }, { status: 403 })
