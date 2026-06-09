@@ -209,45 +209,6 @@ export type Database = {
           },
         ]
       }
-      member_warnings: {
-        Row: {
-          created_at: string
-          id: string
-          issued_by: string | null
-          reason: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          issued_by?: string | null
-          reason: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          issued_by?: string | null
-          reason?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "member_warnings_issued_by_fkey"
-            columns: ["issued_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "member_warnings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       member_history: {
         Row: {
           changed_by: string | null
@@ -307,6 +268,59 @@ export type Database = {
           },
         ]
       }
+      member_warnings: {
+        Row: {
+          created_at: string
+          id: string
+          issued_by: string | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_warnings_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_warnings_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_warnings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_warnings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recruitment_periods: {
         Row: {
           close_at: string
@@ -349,52 +363,6 @@ export type Database = {
           },
         ]
       }
-      team_members: {
-        Row: {
-          id: string
-          joined_at: string
-          session_in_team: string[] | null
-          team_id: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          joined_at?: string
-          session_in_team?: string[] | null
-          team_id: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          joined_at?: string
-          session_in_team?: string[] | null
-          team_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "team_members_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "team_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "probation_expiry"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "team_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       team_invitations: {
         Row: {
           created_at: string
@@ -431,7 +399,21 @@ export type Database = {
             foreignKeyName: "team_invitations_invited_by_fkey"
             columns: ["invited_by"]
             isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invitations_invitee_id_fkey"
+            columns: ["invitee_id"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
             referencedColumns: ["id"]
           },
           {
@@ -483,6 +465,13 @@ export type Database = {
             foreignKeyName: "team_join_requests_applicant_id_fkey"
             columns: ["applicant_id"]
             isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_join_requests_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -491,6 +480,52 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          session_in_team: string[] | null
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          session_in_team?: string[] | null
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          session_in_team?: string[] | null
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -548,6 +583,13 @@ export type Database = {
             columns: ["leader_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_vice_leader_id_fkey"
+            columns: ["vice_leader_id"]
+            isOneToOne: false
+            referencedRelation: "probation_expiry"
             referencedColumns: ["id"]
           },
           {
@@ -699,7 +741,6 @@ export type Database = {
     }
     Enums: {
       interview_result: "PENDING" | "PASS" | "FAIL"
-      request_status: "PENDING" | "ACCEPTED" | "REJECTED"
       member_role:
         | "SUPER_ADMIN"
         | "ADMIN"
@@ -713,6 +754,7 @@ export type Database = {
         | "ACTIVE"
         | "INACTIVE"
         | "WITHDRAWN"
+      request_status: "PENDING" | "ACCEPTED" | "REJECTED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -841,7 +883,6 @@ export const Constants = {
   public: {
     Enums: {
       interview_result: ["PENDING", "PASS", "FAIL"],
-      request_status: ["PENDING", "ACCEPTED", "REJECTED"],
       member_role: [
         "SUPER_ADMIN",
         "ADMIN",
@@ -857,6 +898,7 @@ export const Constants = {
         "INACTIVE",
         "WITHDRAWN",
       ],
+      request_status: ["PENDING", "ACCEPTED", "REJECTED"],
     },
   },
 } as const

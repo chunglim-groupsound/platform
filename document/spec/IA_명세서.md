@@ -279,7 +279,7 @@ PATCH /api/teams/[id]
   ├── getCurrentSession(supabase) — 인증
   ├── resolveTeamAccess() — isAdmin / isLeader / isViceLeader 판단
   ├── isAdmin → adminFields (name, is_active 포함)
-  └── isLeader/isViceLeader → leaderFields (current_song, description, is_recruiting, vice_leader_id, leader_id)
+  └── isLeader/isViceLeader → leaderFields (name, current_song, description, is_recruiting, vice_leader_id, leader_id)
 ```
 
 ### 회원 상태 전이

@@ -10,7 +10,6 @@ export const STATUS_LABELS: Record<string, string> = {
 export const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN:      '개발 담당',
   ADMIN:            '운영진',
-  TEAM_LEADER:      '팀장',
   MEMBER:           '정식 부원',
   PROBATION_MEMBER: '유예 부원',
 }

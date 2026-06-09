@@ -1,6 +1,6 @@
 # 청림그룹사운드 플랫폼 — TODO
 
-> 최종 업데이트: 2026-06-10
+> 최종 업데이트: 2026-06-10 (버그/정책 2건 완료)
 
 ---
 
@@ -19,8 +19,8 @@
 
 ### 버그 / 정책
 
-- [ ] **팀장도 팀 이름 변경 가능하게** — `PATCH /api/teams/[id]`의 `leaderFields`에 `name` 추가
-- [ ] **`member_role.TEAM_LEADER` 제거** — 팀장 여부는 `teams.leader_id`로 관리하므로 enum 값 불필요. DB 마이그레이션 + `database.ts` 재생성 + `constants.ts` `ROLE_LABELS` 정리 필요
+- [x] **팀장도 팀 이름 변경 가능하게** — `PATCH /api/teams/[id]`의 `leaderFields`에 `name` 추가
+- [x] **`member_role.TEAM_LEADER` 제거** — 팀장 여부는 `teams.leader_id`로 관리하므로 enum 값 불필요. DB 마이그레이션 + `database.ts` 재생성 + `constants.ts` `ROLE_LABELS` 정리 필요
 
 ### 기능 추가
 

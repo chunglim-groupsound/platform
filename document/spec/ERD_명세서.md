@@ -183,11 +183,10 @@ erDiagram
 |----|------|
 | `SUPER_ADMIN` | 개발 담당 (최고 권한) |
 | `ADMIN` | 운영진 |
-| `TEAM_LEADER` | 팀장 ⚠️ 제거 예정 — DB에는 존재하나 실제 팀장 여부는 `teams.leader_id`로 관리 |
 | `MEMBER` | 정식 부원 |
 | `PROBATION_MEMBER` | 유예 부원 |
 
-> **⚠️ TODO**: `TEAM_LEADER` 역할은 `teams.leader_id`와 이중 관리 문제로 제거 대상. DB 마이그레이션 + 코드 정리 필요.
+> 팀장 여부는 `teams.leader_id`로 관리. `TEAM_LEADER` enum 값은 제거됨.
 
 ### `interview_result`
 | 값 | 설명 |
