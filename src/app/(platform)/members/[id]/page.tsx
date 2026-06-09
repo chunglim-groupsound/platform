@@ -11,7 +11,6 @@ import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 const ROLE_LABEL: Record<string, string> = {
   SUPER_ADMIN: '최고관리자',
   ADMIN: '운영진',
-  TEAM_LEADER: '팀장',
   MEMBER: '일반 부원',
   PROBATION_MEMBER: '수습 부원',
 }

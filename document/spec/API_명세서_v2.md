@@ -301,7 +301,7 @@ Kakao Auth UID를 기존 부원 계정에 연결.
 **추가 수정 가능 필드 (운영진만)**
 ```json
 {
-  "name": "팀명 변경",            // ⚠️ 팀장 권한 추가 예정 (TODO)
+  "name": "팀명 변경",            // 팀장도 변경 가능
   "is_active": false              // is_active 변경 시 activation_requested 자동 false
 }
 ```
@@ -664,6 +664,6 @@ CSV 파일 부원 일괄 등록.
 | `/api/timetable/*` | 시간표 데이터 | 미존재 |
 | `/api/notices/*` | 공지사항 데이터 | 미존재 |
 | FCM 웹 푸시 연동 | 알림 시스템 | 설계만 완료 |
-| `PATCH /api/teams/[id]` — `name` 필드 팀장 권한 | 팀장의 팀 이름 변경 | 현재 운영진만 가능 (TODO) |
-| `member_role.TEAM_LEADER` 제거 | DB Enum 정리 | 미완료 — DB 마이그레이션 필요 |
+| `PATCH /api/teams/[id]` — `name` 필드 팀장 권한 | 팀장의 팀 이름 변경 | 완료 — leaderFields에 name 추가 |
+| `member_role.TEAM_LEADER` 제거 | DB Enum 정리 | 완료 — DB 마이그레이션 + 코드 정리 완료 |
 | 세션 연차 | 사용자별 각 세션 활동 기간 기록 | 미설계 |

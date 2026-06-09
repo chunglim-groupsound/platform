@@ -7,7 +7,6 @@ import type { MemberCardData } from '@/types/app'
 const ROLE_LABEL: Record<string, string> = {
   SUPER_ADMIN: '최고관리자',
   ADMIN:       '운영진',
-  TEAM_LEADER: '팀장',
 }
 
 interface MemberCardProps {

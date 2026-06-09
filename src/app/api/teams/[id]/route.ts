@@ -83,7 +83,7 @@ export async function PATCH(
     return apiError('잘못된 요청입니다', 400)
   }
 
-  const leaderFields = new Set(['current_song', 'description', 'is_recruiting', 'vice_leader_id', 'leader_id'])
+  const leaderFields = new Set(['name', 'current_song', 'description', 'is_recruiting', 'vice_leader_id', 'leader_id'])
   const adminFields  = new Set(['name', 'is_active', 'current_song', 'description', 'is_recruiting', 'vice_leader_id', 'leader_id'])
 
   const patch: Record<string, unknown> = {}
