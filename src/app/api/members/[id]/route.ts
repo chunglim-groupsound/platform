@@ -70,7 +70,6 @@ export async function GET(
   //    민감 필드만 조건부 제거, 나머지는 항상 반환
   const filtered: Record<string, unknown> = {
     id:                target.id,
-    name:              target.name,
     nickname:          target.nickname,
     profile_image_url: target.profile_image_url,
     session:           target.session,
@@ -79,6 +78,11 @@ export async function GET(
     role:              target.role,
     is_whitelist:      target.is_whitelist,
     created_at:        target.created_at,
+  }
+
+  // name (실명) — 기본값 member
+  if (canView(privacy.name ?? 'member', isSelf, isMember, isAdmin)) {
+    filtered.name = target.name
   }
 
   // generation
@@ -111,6 +115,19 @@ export async function GET(
     filtered.probation_started_at = target.probation_started_at
     filtered.activated_at         = target.activated_at
   }
+
+  // 소속 팀 목록 (PROBATION 이상 조회 가능)
+  const { data: teamMemberships } = await supabase
+    .from('team_members')
+    .select('team_id, teams!team_id ( id, name, leader_id )')
+    .eq('user_id', id)
+
+  const teams = (teamMemberships ?? []).map((tm: Record<string, unknown>) => {
+    const t = tm.teams as { id: string; name: string; leader_id: string | null } | null
+    return t ? { id: t.id, name: t.name, is_leader: t.leader_id === id } : null
+  }).filter(Boolean)
+
+  filtered.teams = teams
 
   return NextResponse.json(filtered)
 }

@@ -8,10 +8,11 @@ interface NavLinksProps {
 }
 
 const LINKS = [
-  { href: '/home',       label: '홈' },
-  { href: '/timetable',  label: '타임테이블' },
-  { href: '/members',    label: '부원' },
-  { href: '/notices',    label: '공지' },
+  { href: '/home',      label: '홈' },
+  { href: '/timetable', label: '타임테이블' },
+  { href: '/members',   label: '부원' },
+  { href: '/teams',     label: '팀' },
+  { href: '/notices',   label: '공지' },
 ]
 
 const ADMIN_LINK = { href: '/admin/applications', label: '운영' }
@@ -19,10 +20,11 @@ const ADMIN_LINK = { href: '/admin/applications', label: '운영' }
 export function NavLinks({ isAdmin }: NavLinksProps) {
   const pathname = usePathname()
 
-  const isActive = (href: string) =>
-    href === '/home' || href === '/timetable'
-      ? pathname === href
-      : pathname.startsWith(href)
+  const isActive = (href: string) => {
+    if (href === '/members') return pathname.startsWith('/members') && !pathname.startsWith('/members/teams')
+    if (href === '/home' || href === '/timetable') return pathname === href
+    return pathname.startsWith(href)
+  }
 
   return (
     <nav style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>

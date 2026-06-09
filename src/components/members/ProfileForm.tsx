@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { PrivacySettings } from './PrivacySettings'
 
@@ -27,6 +28,7 @@ interface ProfileData {
 
 interface FormState {
   nickname: string
+  profile_image_url: string | null
   session: string[]
   genre_preference: string[]
   phone: string
@@ -46,18 +48,20 @@ const ROLE_LABEL: Record<string, string> = {
 
 function toFormState(p: ProfileData): FormState {
   return {
-    nickname:         p.nickname ?? '',
-    session:          p.session ?? [],
-    genre_preference: p.genre_preference ?? [],
-    phone:            p.phone ?? '',
-    department:       p.department ?? '',
-    student_id:       p.student_id ?? '',
-    school_year:      p.school_year?.toString() ?? '',
-    privacy_settings: p.privacy_settings ?? {},
+    nickname:          p.nickname ?? '',
+    profile_image_url: p.profile_image_url ?? null,
+    session:           p.session ?? [],
+    genre_preference:  p.genre_preference ?? [],
+    phone:             p.phone ?? '',
+    department:        p.department ?? '',
+    student_id:        p.student_id ?? '',
+    school_year:       p.school_year?.toString() ?? '',
+    privacy_settings:  p.privacy_settings ?? {},
   }
 }
 
-export function ProfileForm({ profile }: { profile: ProfileData }) {
+export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { profile: ProfileData; kakaoAvatarUrl: string | null; redirectAfterSave?: string }) {
+  const router = useRouter()
   const [form, setForm] = useState<FormState>(() => toFormState(profile))
   const [original] = useState<FormState>(() => toFormState(profile))
   const [saving, setSaving] = useState(false)
@@ -99,14 +103,15 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
     setSaving(true)
     try {
       const payload: Record<string, unknown> = {
-        nickname:         form.nickname.trim() || null,
-        session:          form.session,
-        genre_preference: form.genre_preference,
-        phone:            form.phone.trim() || null,
-        department:       form.department.trim() || null,
-        student_id:       form.student_id.trim() || null,
-        school_year:      form.school_year ? Number(form.school_year) : null,
-        privacy_settings: form.privacy_settings,
+        nickname:          form.nickname.trim() || null,
+        profile_image_url: form.profile_image_url,
+        session:           form.session,
+        genre_preference:  form.genre_preference,
+        phone:             form.phone.trim() || null,
+        department:        form.department.trim() || null,
+        student_id:        form.student_id.trim() || null,
+        school_year:       form.school_year ? Number(form.school_year) : null,
+        privacy_settings:  form.privacy_settings,
       }
       const res = await fetch('/api/members/me', {
         method: 'PATCH',
@@ -115,6 +120,9 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
       })
       if (res.ok) {
         setToast({ msg: '저장되었습니다', type: 'ok' })
+        if (redirectAfterSave) {
+          setTimeout(() => router.push(redirectAfterSave), 800)
+        }
       } else {
         const data = await res.json()
         setToast({ msg: data.error ?? '저장에 실패했습니다', type: 'err' })
@@ -134,29 +142,62 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* 읽기 전용 프로필 헤더 */}
+      {/* 프로필 헤더 */}
       <div style={{
         background: '#f9fafb', borderRadius: '12px', padding: '20px',
         display: 'flex', alignItems: 'center', gap: '16px',
       }}>
-        <div style={{ position: 'relative', width: 72, height: 72, flexShrink: 0 }}>
-          {profile.profile_image_url ? (
-            <Image
-              src={profile.profile_image_url}
-              alt={profile.name}
-              fill
-              style={{ borderRadius: '50%', objectFit: 'cover' }}
-            />
-          ) : (
-            <div style={{
-              width: 72, height: 72, borderRadius: '50%',
-              background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.8rem', color: '#6b7280',
-            }}>
-              {profile.name[0]}
-            </div>
-          )}
+        {/* 프로필 이미지 + 선택 버튼 */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+          <div style={{ position: 'relative', width: 72, height: 72 }}>
+            {form.profile_image_url ? (
+              <Image
+                src={form.profile_image_url}
+                alt={profile.name}
+                fill
+                style={{ borderRadius: '50%', objectFit: 'cover' }}
+              />
+            ) : (
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%',
+                background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1.8rem', color: '#6b7280',
+              }}>
+                {profile.name[0]}
+              </div>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button
+              type="button"
+              disabled={!kakaoAvatarUrl}
+              onClick={() => setForm(f => ({ ...f, profile_image_url: kakaoAvatarUrl }))}
+              style={{
+                padding: '4px 10px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 600,
+                border: 'none', cursor: kakaoAvatarUrl ? 'pointer' : 'not-allowed',
+                background: form.profile_image_url === kakaoAvatarUrl && kakaoAvatarUrl
+                  ? '#4A90E2' : '#e5e7eb',
+                color: form.profile_image_url === kakaoAvatarUrl && kakaoAvatarUrl
+                  ? '#fff' : '#6b7280',
+              }}
+            >
+              카카오
+            </button>
+            <button
+              type="button"
+              onClick={() => setForm(f => ({ ...f, profile_image_url: null }))}
+              style={{
+                padding: '4px 10px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 600,
+                border: 'none', cursor: 'pointer',
+                background: !form.profile_image_url ? '#4A90E2' : '#e5e7eb',
+                color: !form.profile_image_url ? '#fff' : '#6b7280',
+              }}
+            >
+              기본
+            </button>
+          </div>
         </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{profile.name}</div>
           {profile.generation && (
@@ -178,7 +219,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
               </span>
             )}
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>프로필 사진 · 이름 · 기수는 운영진만 수정 가능합니다</div>
+          <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>이름 · 기수는 운영진만 수정 가능합니다</div>
         </div>
       </div>
 

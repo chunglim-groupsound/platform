@@ -49,7 +49,7 @@ export default function MembersPage() {
     if (filter.q) {
       const q = filter.q.toLowerCase()
       result = result.filter(m =>
-        m.name.toLowerCase().includes(q) ||
+        (m.name ?? '').toLowerCase().includes(q) ||
         (m.nickname ?? '').toLowerCase().includes(q) ||
         String(m.generation ?? '').includes(q)
       )
@@ -60,7 +60,9 @@ export default function MembersPage() {
     if (filter.generation) {
       result = result.filter(m => m.generation === Number(filter.generation))
     }
-    if (filter.role) {
+    if (filter.role === 'TEAM_LEADER') {
+      result = result.filter(m => m.isLeader)
+    } else if (filter.role) {
       result = result.filter(m => m.role === filter.role)
     }
     if (filter.isWhitelist) {
@@ -79,7 +81,7 @@ export default function MembersPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>부원 명단</h1>
         <button
-          onClick={() => router.push('/members/teams')}
+          onClick={() => router.push('/teams')}
           style={{
             padding: '7px 16px', borderRadius: '8px', fontSize: '0.85rem',
             border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontWeight: 500,

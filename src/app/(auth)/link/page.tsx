@@ -152,7 +152,7 @@ export default function LinkPage() {
     }
 
     setLoading(false)
-    router.replace('/timetable')
+    router.replace('/home')
   }
 
   // ─────────────────────────────────────────────

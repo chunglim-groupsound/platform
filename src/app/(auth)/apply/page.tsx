@@ -71,6 +71,7 @@ export default function ApplyPage() {
     motivation:        '',
     self_intro:        '',
   })
+  const [kakaoAvatarUrl, setKakaoAvatarUrl] = useState('')
   const [agreed,  setAgreed]  = useState(false)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState<string | null>(null)
@@ -83,6 +84,7 @@ export default function ApplyPage() {
       const kakaoName     = user.user_metadata?.name      ?? ''
       const kakaoNickname = user.user_metadata?.nickname  ?? user.user_metadata?.name ?? ''
       const kakaoAvatar   = user.user_metadata?.avatar_url ?? ''
+      setKakaoAvatarUrl(kakaoAvatar)
       setForm(prev => ({
         ...prev,
         ...(kakaoName     ? { name:              kakaoName }     : {}),
@@ -257,21 +259,36 @@ export default function ApplyPage() {
             />
           </Field>
 
-          <Field label="프로필 사진 URL" hint="선택 — 카카오 프로필이 자동으로 채워집니다">
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              {form.profile_image_url && (
-                <img
-                  src={form.profile_image_url}
-                  alt="프로필 미리보기"
-                  style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #e0e0e0', flexShrink: 0 }}
-                />
-              )}
-              <input
-                value={form.profile_image_url}
-                onChange={e => setField('profile_image_url', e.target.value)}
-                placeholder="이미지 URL"
-                style={styles.input}
-              />
+          <Field label="프로필 사진" hint="선택">
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setField('profile_image_url', kakaoAvatarUrl)}
+                disabled={!kakaoAvatarUrl}
+                style={{
+                  ...styles.profileOption,
+                  ...(form.profile_image_url ? styles.profileOptionActive : {}),
+                  opacity: kakaoAvatarUrl ? 1 : 0.4,
+                  cursor: kakaoAvatarUrl ? 'pointer' : 'not-allowed',
+                }}
+              >
+                {kakaoAvatarUrl
+                  ? <img src={kakaoAvatarUrl} alt="카카오 프로필" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                  : <DefaultAvatar size={32} />
+                }
+                <span style={{ fontSize: '13px' }}>카카오 프로필</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setField('profile_image_url', '')}
+                style={{
+                  ...styles.profileOption,
+                  ...(!form.profile_image_url ? styles.profileOptionActive : {}),
+                }}
+              >
+                <DefaultAvatar size={32} />
+                <span style={{ fontSize: '13px' }}>기본 프로필</span>
+              </button>
             </div>
           </Field>
 
@@ -438,6 +455,16 @@ export default function ApplyPage() {
 // ─────────────────────────────────────────────
 // 서브 컴포넌트
 // ─────────────────────────────────────────────
+function DefaultAvatar({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" style={{ borderRadius: '50%', flexShrink: 0 }}>
+      <circle cx="16" cy="16" r="16" fill="#e5e7eb" />
+      <circle cx="16" cy="13" r="5" fill="#9ca3af" />
+      <path d="M6 26c0-5.523 4.477-10 10-10s10 4.477 10 10" fill="#9ca3af" />
+    </svg>
+  )
+}
+
 function Section({
   title,
   hint,
@@ -643,5 +670,25 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#fff',
     border: 'none',
     borderRadius: '8px',
+  },
+  profileOption: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    gap: '6px',
+    padding: '12px 16px',
+    borderWidth: '2px',
+    borderStyle: 'solid',
+    borderColor: '#e0e0e0',
+    borderRadius: '10px',
+    background: '#fff',
+    cursor: 'pointer',
+    color: '#555',
+    minWidth: '96px',
+  },
+  profileOptionActive: {
+    borderColor: '#4A90E2',
+    background: '#f0f7ff',
+    color: '#4A90E2',
   },
 }

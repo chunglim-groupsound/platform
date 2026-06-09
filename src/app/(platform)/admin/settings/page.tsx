@@ -28,12 +28,18 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     fetch('/api/admin/settings/recruitment')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
       .then((d: RecruitmentPeriod) => {
         setCurrent(d)
         setIsOpen(d.is_open)
         setOpenAt(toLocalDatetimeValue(d.open_at))
         setCloseAt(toLocalDatetimeValue(d.close_at))
+      })
+      .catch(() => {
+        setMessage({ type: 'error', text: '설정을 불러오지 못했습니다.' })
       })
   }, [])
 

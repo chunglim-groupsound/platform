@@ -8,13 +8,16 @@ interface TeamCardProps {
     name: string
     current_song: string | null
     description: string | null
+    is_active?: boolean
+    is_recruiting: boolean
     leader: { id: string; name: string; nickname: string | null } | null
     member_count: number
     session_summary: Record<string, number>
   }
+  baseUrl?: string
 }
 
-export function TeamCard({ team }: TeamCardProps) {
+export function TeamCard({ team, baseUrl = '/teams' }: TeamCardProps) {
   const router = useRouter()
   const leaderName = team.leader
     ? (team.leader.nickname ?? team.leader.name)
@@ -26,7 +29,7 @@ export function TeamCard({ team }: TeamCardProps) {
 
   return (
     <div
-      onClick={() => router.push(`/members/teams/${team.id}`)}
+      onClick={() => router.push(`${baseUrl}/${team.id}`)}
       style={{
         borderRadius: '12px',
         border: '1px solid #e5e7eb',
@@ -41,7 +44,32 @@ export function TeamCard({ team }: TeamCardProps) {
       onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)')}
       onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
     >
-      <div style={{ fontWeight: 700, fontSize: '1rem' }}>{team.name}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+        <div style={{ fontWeight: 700, fontSize: '1rem', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{team.name}</div>
+        <div style={{ display: 'flex', gap: '4px', flexShrink: 0, alignItems: 'center' }}>
+          {team.is_active === false && (
+            <span style={{
+              padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem',
+              fontWeight: 600, background: '#fef3c7', color: '#92400e',
+              border: '1px solid #fcd34d', whiteSpace: 'nowrap',
+            }}>
+              비활성
+            </span>
+          )}
+          <span style={{
+            padding: '2px 8px',
+            borderRadius: '9999px',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            background: team.is_recruiting ? '#dcfce7' : '#f3f4f6',
+            color:      team.is_recruiting ? '#15803d' : '#6b7280',
+            border:     `1px solid ${team.is_recruiting ? '#bbf7d0' : '#e5e7eb'}`,
+            whiteSpace: 'nowrap',
+          }}>
+            {team.is_recruiting ? '모집 중' : '모집 완료'}
+          </span>
+        </div>
+      </div>
 
       <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>
         팀장: {leaderName} · {team.member_count}명

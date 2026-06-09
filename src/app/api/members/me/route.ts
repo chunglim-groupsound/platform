@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 const ALLOWED_FIELDS = [
-  'nickname', 'session', 'genre_preference',
+  'nickname', 'profile_image_url', 'session', 'genre_preference',
   'phone', 'department', 'student_id', 'school_year',
   'privacy_settings',
 ] as const
@@ -11,7 +11,7 @@ const BLOCKED_FIELDS = new Set([
   'id', 'kakao_id', 'linked_auth_id', 'name', 'generation',
   'status', 'role', 'is_whitelist', 'created_at', 'updated_at',
   'activated_at', 'probation_started_at', 'last_active_at',
-  'privacy_agreed_at', 'profile_image_url',
+  'privacy_agreed_at',
 ])
 
 const VALID_SESSIONS = new Set(['보컬', '기타', '베이스', '드럼', '건반', '기타(악기)'])
@@ -58,6 +58,15 @@ export async function PATCH(request: Request) {
 
   // 유효성 검증
   const errors: Record<string, string> = {}
+
+  const kakaoAvatarUrl = user.user_metadata?.avatar_url as string | undefined
+
+  if ('profile_image_url' in patch) {
+    const url = patch.profile_image_url
+    if (url !== null && url !== kakaoAvatarUrl) {
+      errors.profile_image_url = '카카오 프로필 또는 기본 프로필만 선택 가능합니다'
+    }
+  }
 
   if ('nickname' in patch && patch.nickname !== null) {
     const n = String(patch.nickname)

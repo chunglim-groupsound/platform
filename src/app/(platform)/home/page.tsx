@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { DashboardCards } from '@/components/layout/DashboardCards'
+import Link from 'next/link'
 
 const ROLE_LABEL: Record<string, string> = {
   SUPER_ADMIN: '최고관리자',
@@ -16,7 +18,18 @@ const STATUS_LABEL: Record<string, string> = {
   INACTIVE: '비활동',
 }
 
-export default async function TimetablePage() {
+interface TeamLeader { name: string; nickname: string | null }
+interface TeamMemberRow { user_id: string }
+interface ActiveTeam {
+  id: string
+  name: string
+  current_song: string | null
+  is_recruiting: boolean
+  leader: TeamLeader | null
+  team_members: TeamMemberRow[]
+}
+
+export default async function HomePage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -32,17 +45,27 @@ export default async function TimetablePage() {
 
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(profile.role)
 
-  // 간단한 통계
-  const [{ count: memberCount }, { count: teamCount }] = await Promise.all([
-    supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .in('status', ['ACTIVE', 'INACTIVE', 'PROBATION']),
-    supabase
-      .from('teams')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_active', true),
-  ])
+  // 부원 수
+  const { count: memberCount } = await supabaseAdmin
+    .from('users')
+    .select('*', { count: 'exact', head: true })
+    .in('status', ['ACTIVE', 'INACTIVE', 'PROBATION'])
+
+  // 활성 팀 + 팀원 목록 (팀원 있는 팀만 카운트/표시)
+  const { data: rawTeams } = await supabaseAdmin
+    .from('teams')
+    .select(`
+      id, name, current_song, is_recruiting,
+      leader:users!leader_id ( name, nickname ),
+      team_members ( user_id )
+    `)
+    .eq('is_active', true)
+    .order('created_at', { ascending: true })
+
+  const activeTeams = ((rawTeams ?? []) as unknown as ActiveTeam[])
+    .filter(t => t.team_members.length > 0)
+
+  const teamCount = activeTeams.length
 
   const displayName = profile.nickname ?? profile.name
 
@@ -54,50 +77,12 @@ export default async function TimetablePage() {
     adminOnly?: boolean
     color: string
   }[] = [
-    {
-      href: '/members',
-      emoji: '👥',
-      title: '부원 명단',
-      desc: '전체 부원 검색 · 필터 · 프로필 조회',
-      color: '#eff6ff',
-    },
-    {
-      href: '/members/me',
-      emoji: '✏️',
-      title: '내 프로필',
-      desc: '세션, 학과, 연락처 등 프로필 수정',
-      color: '#f0fdf4',
-    },
-    {
-      href: '/members/teams',
-      emoji: '🎸',
-      title: '팀 목록',
-      desc: '합주 팀 구성 및 현재 연습 곡 확인',
-      color: '#fff7ed',
-    },
-    {
-      href: '/notices',
-      emoji: '📢',
-      title: '공지사항',
-      desc: '동아리 공지 및 일정 안내',
-      color: '#fdf4ff',
-    },
-    {
-      href: '/admin/applications',
-      emoji: '⚙️',
-      title: '운영 관리',
-      desc: '가입 신청 처리 · 부원 상태 관리',
-      adminOnly: true,
-      color: '#fff1f2',
-    },
-    {
-      href: '/admin/members',
-      emoji: '👤',
-      title: '부원 관리',
-      desc: '기수 · 역할 · 화이트리스트 설정',
-      adminOnly: true,
-      color: '#fff1f2',
-    },
+    { href: '/members',   emoji: '👥', title: '부원 명단',  desc: '전체 부원 검색 · 필터 · 프로필 조회', color: '#eff6ff' },
+    { href: '/members/me', emoji: '✏️', title: '내 프로필', desc: '세션, 학과, 연락처 등 프로필 수정',    color: '#f0fdf4' },
+    { href: '/teams',     emoji: '🎸', title: '팀 목록',    desc: '합주 팀 구성 및 현재 연습 곡 확인',   color: '#fff7ed' },
+    { href: '/notices',   emoji: '📢', title: '공지사항',   desc: '동아리 공지 및 일정 안내',             color: '#fdf4ff' },
+    { href: '/admin/applications', emoji: '⚙️', title: '운영 관리', desc: '가입 신청 처리 · 부원 상태 관리', adminOnly: true, color: '#fff1f2' },
+    { href: '/admin/members',      emoji: '👤', title: '부원 관리', desc: '기수 · 역할 · 화이트리스트 설정', adminOnly: true, color: '#fff1f2' },
   ]
 
   const visibleCards = cards.filter(c => !c.adminOnly || isAdmin)
@@ -108,14 +93,9 @@ export default async function TimetablePage() {
       {/* 환영 배너 */}
       <section style={{
         background: 'linear-gradient(135deg, #1e3a5f 0%, #111827 100%)',
-        borderRadius: '16px',
-        padding: '28px 28px',
-        color: '#fff',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: '16px',
-        flexWrap: 'wrap',
+        borderRadius: '16px', padding: '28px', color: '#fff',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        gap: '16px', flexWrap: 'wrap',
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>
@@ -125,33 +105,20 @@ export default async function TimetablePage() {
             안녕하세요, {displayName}님 👋
           </div>
           <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{
-              padding: '3px 10px', borderRadius: '9999px',
-              background: 'rgba(255,255,255,0.12)', fontSize: '0.78rem',
-              color: 'rgba(255,255,255,0.8)',
-            }}>
+            <span style={{ padding: '3px 10px', borderRadius: '9999px', background: 'rgba(255,255,255,0.12)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.8)' }}>
               {ROLE_LABEL[profile.role] ?? profile.role}
             </span>
             {profile.generation != null && (
-              <span style={{
-                padding: '3px 10px', borderRadius: '9999px',
-                background: 'rgba(255,255,255,0.12)', fontSize: '0.78rem',
-                color: 'rgba(255,255,255,0.8)',
-              }}>
+              <span style={{ padding: '3px 10px', borderRadius: '9999px', background: 'rgba(255,255,255,0.12)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.8)' }}>
                 {profile.generation}기
               </span>
             )}
-            <span style={{
-              padding: '3px 10px', borderRadius: '9999px',
-              background: 'rgba(255,255,255,0.12)', fontSize: '0.78rem',
-              color: 'rgba(255,255,255,0.8)',
-            }}>
+            <span style={{ padding: '3px 10px', borderRadius: '9999px', background: 'rgba(255,255,255,0.12)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.8)' }}>
               {STATUS_LABEL[profile.status] ?? profile.status}
             </span>
           </div>
         </div>
 
-        {/* 통계 */}
         <div style={{ display: 'flex', gap: '20px' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '1.8rem', fontWeight: 800, lineHeight: 1 }}>{memberCount ?? '-'}</div>
@@ -159,11 +126,64 @@ export default async function TimetablePage() {
           </div>
           <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)' }} />
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.8rem', fontWeight: 800, lineHeight: 1 }}>{teamCount ?? '-'}</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, lineHeight: 1 }}>{teamCount}</div>
             <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)', marginTop: '4px' }}>활성 팀</div>
           </div>
         </div>
       </section>
+
+      {/* 활성 팀 목록 */}
+      {activeTeams.length > 0 && (
+        <section>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <h2 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#6b7280', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              활성 팀
+            </h2>
+            <Link href="/teams" style={{ fontSize: '0.8rem', color: '#6366f1', textDecoration: 'none', fontWeight: 500 }}>
+              전체 보기 →
+            </Link>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {activeTeams.map(team => {
+              const leaderName = team.leader
+                ? (team.leader.nickname ?? team.leader.name)
+                : null
+              return (
+                <Link
+                  key={team.id}
+                  href={`/teams/${team.id}`}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '12px 16px', borderRadius: '12px',
+                    border: '1px solid #e5e7eb', background: '#fff',
+                    textDecoration: 'none', color: '#111827',
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{team.name}</span>
+                      <span style={{
+                        padding: '1px 7px', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 600, flexShrink: 0,
+                        background: team.is_recruiting ? '#dcfce7' : '#f3f4f6',
+                        color:      team.is_recruiting ? '#15803d' : '#6b7280',
+                        border:     `1px solid ${team.is_recruiting ? '#bbf7d0' : '#e5e7eb'}`,
+                      }}>
+                        {team.is_recruiting ? '모집 중' : '모집 완료'}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: '#9ca3af' }}>
+                      {team.current_song ? `♪ ${team.current_song}` : (leaderName ? `팀장: ${leaderName}` : '')}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#6b7280', flexShrink: 0 }}>
+                    {team.team_members.length}명
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       {/* 빠른 이동 */}
       <section>
@@ -175,11 +195,8 @@ export default async function TimetablePage() {
 
       {/* 타임테이블 예고 */}
       <section style={{
-        border: '1px dashed #d1d5db',
-        borderRadius: '14px',
-        padding: '28px',
-        textAlign: 'center',
-        color: '#9ca3af',
+        border: '1px dashed #d1d5db', borderRadius: '14px',
+        padding: '28px', textAlign: 'center', color: '#9ca3af',
       }}>
         <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>🗓</div>
         <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#6b7280', marginBottom: '4px' }}>합주실 타임테이블</div>

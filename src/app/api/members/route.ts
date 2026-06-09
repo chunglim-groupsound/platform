@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { maskMember } from '@/lib/member/privacy'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -61,14 +62,22 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const { data: rows, error } = await query.order('created_at', { ascending: true })
+  const [{ data: rows, error }, { data: teamLeaders }] = await Promise.all([
+    query.order('created_at', { ascending: true }),
+    supabaseAdmin.from('teams').select('leader_id').eq('is_active', true),
+  ])
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  const leaderIds = new Set((teamLeaders ?? []).map(t => t.leader_id).filter(Boolean))
+
   const members = (rows ?? []).map((row) =>
-    maskMember(row as Record<string, unknown>, row.id === callerId, isMember, isAdmin)
+    maskMember(
+      { ...row, isLeader: leaderIds.has(row.id) } as Record<string, unknown>,
+      row.id === callerId, isMember, isAdmin
+    )
   )
 
   const admins = members.filter(m => ['ADMIN', 'SUPER_ADMIN'].includes(m.role) && m.status === 'ACTIVE')
