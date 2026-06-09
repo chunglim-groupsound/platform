@@ -1,12 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextResponse } from 'next/server'
 import { isAdminRole } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
+import { apiError, apiSuccess } from '@/lib/api/response'
 import type { RequestStatus } from '@/types/app'
-
-// PATCH /api/teams/[id]/join-requests/[requestId] — 수락/거절 (팀장/운영진)
-// DELETE /api/teams/[id]/join-requests/[requestId] — 신청 취소 (본인)
 
 export async function PATCH(
   request: Request,
@@ -15,7 +12,7 @@ export async function PATCH(
   const { id: teamId, requestId } = await params
   const supabase = await createClient()
   const session = await getCurrentSession(supabase)
-  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!session) return apiError('인증 필요', 401)
 
   const { profile: callerProfile, myId } = session
   const isAdmin = isAdminRole(callerProfile?.role)
@@ -29,16 +26,16 @@ export async function PATCH(
   const isLeader     = team?.leader_id      === myId
   const isViceLeader = team?.vice_leader_id === myId
   if (!isAdmin && !isLeader && !isViceLeader) {
-    return NextResponse.json({ error: '수락/거절 권한이 없습니다' }, { status: 403 })
+    return apiError('수락/거절 권한이 없습니다', 403)
   }
 
   let body: { status?: string }
   try { body = await request.json() } catch {
-    return NextResponse.json({ error: '잘못된 요청입니다' }, { status: 400 })
+    return apiError('잘못된 요청입니다', 400)
   }
 
   if (!['ACCEPTED', 'REJECTED'].includes(body.status ?? '')) {
-    return NextResponse.json({ error: 'status는 ACCEPTED 또는 REJECTED여야 합니다' }, { status: 400 })
+    return apiError('status는 ACCEPTED 또는 REJECTED여야 합니다', 400)
   }
 
   const { data: joinRequest } = await supabaseAdmin
@@ -48,28 +45,27 @@ export async function PATCH(
     .eq('team_id', teamId)
     .single()
 
-  if (!joinRequest) return NextResponse.json({ error: '신청을 찾을 수 없습니다' }, { status: 404 })
-  if (joinRequest.status !== 'PENDING') return NextResponse.json({ error: '이미 처리된 신청입니다' }, { status: 409 })
+  if (!joinRequest) return apiError('신청을 찾을 수 없습니다', 404)
+  if (joinRequest.status !== 'PENDING') return apiError('이미 처리된 신청입니다', 409)
 
   const { error: updateError } = await supabaseAdmin
     .from('team_join_requests')
     .update({ status: body.status as RequestStatus })
     .eq('id', requestId)
 
-  if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
+  if (updateError) return apiError('서버 오류가 발생했습니다', 500)
 
-  // 수락 시 team_members에 추가
   if (body.status === 'ACCEPTED') {
     const { error: memberError } = await supabaseAdmin
       .from('team_members')
       .insert({ team_id: teamId, user_id: joinRequest.applicant_id })
 
     if (memberError && memberError.code !== '23505') {
-      return NextResponse.json({ error: memberError.message }, { status: 500 })
+      return apiError('서버 오류가 발생했습니다', 500)
     }
   }
 
-  return NextResponse.json({ success: true })
+  return apiSuccess({ success: true })
 }
 
 export async function DELETE(
@@ -79,7 +75,7 @@ export async function DELETE(
   const { id: teamId, requestId } = await params
   const supabase = await createClient()
   const delSession = await getCurrentSession(supabase)
-  if (!delSession) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!delSession) return apiError('인증 필요', 401)
 
   const { data: joinRequest } = await supabaseAdmin
     .from('team_join_requests')
@@ -88,9 +84,9 @@ export async function DELETE(
     .eq('team_id', teamId)
     .single()
 
-  if (!joinRequest) return NextResponse.json({ error: '신청을 찾을 수 없습니다' }, { status: 404 })
+  if (!joinRequest) return apiError('신청을 찾을 수 없습니다', 404)
   if (joinRequest.applicant_id !== delSession.myId) {
-    return NextResponse.json({ error: '취소 권한이 없습니다' }, { status: 403 })
+    return apiError('취소 권한이 없습니다', 403)
   }
 
   const { error } = await supabaseAdmin
@@ -98,7 +94,7 @@ export async function DELETE(
     .delete()
     .eq('id', requestId)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return apiError('서버 오류가 발생했습니다', 500)
 
-  return NextResponse.json({ success: true })
+  return apiSuccess({ success: true })
 }

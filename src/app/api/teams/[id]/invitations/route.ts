@@ -1,10 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextResponse } from 'next/server'
 import { isAdminRole } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
-
-// POST /api/teams/[id]/invitations — 팀원 초대 발송 (팀장/운영진)
+import { apiError, apiSuccess } from '@/lib/api/response'
 
 export async function POST(
   request: Request,
@@ -13,7 +11,7 @@ export async function POST(
   const { id: teamId } = await params
   const supabase = await createClient()
   const session = await getCurrentSession(supabase)
-  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!session) return apiError('인증 필요', 401)
 
   const { profile: callerProfile, myId } = session
   const isAdmin = isAdminRole(callerProfile?.role)
@@ -27,17 +25,16 @@ export async function POST(
   const isLeader     = team?.leader_id      === myId
   const isViceLeader = team?.vice_leader_id === myId
   if (!isAdmin && !isLeader && !isViceLeader) {
-    return NextResponse.json({ error: '초대 권한이 없습니다' }, { status: 403 })
+    return apiError('초대 권한이 없습니다', 403)
   }
 
   let body: { inviteeId?: string; message?: string }
   try { body = await request.json() } catch {
-    return NextResponse.json({ error: '잘못된 요청입니다' }, { status: 400 })
+    return apiError('잘못된 요청입니다', 400)
   }
 
-  if (!body.inviteeId) return NextResponse.json({ error: 'inviteeId는 필수입니다' }, { status: 400 })
+  if (!body.inviteeId) return apiError('inviteeId는 필수입니다', 400)
 
-  // 이미 팀원인지 확인
   const { data: existing } = await supabaseAdmin
     .from('team_members')
     .select('id')
@@ -45,7 +42,7 @@ export async function POST(
     .eq('user_id', body.inviteeId)
     .maybeSingle()
 
-  if (existing) return NextResponse.json({ error: '이미 팀원입니다' }, { status: 409 })
+  if (existing) return apiError('이미 팀원입니다', 409)
 
   const { data, error } = await supabaseAdmin
     .from('team_invitations')
@@ -59,9 +56,9 @@ export async function POST(
     .single()
 
   if (error) {
-    if (error.code === '23505') return NextResponse.json({ error: '이미 초대한 부원입니다' }, { status: 409 })
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error.code === '23505') return apiError('이미 초대한 부원입니다', 409)
+    return apiError('서버 오류가 발생했습니다', 500)
   }
 
-  return NextResponse.json({ invitation: { id: data.id } }, { status: 201 })
+  return apiSuccess({ invitation: { id: data.id } }, 201)
 }

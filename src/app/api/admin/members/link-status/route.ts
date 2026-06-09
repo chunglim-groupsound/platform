@@ -2,7 +2,7 @@
 // 운영진이 임포트 레코드 중 연동 완료/미완료 현황을 확인하는 API
 
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { apiError, apiSuccess } from '@/lib/api/response'
 import { isAdminRole } from '@/lib/constants'
 
 export async function GET() {
@@ -10,7 +10,7 @@ export async function GET() {
 
   // 호출자 권한 확인
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!user) return apiError('인증 필요', 401)
 
   const { data: caller } = await supabase
     .from('users')
@@ -19,7 +19,7 @@ export async function GET() {
     .single()
 
   if (!isAdminRole(caller?.role)) {
-    return NextResponse.json({ error: '권한 없음' }, { status: 403 })
+    return apiError('권한 없음', 403)
   }
 
   // 임포트 레코드 전체 조회 (연동 여부 포함)
@@ -32,7 +32,7 @@ export async function GET() {
   const linked    = allImported?.filter(m => m.linked_auth_id !== null) ?? []
   const notLinked = allImported?.filter(m => m.linked_auth_id === null)  ?? []
 
-  return NextResponse.json({
+  return apiSuccess({
     total:     allImported?.length ?? 0,
     linked:    linked.length,
     notLinked: notLinked.length,

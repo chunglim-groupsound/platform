@@ -1,18 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { apiError, apiSuccess } from '@/lib/api/response'
 import { isAdminRole } from '@/lib/constants'
 
 async function requireAdmin() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: NextResponse.json({ error: '인증 필요' }, { status: 401 }), supabase: null }
+  if (!user) return { error: apiError('인증 필요', 401), supabase: null, user: null }
 
   const { data: caller } = await supabase.from('users').select('role').eq('id', user.id).single()
   if (!isAdminRole(caller?.role)) {
-    return { error: NextResponse.json({ error: '권한 없음' }, { status: 403 }), supabase: null }
+    return { error: apiError('권한 없음', 403), supabase: null, user: null }
   }
 
-  return { error: null, supabase }
+  return { error: null, supabase, user }
 }
 
 export async function GET() {
@@ -24,21 +24,19 @@ export async function GET() {
     .select('is_open, open_at, close_at')
     .maybeSingle()
 
-  if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
-  return NextResponse.json(data ?? { is_open: false, open_at: null, close_at: null })
+  if (dbError) return apiError('서버 오류가 발생했습니다', 500)
+  return apiSuccess(data ?? { is_open: false, open_at: null, close_at: null })
 }
 
 export async function PATCH(request: Request) {
-  const { error, supabase } = await requireAdmin()
+  const { error, supabase, user } = await requireAdmin()
   if (error) return error
-
-  const { data: { user } } = await (await createClient()).auth.getUser()
 
   const body = await request.json()
   const { is_open, open_at, close_at } = body
 
   if (typeof is_open !== 'boolean' || !open_at || !close_at) {
-    return NextResponse.json({ error: 'is_open, open_at, close_at 필드가 필요합니다' }, { status: 400 })
+    return apiError('is_open, open_at, close_at 필드가 필요합니다', 400)
   }
 
   const { data: existing } = await supabase!
@@ -52,6 +50,6 @@ export async function PATCH(request: Request) {
     ? await supabase!.from('recruitment_periods').update(payload).eq('id', existing.id)
     : await supabase!.from('recruitment_periods').insert(payload)
 
-  if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
-  return NextResponse.json({ success: true })
+  if (dbError) return apiError('서버 오류가 발생했습니다', 500)
+  return apiSuccess({ success: true })
 }

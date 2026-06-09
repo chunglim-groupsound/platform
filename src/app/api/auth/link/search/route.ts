@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextResponse } from 'next/server'
+import { apiError, apiSuccess } from '@/lib/api/response'
 import { ACTIVE_STATUSES } from '@/lib/constants'
 
 export async function POST(request: Request) {
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     // 1. 로그인 확인
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+      return apiError('인증 필요', 401)
     }
 
     // 2. 요청 파싱
@@ -21,10 +21,10 @@ export async function POST(request: Request) {
     const generation: number = Number(body.generation)
 
     if (!name) {
-      return NextResponse.json({ error: '이름을 입력해주세요.' }, { status: 400 })
+      return apiError('이름을 입력해주세요.', 400)
     }
     if (!generation || isNaN(generation) || generation < 1) {
-      return NextResponse.json({ error: '기수를 올바르게 입력해주세요.' }, { status: 400 })
+      return apiError('기수를 올바르게 입력해주세요.', 400)
     }
 
     // 3. 임포트 레코드 검색
@@ -41,13 +41,13 @@ export async function POST(request: Request) {
 
     if (searchError) {
       console.error('search error:', searchError)
-      return NextResponse.json({ error: searchError.message }, { status: 500 })
+      return apiError('서버 오류가 발생했습니다', 500)
     }
 
-    return NextResponse.json({ candidates: candidates ?? [] })
+    return apiSuccess({ candidates: candidates ?? [] })
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('link/search unexpected error:', err)
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
+    return apiError('서버 오류가 발생했습니다.', 500)
   }
 }

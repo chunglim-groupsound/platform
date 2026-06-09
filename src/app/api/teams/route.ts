@@ -1,21 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isAdminRole, hasActiveMemberAccess, canCreateTeam } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
 import { calcSessionSummary, calcMemberCount } from '@/lib/team/utils'
+import { apiError, apiSuccess } from '@/lib/api/response'
 import type { TeamListItem } from '@/types/team'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const session = await getCurrentSession(supabase)
-  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!session) return apiError('인증 필요', 401)
 
   const { profile: callerProfile } = session
   const isAdmin = isAdminRole(callerProfile?.role)
   if (!hasActiveMemberAccess(callerProfile?.status)) {
-    return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 })
+    return apiError('접근 권한이 없습니다', 403)
   }
 
   const includeInactive = request.nextUrl.searchParams.get('include_inactive') === 'true' && isAdmin
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
   if (recruitingFilter === 'false') query = query.eq('is_recruiting', false)
 
   const { data: rawTeams, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return apiError('서버 오류가 발생했습니다', 500)
 
   const teams = (rawTeams ?? []) as TeamListItem[]
 
@@ -56,41 +56,38 @@ export async function GET(request: NextRequest) {
     }
   })
 
-  return NextResponse.json({ teams: result })
+  return apiSuccess({ teams: result })
 }
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const session = await getCurrentSession(supabase)
-  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!session) return apiError('인증 필요', 401)
 
   const { profile: callerProfile, myId: userId } = session
 
-  // ACTIVE, INACTIVE 부원만 팀 생성 가능
   if (!canCreateTeam(callerProfile?.status)) {
-    return NextResponse.json({ error: '정식 부원(ACTIVE/INACTIVE)만 팀을 만들 수 있습니다' }, { status: 403 })
+    return apiError('정식 부원(ACTIVE/INACTIVE)만 팀을 만들 수 있습니다', 403)
   }
 
   let body: { name?: string; description?: string; current_song?: string }
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: '잘못된 요청입니다' }, { status: 400 })
+    return apiError('잘못된 요청입니다', 400)
   }
 
   const name = (body.name ?? '').trim()
-  if (!name) return NextResponse.json({ error: '팀명은 필수입니다' }, { status: 400 })
+  if (!name) return apiError('팀명은 필수입니다', 400)
 
-  // 팀명 중복 검증
   const { data: existing } = await supabase
     .from('teams')
     .select('id')
     .eq('name', name)
     .maybeSingle()
 
-  if (existing) return NextResponse.json({ error: '이미 존재하는 팀명입니다' }, { status: 409 })
+  if (existing) return apiError('이미 존재하는 팀명입니다', 409)
 
-  // 팀 생성 (RLS 정책 없이 서버에서 직접 처리 — 권한 검증은 위에서 완료)
   const { data: newTeam, error: insertError } = await supabaseAdmin
     .from('teams')
     .insert({
@@ -106,14 +103,13 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (insertError || !newTeam) {
-    return NextResponse.json({ error: insertError?.message ?? '팀 생성 실패' }, { status: 500 })
+    return apiError('팀 생성 실패', 500)
   }
 
-  // 팀장을 team_members에 추가
   await supabaseAdmin.from('team_members').insert({
     team_id: newTeam.id,
     user_id: userId,
   })
 
-  return NextResponse.json({ team: { id: newTeam.id } }, { status: 201 })
+  return apiSuccess({ team: { id: newTeam.id } }, 201)
 }

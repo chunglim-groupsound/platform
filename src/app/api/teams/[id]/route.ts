@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextResponse } from 'next/server'
 import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
+import { apiError, apiSuccess } from '@/lib/api/response'
 import type { Database } from '@/types/database'
 
 type TeamsUpdate = Database['public']['Tables']['teams']['Update']
@@ -34,10 +34,10 @@ export async function GET(
   const { id } = await params
   const supabase = await createClient()
   const session = await getCurrentSession(supabase)
-  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!session) return apiError('인증 필요', 401)
 
   if (!hasActiveMemberAccess(session.profile?.status)) {
-    return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 })
+    return apiError('접근 권한이 없습니다', 403)
   }
 
   const { data: team, error } = await supabaseAdmin
@@ -55,10 +55,10 @@ export async function GET(
     .single()
 
   if (error || !team) {
-    return NextResponse.json({ error: '팀을 찾을 수 없습니다' }, { status: 404 })
+    return apiError('팀을 찾을 수 없습니다', 404)
   }
 
-  return NextResponse.json({ team, reservations: [] })
+  return apiSuccess({ team, reservations: [] })
 }
 
 export async function PATCH(
@@ -68,23 +68,21 @@ export async function PATCH(
   const { id } = await params
   const supabase = await createClient()
   const session = await getCurrentSession(supabase)
-  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!session) return apiError('인증 필요', 401)
 
   const { isAdmin, isLeader, isViceLeader } = await resolveTeamAccess(session.user.id, id)
 
   if (!isAdmin && !isLeader && !isViceLeader) {
-    return NextResponse.json({ error: '수정 권한이 없습니다' }, { status: 403 })
+    return apiError('수정 권한이 없습니다', 403)
   }
 
   let body: Record<string, unknown>
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: '잘못된 요청입니다' }, { status: 400 })
+    return apiError('잘못된 요청입니다', 400)
   }
 
-  // 팀장/부팀장: 팀 소개·곡·모집 상태·부팀장·팀장 위임 가능
-  // 운영진: 이름·활성 여부 추가
   const leaderFields = new Set(['current_song', 'description', 'is_recruiting', 'vice_leader_id', 'leader_id'])
   const adminFields  = new Set(['name', 'is_active', 'current_song', 'description', 'is_recruiting', 'vice_leader_id', 'leader_id'])
 
@@ -95,10 +93,9 @@ export async function PATCH(
   }
 
   if (Object.keys(patch).length === 0) {
-    return NextResponse.json({ error: '변경할 항목이 없습니다' }, { status: 400 })
+    return apiError('변경할 항목이 없습니다', 400)
   }
 
-  // 활성 여부를 변경할 때 활성화 신청 상태도 초기화
   if ('is_active' in patch) {
     patch.activation_requested = false
   }
@@ -109,10 +106,10 @@ export async function PATCH(
     .eq('id', id)
 
   if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 })
+    return apiError('서버 오류가 발생했습니다', 500)
   }
 
-  return NextResponse.json({ success: true })
+  return apiSuccess({ success: true })
 }
 
 export async function DELETE(
@@ -122,12 +119,12 @@ export async function DELETE(
   const { id } = await params
   const supabase = await createClient()
   const session = await getCurrentSession(supabase)
-  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!session) return apiError('인증 필요', 401)
 
   const { isAdmin, isLeader, isViceLeader } = await resolveTeamAccess(session.user.id, id)
 
   if (!isAdmin && !isLeader && !isViceLeader) {
-    return NextResponse.json({ error: '삭제 권한이 없습니다' }, { status: 403 })
+    return apiError('삭제 권한이 없습니다', 403)
   }
 
   const { error } = await supabaseAdmin
@@ -135,7 +132,7 @@ export async function DELETE(
     .delete()
     .eq('id', id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return apiError('서버 오류가 발생했습니다', 500)
 
-  return NextResponse.json({ success: true })
+  return apiSuccess({ success: true })
 }

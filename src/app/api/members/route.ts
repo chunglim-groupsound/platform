@@ -1,16 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { maskMember } from '@/lib/member/privacy'
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isAdminRole, hasActiveMemberAccess, ACTIVE_STATUSES } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
+import { apiError, apiSuccess } from '@/lib/api/response'
 import type { MemberStatus, MemberRole } from '@/types/app'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const session = await getCurrentSession(supabase)
-  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!session) return apiError('인증 필요', 401)
 
   const { profile: callerProfile, myId: callerId } = session
   const isAdmin  = isAdminRole(callerProfile?.role)
@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
       privacy_settings
     `)
 
-  // 상태 필터: 운영진은 지정 가능, 일반은 ACTIVE/INACTIVE/PROBATION 고정
   if (isAdmin && statusParam) {
     query = query.eq('status', statusParam as MemberStatus)
   } else {
@@ -44,12 +43,10 @@ export async function GET(request: NextRequest) {
   if (role)       query = query.eq('role', role as MemberRole)
   if (isWhitelist === 'true') query = query.eq('is_whitelist', true)
 
-  // 세션 필터: OR 조건
   if (sessions.length > 0) {
     query = query.overlaps('session', sessions)
   }
 
-  // 검색어: name, nickname, generation 부분 일치
   if (q) {
     query = query.or(
       `name.ilike.%${q}%,nickname.ilike.%${q}%`
@@ -62,7 +59,7 @@ export async function GET(request: NextRequest) {
   ])
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('서버 오류가 발생했습니다', 500)
   }
 
   const leaderIds = new Set((teamLeaders ?? []).map(t => t.leader_id).filter(Boolean))
@@ -76,5 +73,5 @@ export async function GET(request: NextRequest) {
 
   const admins = members.filter(m => isAdminRole(m.role) && m.status === 'ACTIVE')
 
-  return NextResponse.json({ members, admins, total: members.length })
+  return apiSuccess({ members, admins, total: members.length })
 }

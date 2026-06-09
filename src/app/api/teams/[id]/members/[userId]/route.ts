@@ -1,10 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextResponse } from 'next/server'
 import { isAdminRole } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
-
-// DELETE /api/teams/[id]/members/[userId] — 팀원 추방 (팀장/부팀장/관리자)
+import { apiError, apiSuccess } from '@/lib/api/response'
 
 export async function DELETE(
   _request: Request,
@@ -13,7 +11,7 @@ export async function DELETE(
   const { id: teamId, userId: targetUserId } = await params
   const supabase = await createClient()
   const session = await getCurrentSession(supabase)
-  if (!session) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!session) return apiError('인증 필요', 401)
 
   const { profile: callerProfile, myId } = session
 
@@ -23,18 +21,18 @@ export async function DELETE(
     .eq('id', teamId)
     .single()
 
-  if (!team) return NextResponse.json({ error: '팀을 찾을 수 없습니다' }, { status: 404 })
+  if (!team) return apiError('팀을 찾을 수 없습니다', 404)
 
   const isAdmin      = isAdminRole(callerProfile?.role)
   const isLeader     = team.leader_id      === myId
   const isViceLeader = team.vice_leader_id === myId
 
   if (!isAdmin && !isLeader && !isViceLeader) {
-    return NextResponse.json({ error: '추방 권한이 없습니다' }, { status: 403 })
+    return apiError('추방 권한이 없습니다', 403)
   }
 
   if (targetUserId === team.leader_id) {
-    return NextResponse.json({ error: '팀장은 추방할 수 없습니다' }, { status: 400 })
+    return apiError('팀장은 추방할 수 없습니다', 400)
   }
 
   const { error } = await supabaseAdmin
@@ -43,7 +41,7 @@ export async function DELETE(
     .eq('team_id', teamId)
     .eq('user_id', targetUserId)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return apiError('서버 오류가 발생했습니다', 500)
 
-  return NextResponse.json({ success: true })
+  return apiSuccess({ success: true })
 }

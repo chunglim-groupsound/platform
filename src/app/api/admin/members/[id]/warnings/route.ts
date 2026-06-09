@@ -3,7 +3,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { transitionMemberStatus } from '@/lib/member/transitions'
-import { NextResponse } from 'next/server'
+import { apiError, apiSuccess } from '@/lib/api/response'
 import { isAdminRole } from '@/lib/constants'
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -21,7 +21,7 @@ export async function GET(
   const { id } = await params
   const supabase = await createClient()
   if (!await requireAdmin(supabase)) {
-    return NextResponse.json({ error: '권한 없음' }, { status: 403 })
+    return apiError('권한 없음', 403)
   }
 
   const { data, error } = await supabase
@@ -30,8 +30,8 @@ export async function GET(
     .eq('user_id', id)
     .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data ?? [])
+  if (error) return apiError('서버 오류가 발생했습니다', 500)
+  return apiSuccess(data ?? [])
 }
 
 export async function POST(
@@ -41,11 +41,11 @@ export async function POST(
   const { id: targetUserId } = await params
   const supabase = await createClient()
   const caller = await requireAdmin(supabase)
-  if (!caller) return NextResponse.json({ error: '권한 없음' }, { status: 403 })
+  if (!caller) return apiError('권한 없음', 403)
 
   const { reason } = await request.json()
   if (!reason?.trim()) {
-    return NextResponse.json({ error: '경고 사유를 입력해주세요.' }, { status: 400 })
+    return apiError('경고 사유를 입력해주세요.', 400)
   }
 
   // 경고 추가
@@ -53,7 +53,7 @@ export async function POST(
     .from('member_warnings')
     .insert({ user_id: targetUserId, reason: reason.trim(), issued_by: caller.id })
 
-  if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 })
+  if (insertError) return apiError('서버 오류가 발생했습니다', 500)
 
   // 누적 경고 수 확인
   const { count } = await supabase
@@ -83,10 +83,10 @@ export async function POST(
         withdrawn = true
       } catch {
         // 전이 실패 시 경고는 이미 추가됐으므로 무시하지 않고 에러 반환
-        return NextResponse.json({ error: '상태 전이 실패' }, { status: 500 })
+        return apiError('상태 전이 실패', 500)
       }
     }
   }
 
-  return NextResponse.json({ success: true, totalWarnings: total, withdrawn })
+  return apiSuccess({ success: true, totalWarnings: total, withdrawn })
 }
