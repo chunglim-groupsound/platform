@@ -31,8 +31,9 @@
 
 ### 스타일
 
-- [ ] **스타일링 전략 합의** — 현재 전체가 인라인 `style={{}}`. Tailwind 전환 / CSS 모듈 / 현 구조 유지 중 팀 합의 필요 (자세한 내용: 리팩토링 체크리스트 섹션 5)
-- [ ] **전체 디자인 적용** — 합의된 스타일 전략 기반으로 UI 전체 정비
+- [ ] **globals.css 테마 세팅** — `@theme` 블록으로 CSS 변수 → Tailwind 토큰 등록, 테마별(`default` / `dark` 등) 색상 정의
+- [ ] **ThemeSwitcher 컴포넌트** — `<html data-theme>` 토글 + localStorage 저장
+- [ ] **전체 디자인 적용** — 인라인 `style={{}}` → Tailwind 클래스로 전체 마이그레이션
 
 ---
 
