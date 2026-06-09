@@ -18,6 +18,7 @@ interface ProfileData {
   generation: number | null
   is_whitelist: boolean
   session: string[] | null
+  session_years: Record<string, number> | null
   genre_preference: string[] | null
   phone: string | null
   department: string | null
@@ -30,6 +31,7 @@ interface FormState {
   nickname: string
   profile_image_url: string | null
   session: string[]
+  session_years: Record<string, string>
   genre_preference: string[]
   phone: string
   department: string
@@ -46,10 +48,15 @@ const ROLE_LABEL: Record<string, string> = {
 }
 
 function toFormState(p: ProfileData): FormState {
+  const sy: Record<string, string> = {}
+  for (const s of (p.session ?? [])) {
+    sy[s] = p.session_years?.[s]?.toString() ?? ''
+  }
   return {
     nickname:          p.nickname ?? '',
     profile_image_url: p.profile_image_url ?? null,
     session:           p.session ?? [],
+    session_years:     sy,
     genre_preference:  p.genre_preference ?? [],
     phone:             p.phone ?? '',
     department:        p.department ?? '',
@@ -70,10 +77,13 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
   const isDirty = JSON.stringify(form) !== JSON.stringify(original)
 
   const toggleSession = (s: string) => {
-    setForm(f => ({
-      ...f,
-      session: f.session.includes(s) ? f.session.filter(x => x !== s) : [...f.session, s],
-    }))
+    setForm(f => {
+      const next = f.session.includes(s) ? f.session.filter(x => x !== s) : [...f.session, s]
+      const sy = { ...f.session_years }
+      if (!next.includes(s)) delete sy[s]
+      else if (!(s in sy)) sy[s] = ''
+      return { ...f, session: next, session_years: sy }
+    })
   }
 
   const toggleGenre = (g: string) => {
@@ -101,10 +111,15 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
     if (!validate()) return
     setSaving(true)
     try {
+      const syPayload: Record<string, number> = {}
+      for (const [k, v] of Object.entries(form.session_years)) {
+        if (v !== '') syPayload[k] = Number(v)
+      }
       const payload: Record<string, unknown> = {
         nickname:          form.nickname.trim() || null,
         profile_image_url: form.profile_image_url,
         session:           form.session,
+        session_years:     Object.keys(syPayload).length > 0 ? syPayload : null,
         genre_preference:  form.genre_preference,
         phone:             form.phone.trim() || null,
         department:        form.department.trim() || null,
@@ -250,6 +265,31 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
               </button>
             ))}
           </div>
+          {form.session.length > 0 && (
+            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>세션별 경력 연차 (선택)</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {form.session.map(s => (
+                  <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.82rem', color: '#374151' }}>
+                    <span style={{ minWidth: '52px' }}>{s}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={99}
+                      placeholder="0"
+                      value={form.session_years[s] ?? ''}
+                      onChange={e => setForm(f => ({
+                        ...f,
+                        session_years: { ...f.session_years, [s]: e.target.value },
+                      }))}
+                      style={{ width: '52px', padding: '4px 6px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.82rem', textAlign: 'center' }}
+                    />
+                    <span>년</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </Field>
 
         <Field label="선호 장르">

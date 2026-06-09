@@ -140,6 +140,7 @@ Kakao Auth UID를 기존 부원 계정에 연결.
   "department": "컴퓨터공학과",
   "school_year": 3,
   "session": ["기타"],
+  "session_years": { "기타": 3 },
   "genre_preference": ["록", "재즈"],
   "privacy_settings": {
     "name": "member",
@@ -595,6 +596,22 @@ CSV 등록 부원들의 Kakao 계정 연동 여부 조회.
 
 ---
 
+### `PATCH /api/admin/members/[id]`
+특정 부원 정보 수정 (운영진 전용).
+
+**권한**: `ADMIN_ACCESS`
+
+**수정 가능 필드**
+```json
+{
+  "session_years": { "기타": 3, "보컬": 1 }
+}
+```
+
+> `name`, `generation`, `role`, `status`, `is_whitelist`도 허용 필드이나, 상태 변경은 `/transition` 사용 권장.
+
+---
+
 ### `POST /api/admin/members/transition`
 회원 상태 강제 변경.
 
@@ -666,4 +683,4 @@ CSV 파일 부원 일괄 등록.
 | FCM 웹 푸시 연동 | 알림 시스템 | 설계만 완료 |
 | `PATCH /api/teams/[id]` — `name` 필드 팀장 권한 | 팀장의 팀 이름 변경 | 완료 — leaderFields에 name 추가 |
 | `member_role.TEAM_LEADER` 제거 | DB Enum 정리 | 완료 — DB 마이그레이션 + 코드 정리 완료 |
-| 세션 연차 | 사용자별 각 세션 활동 기간 기록 | 미설계 |
+| 세션 연차 | 사용자별 각 세션 활동 기간 기록 | 완료 — `users.session_years jsonb`, 본인·운영진 수정 가능 |

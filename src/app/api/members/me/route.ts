@@ -8,7 +8,7 @@ type UsersUpdate = Database['public']['Tables']['users']['Update']
 const ALLOWED_FIELDS = [
   'nickname', 'profile_image_url', 'session', 'genre_preference',
   'phone', 'department', 'student_id', 'school_year',
-  'privacy_settings',
+  'privacy_settings', 'session_years',
 ] as const
 
 const BLOCKED_FIELDS = new Set([
@@ -98,6 +98,27 @@ export async function PATCH(request: Request) {
 
   if ('student_id' in patch && patch.student_id !== null) {
     if (String(patch.student_id).length > 20) errors.student_id = '학번은 최대 20자입니다'
+  }
+
+  if ('session_years' in patch) {
+    const sy = patch.session_years
+    if (sy !== null) {
+      if (typeof sy !== 'object' || Array.isArray(sy)) {
+        errors.session_years = '세션 연차는 객체여야 합니다'
+      } else {
+        for (const [k, v] of Object.entries(sy as Record<string, unknown>)) {
+          if (!VALID_SESSIONS.has(k)) {
+            errors.session_years = `허용되지 않은 세션: ${k}`
+            break
+          }
+          const n = Number(v)
+          if (!Number.isInteger(n) || n < 0 || n > 99) {
+            errors.session_years = `연차는 0~99 사이의 정수여야 합니다 (${k})`
+            break
+          }
+        }
+      }
+    }
   }
 
   if ('privacy_settings' in patch && typeof patch.privacy_settings === 'object' && patch.privacy_settings !== null) {

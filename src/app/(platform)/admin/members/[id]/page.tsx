@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { WarningSection } from '@/components/admin/WarningSection'
 import { WithdrawSection } from '@/components/admin/WithdrawSection'
+import { SessionYearsEditor } from '@/components/admin/SessionYearsEditor'
 import { STATUS_LABELS, ROLE_LABELS } from '@/lib/constants'
 import { calcProbationDday, calcProbationEndDate } from '@/lib/member/probation'
 
@@ -140,6 +141,16 @@ export default async function MemberDetailPage({
           </div>
         </section>
       )}
+
+      {/* ── 세션 연차 ── */}
+      <section style={styles.section}>
+        <h2 style={styles.sectionTitle}>세션 연차</h2>
+        <SessionYearsEditor
+          memberId={params.id}
+          initialSessionYears={(member.session_years ?? null) as Record<string, number> | null}
+          memberSession={member.session}
+        />
+      </section>
 
       {/* ── 경고 이력 ── */}
       <WarningSection memberId={params.id} />

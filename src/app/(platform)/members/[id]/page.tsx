@@ -50,7 +50,7 @@ export default async function MemberDetailPage({
   const { data: target } = await supabase
     .from('users')
     .select(`
-      id, name, nickname, generation, session, genre_preference,
+      id, name, nickname, generation, session, session_years, genre_preference,
       phone, profile_image_url, department, student_id, school_year,
       status, role, is_whitelist, privacy_settings
     `)
@@ -164,14 +164,17 @@ export default async function MemberDetailPage({
 
         {(target.session ?? []).length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
-            {target.session!.map((s: string) => (
-              <span key={s} style={{
-                padding: '3px 10px', borderRadius: '9999px',
-                background: '#eff6ff', color: '#1d4ed8', fontSize: '0.78rem',
-              }}>
-                {s}
-              </span>
-            ))}
+            {target.session!.map((s: string) => {
+              const sy = (target.session_years as Record<string, number> | null)?.[s]
+              return (
+                <span key={s} style={{
+                  padding: '3px 10px', borderRadius: '9999px',
+                  background: '#eff6ff', color: '#1d4ed8', fontSize: '0.78rem',
+                }}>
+                  {s}{sy != null ? ` ${sy}년` : ''}
+                </span>
+              )
+            })}
           </div>
         )}
       </div>

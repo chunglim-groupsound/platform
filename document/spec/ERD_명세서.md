@@ -17,6 +17,7 @@ erDiagram
         text nickname
         int generation
         text[] session
+        jsonb session_years
         text profile_image_url
         text[] genre_preference
         text phone
@@ -209,6 +210,7 @@ erDiagram
 ### users
 핵심 회원 테이블. Supabase Auth의 `auth.users`와 별도로 관리됨.
 - `linked_auth_id`: 기존 부원(kakao_id로 등록)이 새 Kakao 계정으로 로그인했을 때 연결되는 auth UID
+- `session_years` (JSONB): 세션별 경력 연차 — 예: `{"기타": 3, "보컬": 1}`. 본인 및 운영진이 직접 입력. `null` 허용
 - `privacy_settings` (JSONB): `{ name, generation, phone, department, school_year }` 각 필드별 공개 범위 (`'all'|'member'|'admin'`)
 - `session`: 악기/파트 배열 (예: `['기타', '보컬']`)
 - `is_whitelist`: 사전 등록된 명단 여부
