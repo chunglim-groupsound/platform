@@ -5,10 +5,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isAdminRole } from '@/lib/constants'
 
-export const supabaseAdmin = createClient<Database>(
+const _adminClient = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+export function createAdminClient() {
+  return _adminClient
+}
 
 // 로그인 없이 접근 가능한 경로
 const PUBLIC_PATHS = ['/', '/auth', '/status']

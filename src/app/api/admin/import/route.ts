@@ -1,5 +1,5 @@
-// src/app/api/admin/import/route.ts
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿// src/app/api/admin/import/route.ts
+import { createAdminClient } from '@/lib/supabase/admin'
 import { apiError, apiSuccess } from '@/lib/api/response'
 import { randomUUID } from 'crypto'
 import type { Database } from '@/types/database'
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     }
   })
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('users')
     .insert(formatted)
     .select('id, name, generation')

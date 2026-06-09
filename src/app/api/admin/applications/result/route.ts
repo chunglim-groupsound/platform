@@ -1,8 +1,8 @@
-// src/app/api/admin/applications/result/route.ts
+﻿// src/app/api/admin/applications/result/route.ts
 // 합격 → PROBATION 전환 / 불합격 → WITHDRAWN 전환
 
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { transitionMemberStatus } from '@/lib/member/transitions'
 import { apiError, apiSuccess } from '@/lib/api/response'
 import { isAdminRole } from '@/lib/constants'
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
   // 2. join_applications 결과 저장
   //    admin_note는 민감 정보이므로 service role key 사용
-  const { error: appError } = await supabaseAdmin
+  const { error: appError } = await createAdminClient()
     .from('join_applications')
     .update({
       interview_result: result,

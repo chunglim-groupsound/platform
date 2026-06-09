@@ -1,6 +1,6 @@
 // Server Component — 데이터 fetch
 import { createClient } from '@/lib/supabase/server'
-import MemberListClient from '@/components/admin/MemberListClient'
+import MemberList from '@/components/admin/MemberList'
 
 export default async function AdminMembersPage() {
   const supabase = await createClient()
@@ -14,5 +14,5 @@ export default async function AdminMembersPage() {
     `)
     .order('created_at', { ascending: false })
 
-  return <MemberListClient members={members ?? []} />
+  return <MemberList members={members ?? []} />
 }

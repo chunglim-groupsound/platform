@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { apiError, apiSuccess } from '@/lib/api/response'
 import type { RequestStatus } from '@/types/app'
 
@@ -30,7 +30,7 @@ export async function PATCH(
     return apiError('status는 ACCEPTED 또는 REJECTED여야 합니다', 400)
   }
 
-  const { data: invitation } = await supabaseAdmin
+  const { data: invitation } = await createAdminClient()
     .from('team_invitations')
     .select('id, team_id, invitee_id, status')
     .eq('id', invitationId)
@@ -40,7 +40,7 @@ export async function PATCH(
   if (invitation.invitee_id !== callerProfile.id) return apiError('권한이 없습니다', 403)
   if (invitation.status !== 'PENDING') return apiError('이미 처리된 초대입니다', 409)
 
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await createAdminClient()
     .from('team_invitations')
     .update({ status: body.status as RequestStatus })
     .eq('id', invitationId)
@@ -48,7 +48,7 @@ export async function PATCH(
   if (updateError) return apiError('서버 오류가 발생했습니다', 500)
 
   if (body.status === 'ACCEPTED') {
-    const { error: memberError } = await supabaseAdmin
+    const { error: memberError } = await createAdminClient()
       .from('team_members')
       .insert({ team_id: invitation.team_id, user_id: callerProfile.id })
 

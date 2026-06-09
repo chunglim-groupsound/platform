@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
 import { apiError, apiSuccess } from '@/lib/api/response'
@@ -15,7 +15,7 @@ export async function DELETE(
 
   const { profile: callerProfile, myId } = session
 
-  const { data: team } = await supabaseAdmin
+  const { data: team } = await createAdminClient()
     .from('teams')
     .select('leader_id, vice_leader_id')
     .eq('id', teamId)
@@ -35,7 +35,7 @@ export async function DELETE(
     return apiError('팀장은 추방할 수 없습니다', 400)
   }
 
-  const { error } = await supabaseAdmin
+  const { error } = await createAdminClient()
     .from('team_members')
     .delete()
     .eq('team_id', teamId)

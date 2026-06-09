@@ -1,6 +1,6 @@
-import { redirect, notFound } from 'next/navigation'
+﻿import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { EditTeamForm } from '@/components/teams/EditTeamForm'
 import Link from 'next/link'
 import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
@@ -27,7 +27,7 @@ export default async function EditTeamPage({
 
   if (!hasActiveMemberAccess(profile?.status)) redirect('/timetable')
 
-  const { data: team } = await supabaseAdmin
+  const { data: team } = await createAdminClient()
     .from('teams')
     .select(`
       id, name, description, current_song, is_recruiting, is_active, leader_id, vice_leader_id,

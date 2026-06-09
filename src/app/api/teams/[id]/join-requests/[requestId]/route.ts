@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
 import { apiError, apiSuccess } from '@/lib/api/response'
@@ -17,7 +17,7 @@ export async function PATCH(
   const { profile: callerProfile, myId } = session
   const isAdmin = isAdminRole(callerProfile?.role)
 
-  const { data: team } = await supabaseAdmin
+  const { data: team } = await createAdminClient()
     .from('teams')
     .select('leader_id, vice_leader_id')
     .eq('id', teamId)
@@ -38,7 +38,7 @@ export async function PATCH(
     return apiError('status는 ACCEPTED 또는 REJECTED여야 합니다', 400)
   }
 
-  const { data: joinRequest } = await supabaseAdmin
+  const { data: joinRequest } = await createAdminClient()
     .from('team_join_requests')
     .select('id, applicant_id, status')
     .eq('id', requestId)
@@ -48,7 +48,7 @@ export async function PATCH(
   if (!joinRequest) return apiError('신청을 찾을 수 없습니다', 404)
   if (joinRequest.status !== 'PENDING') return apiError('이미 처리된 신청입니다', 409)
 
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await createAdminClient()
     .from('team_join_requests')
     .update({ status: body.status as RequestStatus })
     .eq('id', requestId)
@@ -56,7 +56,7 @@ export async function PATCH(
   if (updateError) return apiError('서버 오류가 발생했습니다', 500)
 
   if (body.status === 'ACCEPTED') {
-    const { error: memberError } = await supabaseAdmin
+    const { error: memberError } = await createAdminClient()
       .from('team_members')
       .insert({ team_id: teamId, user_id: joinRequest.applicant_id })
 
@@ -77,7 +77,7 @@ export async function DELETE(
   const delSession = await getCurrentSession(supabase)
   if (!delSession) return apiError('인증 필요', 401)
 
-  const { data: joinRequest } = await supabaseAdmin
+  const { data: joinRequest } = await createAdminClient()
     .from('team_join_requests')
     .select('id, applicant_id')
     .eq('id', requestId)
@@ -89,7 +89,7 @@ export async function DELETE(
     return apiError('취소 권한이 없습니다', 403)
   }
 
-  const { error } = await supabaseAdmin
+  const { error } = await createAdminClient()
     .from('team_join_requests')
     .delete()
     .eq('id', requestId)

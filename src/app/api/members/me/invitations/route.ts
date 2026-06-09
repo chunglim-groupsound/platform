@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { apiError, apiSuccess } from '@/lib/api/response'
 
 export async function GET() {
@@ -16,7 +16,7 @@ export async function GET() {
 
   if (!callerProfile) return apiError('프로필 없음', 404)
 
-  const { data: invitations, error } = await supabaseAdmin
+  const { data: invitations, error } = await createAdminClient()
     .from('team_invitations')
     .select(`
       id, message, status, created_at, updated_at,

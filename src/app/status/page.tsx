@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import InterviewSlotPicker from '@/components/InterviewSlotPicker'
 
 interface Props {
@@ -41,7 +41,7 @@ export default async function StatusPage({ searchParams }: Props) {
 
   let confirmedSlotAt: string | null = null
   if (application?.confirmed_slot_id) {
-    const { data: slot } = await supabaseAdmin
+    const { data: slot } = await createAdminClient()
       .from('interview_slots')
       .select('slot_at')
       .eq('id', application.confirmed_slot_id)

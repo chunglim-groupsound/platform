@@ -1,6 +1,6 @@
-import { redirect, notFound } from 'next/navigation'
+﻿import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { TeamMemberList } from '@/components/teams/TeamMemberList'
 import { RecruitingToggle } from '@/components/teams/RecruitingToggle'
@@ -23,8 +23,8 @@ export default async function TeamDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
-  // supabaseAdmin으로 조회해야 linked_auth_id 유저도 올바른 users.id를 얻을 수 있음
-  const { data: profile } = await supabaseAdmin
+  // createAdminClient()로 조회해야 linked_auth_id 유저도 올바른 users.id를 얻을 수 있음
+  const { data: profile } = await createAdminClient()
     .from('users')
     .select('id, status, role')
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
@@ -32,7 +32,7 @@ export default async function TeamDetailPage({
 
   if (!hasActiveMemberAccess(profile?.status)) redirect('/timetable')
 
-  const { data: rawTeam } = await supabaseAdmin
+  const { data: rawTeam } = await createAdminClient()
     .from('teams')
     .select(`
       id, name, current_song, description, is_active, is_recruiting, leader_id, vice_leader_id, activation_requested,
@@ -70,7 +70,7 @@ export default async function TeamDetailPage({
 
   // 가입 신청 이력 조회 (ACCEPTED 제외: 실제 멤버십은 team_members로만 판단, 탈퇴 후 재신청 가능해야 함)
   let myJoinRequest: { id: string; status: string } | null = null
-  const { data: joinReqRows } = await supabaseAdmin
+  const { data: joinReqRows } = await createAdminClient()
     .from('team_join_requests')
     .select('id, status')
     .eq('team_id', id)
@@ -85,7 +85,7 @@ export default async function TeamDetailPage({
 
   let joinRequests: TeamDetailJoinRequestRow[] = []
   if (canEdit) {
-    const { data: reqs } = await supabaseAdmin
+    const { data: reqs } = await createAdminClient()
       .from('team_join_requests')
       .select(`
         id, message, status, created_at,

@@ -62,7 +62,7 @@ export default function MembersPage() {
       result = result.filter(m => m.generation === Number(filter.generation))
     }
     if (filter.role === 'TEAM_LEADER') {
-      result = result.filter(m => m.isLeader)
+      result = result.filter(m => m.is_leader)
     } else if (filter.role) {
       result = result.filter(m => m.role === filter.role)
     }

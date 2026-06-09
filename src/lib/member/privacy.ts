@@ -9,7 +9,7 @@ export type RawMemberRow = Pick<
   | 'status' | 'role' | 'is_whitelist' | 'session'
   | 'generation' | 'phone' | 'department' | 'school_year'
   | 'privacy_settings'
-> & { isLeader?: boolean }
+> & { is_leader?: boolean }
 
 type PrivacyScope = 'all' | 'member' | 'admin'
 
@@ -52,6 +52,6 @@ export function maskMember(
       ? raw.department : null,
     school_year: canView(privacy.school_year, 'member', isSelf, isMember, isAdmin)
       ? raw.school_year : null,
-    isLeader: raw.isLeader ?? false,
+    is_leader: raw.is_leader ?? false,
   }
 }

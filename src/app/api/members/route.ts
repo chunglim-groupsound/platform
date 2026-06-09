@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { maskMember } from '@/lib/member/privacy'
 import type { NextRequest } from 'next/server'
 import { isAdminRole, hasActiveMemberAccess, ACTIVE_STATUSES } from '@/lib/constants'
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 
   const [{ data: rows, error }, { data: teamLeaders }] = await Promise.all([
     query.order('created_at', { ascending: true }),
-    supabaseAdmin.from('teams').select('leader_id').eq('is_active', true),
+    createAdminClient().from('teams').select('leader_id').eq('is_active', true),
   ])
 
   if (error) {
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
 
   const members = (rows ?? []).map((row) =>
     maskMember(
-      { ...row, isLeader: leaderIds.has(row.id) },
+      { ...row, is_leader: leaderIds.has(row.id) },
       row.id === callerId, isMember, isAdmin
     )
   )

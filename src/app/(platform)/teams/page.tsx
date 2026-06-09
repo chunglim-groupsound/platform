@@ -1,6 +1,6 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { TeamCard } from '@/components/teams/TeamCard'
 import Link from 'next/link'
 import { isAdminRole, hasActiveMemberAccess, canCreateTeam } from '@/lib/constants'
@@ -29,7 +29,7 @@ export default async function TeamsPage({ searchParams }: Props) {
   const isAdmin   = isAdminRole(profile?.role)
   const canCreate = canCreateTeam(profile?.status)
 
-  let query = supabaseAdmin
+  let query = createAdminClient()
     .from('teams')
     .select(`
       id, name, current_song, description, is_active, is_recruiting,

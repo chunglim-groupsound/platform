@@ -1,16 +1,16 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole } from '@/lib/constants'
 import { apiError, apiSuccess } from '@/lib/api/response'
 
 async function resolveAccess(userId: string, teamId: string) {
   const [{ data: callerProfile }, { data: team }] = await Promise.all([
-    supabaseAdmin
+    createAdminClient()
       .from('users')
       .select('id, role')
       .or(`id.eq.${userId},linked_auth_id.eq.${userId}`)
       .maybeSingle(),
-    supabaseAdmin
+    createAdminClient()
       .from('teams')
       .select('leader_id, vice_leader_id, is_active, activation_requested')
       .eq('id', teamId)
@@ -46,7 +46,7 @@ export async function POST(
     return apiError('이미 신청 중입니다', 409)
   }
 
-  const { error } = await supabaseAdmin
+  const { error } = await createAdminClient()
     .from('teams')
     .update({ activation_requested: true })
     .eq('id', teamId)
@@ -73,7 +73,7 @@ export async function DELETE(
     return apiError('취소 권한이 없습니다', 403)
   }
 
-  const { error } = await supabaseAdmin
+  const { error } = await createAdminClient()
     .from('teams')
     .update({ activation_requested: false })
     .eq('id', teamId)

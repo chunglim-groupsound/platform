@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole, canCreateTeam } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
 import { apiError, apiSuccess } from '@/lib/api/response'
@@ -16,7 +16,7 @@ export async function GET(
   const { profile: callerProfile, myId } = session
   const isAdmin = isAdminRole(callerProfile?.role)
 
-  const { data: team } = await supabaseAdmin
+  const { data: team } = await createAdminClient()
     .from('teams')
     .select('leader_id, vice_leader_id')
     .eq('id', teamId)
@@ -28,7 +28,7 @@ export async function GET(
     return apiError('조회 권한이 없습니다', 403)
   }
 
-  const { data: requests, error } = await supabaseAdmin
+  const { data: requests, error } = await createAdminClient()
     .from('team_join_requests')
     .select(`
       id, message, status, created_at, updated_at,
@@ -52,7 +52,7 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return apiError('인증 필요', 401)
 
-  const { data: callerProfile } = await supabaseAdmin
+  const { data: callerProfile } = await createAdminClient()
     .from('users')
     .select('id, status')
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
@@ -62,7 +62,7 @@ export async function POST(
     return apiError('정식 부원만 가입 신청할 수 있습니다', 403)
   }
 
-  const { data: existing } = await supabaseAdmin
+  const { data: existing } = await createAdminClient()
     .from('team_members')
     .select('id')
     .eq('team_id', teamId)
@@ -71,7 +71,7 @@ export async function POST(
 
   if (existing) return apiError('이미 팀원입니다', 409)
 
-  const { data: existingRequest } = await supabaseAdmin
+  const { data: existingRequest } = await createAdminClient()
     .from('team_join_requests')
     .select('id, status')
     .eq('team_id', teamId)
@@ -82,13 +82,13 @@ export async function POST(
     if (existingRequest.status === 'PENDING') {
       return apiError('이미 신청한 팀입니다', 409)
     }
-    await supabaseAdmin.from('team_join_requests').delete().eq('id', existingRequest.id)
+    await createAdminClient().from('team_join_requests').delete().eq('id', existingRequest.id)
   }
 
   let body: { message?: string } = {}
   try { body = await request.json() } catch { /* optional body */ }
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('team_join_requests')
     .insert({
       team_id:      teamId,

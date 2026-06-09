@@ -1,8 +1,8 @@
-// src/app/api/auth/link/confirm/route.ts
+﻿// src/app/api/auth/link/confirm/route.ts
 // 연동 확정 + 빈 필드 일괄 채우기
 
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { apiError, apiSuccess } from '@/lib/api/response'
 import type { Database } from '@/types/database'
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   }
 
   // 3. 대상 레코드 검증
-  const { data: target, error: fetchError } = await supabaseAdmin
+  const { data: target, error: fetchError } = await createAdminClient()
     .from('users')
     .select('id, kakao_id, linked_auth_id, status, name')
     .eq('id', targetUserId)
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     updatePayload.name = kakaoNickname
   }
 
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await createAdminClient()
     .from('users')
     .update(updatePayload)
     .eq('id', targetUserId)
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
   }
 
   // 6. 트리거가 만든 PENDING 레코드 삭제
-  const { error: deleteError } = await supabaseAdmin
+  const { error: deleteError } = await createAdminClient()
     .from('users')
     .delete()
     .eq('kakao_id', realKakaoId)
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
   }
 
   // 7. member_history 연동 이력 기록
-  await supabaseAdmin
+  await createAdminClient()
     .from('member_history')
     .insert({
       user_id:     targetUserId,

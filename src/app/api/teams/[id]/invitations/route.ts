@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
 import { apiError, apiSuccess } from '@/lib/api/response'
@@ -16,7 +16,7 @@ export async function POST(
   const { profile: callerProfile, myId } = session
   const isAdmin = isAdminRole(callerProfile?.role)
 
-  const { data: team } = await supabaseAdmin
+  const { data: team } = await createAdminClient()
     .from('teams')
     .select('leader_id, vice_leader_id')
     .eq('id', teamId)
@@ -35,7 +35,7 @@ export async function POST(
 
   if (!body.inviteeId) return apiError('inviteeId는 필수입니다', 400)
 
-  const { data: existing } = await supabaseAdmin
+  const { data: existing } = await createAdminClient()
     .from('team_members')
     .select('id')
     .eq('team_id', teamId)
@@ -44,7 +44,7 @@ export async function POST(
 
   if (existing) return apiError('이미 팀원입니다', 409)
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('team_invitations')
     .insert({
       team_id:    teamId,

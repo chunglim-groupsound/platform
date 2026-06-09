@@ -8,7 +8,7 @@ import { calcProbationDday } from '@/lib/member/probation'
 
 const TABS = ['전체', 'PENDING', 'INTERVIEWING', 'PROBATION', 'ACTIVE', 'INACTIVE']
 
-export default function MemberListClient({ members }: { members: any[] }) {
+export default function MemberList({ members }: { members: any[] }) {
   const [activeTab, setActiveTab] = useState('전체')
 
   const filtered = activeTab === '전체'

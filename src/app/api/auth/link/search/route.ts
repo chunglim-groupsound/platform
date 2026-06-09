@@ -1,7 +1,7 @@
-// src/app/api/auth/link/search/route.ts
+﻿// src/app/api/auth/link/search/route.ts
 
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { apiError, apiSuccess } from '@/lib/api/response'
 import { ACTIVE_STATUSES } from '@/lib/constants'
 
@@ -28,9 +28,9 @@ export async function POST(request: Request) {
     }
 
     // 3. 임포트 레코드 검색
-    //    - supabaseAdmin 사용: RLS 우회하여 확실하게 조회
+    //    - createAdminClient() 사용: RLS 우회하여 확실하게 조회
     //    - kakao_id가 imported_ 로 시작 + linked_auth_id가 null(미연동)인 것만
-    const { data: candidates, error: searchError } = await supabaseAdmin
+    const { data: candidates, error: searchError } = await createAdminClient()
       .from('users')
       .select('id, name, generation, session, status, department, student_id, school_year')
       .eq('name', name)

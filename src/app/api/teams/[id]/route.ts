@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
 import { apiError, apiSuccess } from '@/lib/api/response'
@@ -9,12 +9,12 @@ type TeamsUpdate = Database['public']['Tables']['teams']['Update']
 
 async function resolveTeamAccess(userId: string, teamId: string) {
   const [{ data: callerProfile }, { data: team }] = await Promise.all([
-    supabaseAdmin
+    createAdminClient()
       .from('users')
       .select('id, role, status')
       .or(`id.eq.${userId},linked_auth_id.eq.${userId}`)
       .maybeSingle(),
-    supabaseAdmin
+    createAdminClient()
       .from('teams')
       .select('leader_id, vice_leader_id')
       .eq('id', teamId)
@@ -40,7 +40,7 @@ export async function GET(
     return apiError('접근 권한이 없습니다', 403)
   }
 
-  const { data: team, error } = await supabaseAdmin
+  const { data: team, error } = await createAdminClient()
     .from('teams')
     .select(`
       id, name, current_song, description, is_active, is_recruiting, created_at, updated_at,
@@ -100,7 +100,7 @@ export async function PATCH(
     patch.activation_requested = false
   }
 
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await createAdminClient()
     .from('teams')
     .update(patch as TeamsUpdate)
     .eq('id', id)
@@ -127,7 +127,7 @@ export async function DELETE(
     return apiError('삭제 권한이 없습니다', 403)
   }
 
-  const { error } = await supabaseAdmin
+  const { error } = await createAdminClient()
     .from('teams')
     .delete()
     .eq('id', id)

@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { NextRequest } from 'next/server'
 import { isAdminRole, hasActiveMemberAccess, canCreateTeam } from '@/lib/constants'
 import { getCurrentSession } from '@/lib/auth/session'
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   const includeInactive = request.nextUrl.searchParams.get('include_inactive') === 'true' && isAdmin
   const recruitingFilter = request.nextUrl.searchParams.get('recruiting') // 'true' | 'false' | null
 
-  let query = supabaseAdmin
+  let query = createAdminClient()
     .from('teams')
     .select(`
       id, name, current_song, description, is_active, is_recruiting, created_at, updated_at,
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
   if (existing) return apiError('이미 존재하는 팀명입니다', 409)
 
-  const { data: newTeam, error: insertError } = await supabaseAdmin
+  const { data: newTeam, error: insertError } = await createAdminClient()
     .from('teams')
     .insert({
       name,
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     return apiError('팀 생성 실패', 500)
   }
 
-  await supabaseAdmin.from('team_members').insert({
+  await createAdminClient().from('team_members').insert({
     team_id: newTeam.id,
     user_id: userId,
   })
