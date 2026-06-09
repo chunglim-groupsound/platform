@@ -50,7 +50,7 @@ export default async function MyProfilePage() {
     .select(`
       id, name, nickname, profile_image_url,
       status, role, generation, is_whitelist,
-      session, genre_preference, phone,
+      session, session_years, genre_preference, phone,
       department, student_id, school_year,
       privacy_settings
     `)
@@ -196,14 +196,17 @@ export default async function MyProfilePage() {
 
         {(profile.session ?? []).length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
-            {profile.session!.map((s: string) => (
-              <span key={s} style={{
-                padding: '3px 10px', borderRadius: '9999px',
-                background: '#eff6ff', color: '#1d4ed8', fontSize: '0.78rem',
-              }}>
-                {s}
-              </span>
-            ))}
+            {profile.session!.map((s: string) => {
+              const sy = (profile.session_years as Record<string, number> | null)?.[s]
+              return (
+                <span key={s} style={{
+                  padding: '3px 10px', borderRadius: '9999px',
+                  background: '#eff6ff', color: '#1d4ed8', fontSize: '0.78rem',
+                }}>
+                  {s}{sy != null ? ` ${sy}년` : ''}
+                </span>
+              )
+            })}
           </div>
         )}
       </div>

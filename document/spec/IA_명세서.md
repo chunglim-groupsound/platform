@@ -220,7 +220,8 @@ app/
     │   └── components/admin/MemberList.tsx
     ├── members/[id]/page.tsx
     │   ├── components/admin/WarningSection.tsx
-    │   └── components/admin/WithdrawSection.tsx
+    │   ├── components/admin/WithdrawSection.tsx
+    │   └── components/admin/SessionYearsEditor.tsx  // 세션 연차 수정 (운영진용)
     └── import/page.tsx  (CSV 파싱 로직 인라인)
 ```
 
@@ -284,6 +285,7 @@ PATCH /api/teams/[id]
 
 ### 회원 상태 전이
 ```
+PATCH /api/admin/members/[id]       // 세션 연차 등 운영진 수정
 POST /api/admin/members/transition
   ├── 운영진 권한 확인
   ├── validate_status_transition() DB 함수 호출

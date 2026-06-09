@@ -623,6 +623,7 @@ export type Database = {
           role: Database["public"]["Enums"]["member_role"]
           school_year: number | null
           session: string[] | null
+          session_years: Json | null
           status: Database["public"]["Enums"]["member_status"]
           student_id: string | null
           updated_at: string
@@ -648,6 +649,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["member_role"]
           school_year?: number | null
           session?: string[] | null
+          session_years?: Json | null
           status?: Database["public"]["Enums"]["member_status"]
           student_id?: string | null
           updated_at?: string
@@ -673,6 +675,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["member_role"]
           school_year?: number | null
           session?: string[] | null
+          session_years?: Json | null
           status?: Database["public"]["Enums"]["member_status"]
           student_id?: string | null
           updated_at?: string
@@ -741,12 +744,7 @@ export type Database = {
     }
     Enums: {
       interview_result: "PENDING" | "PASS" | "FAIL"
-      member_role:
-        | "SUPER_ADMIN"
-        | "ADMIN"
-        | "TEAM_LEADER"
-        | "MEMBER"
-        | "PROBATION_MEMBER"
+      member_role: "SUPER_ADMIN" | "ADMIN" | "MEMBER" | "PROBATION_MEMBER"
       member_status:
         | "PENDING"
         | "INTERVIEWING"
@@ -883,13 +881,7 @@ export const Constants = {
   public: {
     Enums: {
       interview_result: ["PENDING", "PASS", "FAIL"],
-      member_role: [
-        "SUPER_ADMIN",
-        "ADMIN",
-        "TEAM_LEADER",
-        "MEMBER",
-        "PROBATION_MEMBER",
-      ],
+      member_role: ["SUPER_ADMIN", "ADMIN", "MEMBER", "PROBATION_MEMBER"],
       member_status: [
         "PENDING",
         "INTERVIEWING",
