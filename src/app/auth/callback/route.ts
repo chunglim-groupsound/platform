@@ -1,9 +1,12 @@
-// src/app/auth/callback/route.ts
+﻿// src/app/auth/callback/route.ts
 // 카카오 로그인 완료 시 last_active_at 갱신 + 카카오 모드 프로필 사진 동기화
 
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import type { Database } from '@/types/database'
+
+type UsersUpdate = Database['public']['Tables']['users']['Update']
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -26,7 +29,7 @@ export async function GET(request: Request) {
   if (user) {
     const kakaoAvatarUrl = user.user_metadata?.avatar_url as string | undefined
 
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await createAdminClient()
       .from('users')
       .select('id, profile_image_url')
       .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
@@ -41,9 +44,9 @@ export async function GET(request: Request) {
         update.profile_image_url = kakaoAvatarUrl
       }
 
-      await supabaseAdmin
+      await createAdminClient()
         .from('users')
-        .update(update)
+        .update(update as UsersUpdate)
         .eq('id', profile.id)
     }
   }

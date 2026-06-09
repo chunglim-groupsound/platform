@@ -1,8 +1,9 @@
-import { redirect, notFound } from 'next/navigation'
+﻿import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
-import { EditTeamForm } from '@/components/members/EditTeamForm'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { EditTeamForm } from '@/components/teams/EditTeamForm'
 import Link from 'next/link'
+import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 
 interface TeamMemberUser { id: string; name: string; nickname: string | null }
 interface TeamMemberRow  { user_id: string; user: TeamMemberUser | null }
@@ -24,9 +25,9 @@ export default async function EditTeamPage({
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
     .maybeSingle()
 
-  if (!['PROBATION', 'ACTIVE', 'INACTIVE'].includes(profile?.status ?? '')) redirect('/timetable')
+  if (!hasActiveMemberAccess(profile?.status)) redirect('/timetable')
 
-  const { data: team } = await supabaseAdmin
+  const { data: team } = await createAdminClient()
     .from('teams')
     .select(`
       id, name, description, current_song, is_recruiting, is_active, leader_id, vice_leader_id,
@@ -41,14 +42,14 @@ export default async function EditTeamPage({
   if (!team) notFound()
 
   const myId         = profile?.id ?? ''
-  const isAdmin      = ['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? '')
+  const isAdmin      = isAdminRole(profile?.role)
   const isLeader     = team.leader_id      === myId
   const isViceLeader = team.vice_leader_id === myId
 
   if (!isAdmin && !isLeader && !isViceLeader) redirect(`/teams/${id}`)
 
   // 팀원 목록 (드롭다운용)
-  const rawMembers = (team.team_members ?? []) as unknown as TeamMemberRow[]
+  const rawMembers = (team.team_members ?? []) as TeamMemberRow[]
   const teamMembers = rawMembers
     .map(tm => {
       const u = tm.user

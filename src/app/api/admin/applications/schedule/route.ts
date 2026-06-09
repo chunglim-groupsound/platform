@@ -3,13 +3,14 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { transitionMemberStatus } from '@/lib/member/transitions'
-import { NextResponse } from 'next/server'
+import { apiError, apiSuccess } from '@/lib/api/response'
+import { isAdminRole } from '@/lib/constants'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!user) return apiError('인증 필요', 401)
 
   const { data: caller } = await supabase
     .from('users')
@@ -17,14 +18,14 @@ export async function POST(request: Request) {
     .eq('id', user.id)
     .single()
 
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(caller?.role ?? '')) {
-    return NextResponse.json({ error: '권한 없음' }, { status: 403 })
+  if (!isAdminRole(caller?.role)) {
+    return apiError('권한 없음', 403)
   }
 
   const { applicationId, userId, slotId } = await request.json()
 
   if (!applicationId || !userId || !slotId) {
-    return NextResponse.json({ error: 'applicationId, userId, slotId가 필요합니다.' }, { status: 400 })
+    return apiError('applicationId, userId, slotId가 필요합니다.', 400)
   }
 
   // confirmed_slot_id 업데이트
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     .eq('id', applicationId)
 
   if (appError) {
-    return NextResponse.json({ error: appError.message }, { status: 500 })
+    return apiError('서버 오류가 발생했습니다', 500)
   }
 
   // 회원 상태 PENDING → INTERVIEWING 전환
@@ -52,11 +53,11 @@ export async function POST(request: Request) {
       changedBy: user.id,
       reason: `면접 슬롯 확정: ${slot?.slot_at ?? slotId}`,
     })
-  } catch (e: any) {
-    if (!e.message.includes('허용되지 않습니다')) {
-      return NextResponse.json({ error: e.message }, { status: 400 })
+  } catch (e: unknown) {
+    if (!(e as Error).message.includes('허용되지 않습니다')) {
+      return apiError((e as Error).message, 400)
     }
   }
 
-  return NextResponse.json({ success: true })
+  return apiSuccess({ success: true })
 }

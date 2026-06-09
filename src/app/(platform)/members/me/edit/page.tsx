@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ProfileForm } from '@/components/members/ProfileForm'
 import Link from 'next/link'
+import { hasActiveMemberAccess } from '@/lib/constants'
 
 function isKakaoUrl(url: string | null): boolean {
   return !!url && url.includes('kakaocdn.net')
@@ -29,8 +30,7 @@ export default async function MyProfileEditPage() {
 
   if (!profile) redirect('/')
 
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(profile.status)) redirect('/status')
+  if (!hasActiveMemberAccess(profile.status)) redirect('/status')
 
   let profileImageUrl = profile.profile_image_url
   if (kakaoAvatarUrl && isKakaoUrl(profile.profile_image_url) && profile.profile_image_url !== kakaoAvatarUrl) {

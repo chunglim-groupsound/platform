@@ -1,26 +1,16 @@
-import { redirect, notFound } from 'next/navigation'
+﻿import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
-import { TeamMemberList } from '@/components/members/TeamMemberList'
-import { RecruitingToggle } from '@/components/members/RecruitingToggle'
-import { JoinRequestSection } from '@/components/members/JoinRequestSection'
-import { JoinRequestsPanel } from '@/components/members/JoinRequestsPanel'
-import { ActivationPanel } from '@/components/members/ActivationPanel'
-import { LeaveTeamButton } from '@/components/members/LeaveTeamButton'
+import { TeamMemberList } from '@/components/teams/TeamMemberList'
+import { RecruitingToggle } from '@/components/teams/RecruitingToggle'
+import { JoinRequestSection } from '@/components/teams/JoinRequestSection'
+import { JoinRequestsPanel } from '@/components/teams/JoinRequestsPanel'
+import { ActivationPanel } from '@/components/teams/ActivationPanel'
+import { LeaveTeamButton } from '@/components/teams/LeaveTeamButton'
+import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 import type { MemberCardData } from '@/types/app'
-
-interface LeaderRow extends MemberCardData { privacy_settings: Record<string, string> }
-interface TeamMemberRow { id: string; session_in_team: string[] | null; user: MemberCardData }
-interface JoinRequestRow {
-  id: string; message: string | null; status: string; created_at: string; applicant: MemberCardData
-}
-interface TeamRow {
-  id: string; name: string; current_song: string | null; description: string | null
-  is_active: boolean; is_recruiting: boolean; leader_id: string | null; vice_leader_id: string | null
-  activation_requested: boolean
-  leader: LeaderRow | null; team_members: TeamMemberRow[]
-}
+import type { TeamDetailRow, TeamDetailJoinRequestRow } from '@/types/team'
 
 export default async function TeamDetailPage({
   params,
@@ -33,17 +23,16 @@ export default async function TeamDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
-  // supabaseAdmin으로 조회해야 linked_auth_id 유저도 올바른 users.id를 얻을 수 있음
-  const { data: profile } = await supabaseAdmin
+  // createAdminClient()로 조회해야 linked_auth_id 유저도 올바른 users.id를 얻을 수 있음
+  const { data: profile } = await createAdminClient()
     .from('users')
     .select('id, status, role')
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
     .maybeSingle()
 
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(profile?.status ?? '')) redirect('/timetable')
+  if (!hasActiveMemberAccess(profile?.status)) redirect('/timetable')
 
-  const { data: rawTeam } = await supabaseAdmin
+  const { data: rawTeam } = await createAdminClient()
     .from('teams')
     .select(`
       id, name, current_song, description, is_active, is_recruiting, leader_id, vice_leader_id, activation_requested,
@@ -66,11 +55,11 @@ export default async function TeamDetailPage({
 
   if (!rawTeam) notFound()
 
-  const team = rawTeam as unknown as TeamRow
+  const team = rawTeam as TeamDetailRow
   // profile.id 와 auth.uid 모두 확인 (linked_auth_id 유저, 구버전 데이터 호환)
   const myIds        = [...new Set([profile?.id, user.id].filter(Boolean) as string[])]
   const myId         = profile?.id ?? user.id ?? ''
-  const isAdmin      = ['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? '')
+  const isAdmin      = isAdminRole(profile?.role)
   const isLeader     = myIds.some(id => team.leader_id      === id)
   const isViceLeader = myIds.some(id => team.vice_leader_id === id)
   const canEdit      = isAdmin || isLeader || isViceLeader
@@ -81,7 +70,7 @@ export default async function TeamDetailPage({
 
   // 가입 신청 이력 조회 (ACCEPTED 제외: 실제 멤버십은 team_members로만 판단, 탈퇴 후 재신청 가능해야 함)
   let myJoinRequest: { id: string; status: string } | null = null
-  const { data: joinReqRows } = await supabaseAdmin
+  const { data: joinReqRows } = await createAdminClient()
     .from('team_join_requests')
     .select('id, status')
     .eq('team_id', id)
@@ -94,9 +83,9 @@ export default async function TeamDetailPage({
   const isMember = isMemberByRoster
   const canApply = ['ACTIVE', 'INACTIVE'].includes(profile?.status ?? '') && !isMember
 
-  let joinRequests: JoinRequestRow[] = []
+  let joinRequests: TeamDetailJoinRequestRow[] = []
   if (canEdit) {
-    const { data: reqs } = await supabaseAdmin
+    const { data: reqs } = await createAdminClient()
       .from('team_join_requests')
       .select(`
         id, message, status, created_at,
@@ -105,7 +94,7 @@ export default async function TeamDetailPage({
       .eq('team_id', id)
       .eq('status', 'PENDING')
       .order('created_at', { ascending: false })
-    joinRequests = (reqs ?? []) as unknown as JoinRequestRow[]
+    joinRequests = (reqs ?? []) as TeamDetailJoinRequestRow[]
   }
 
   const members = [

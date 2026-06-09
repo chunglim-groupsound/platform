@@ -1,8 +1,11 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
-import { TeamCard } from '@/components/members/TeamCard'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { TeamCard } from '@/components/teams/TeamCard'
 import Link from 'next/link'
+import { isAdminRole, hasActiveMemberAccess, canCreateTeam } from '@/lib/constants'
+import { filterMyTeams, toTeamCardData } from '@/lib/team/utils'
+import type { TeamListItem } from '@/types/team'
 
 interface Props {
   searchParams: Promise<{ recruiting?: string; inactive?: string; myteam?: string }>
@@ -21,22 +24,12 @@ export default async function TeamsPage({ searchParams }: Props) {
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
     .maybeSingle()
 
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(profile?.status ?? '')) redirect('/timetable')
+  if (!hasActiveMemberAccess(profile?.status)) redirect('/timetable')
 
-  const isAdmin   = ['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? '')
-  const canCreate = ['ACTIVE', 'INACTIVE'].includes(profile?.status ?? '')
+  const isAdmin   = isAdminRole(profile?.role)
+  const canCreate = canCreateTeam(profile?.status)
 
-  interface LeaderData { id: string; name: string; nickname: string | null; session: string[] | null }
-  interface MemberData { user_id: string; session_in_team: string[] }
-  interface TeamData {
-    id: string; name: string; current_song: string | null; description: string | null
-    is_active: boolean; is_recruiting: boolean; leader_id: string | null
-    leader: LeaderData | null
-    team_members: MemberData[]
-  }
-
-  let query = supabaseAdmin
+  let query = createAdminClient()
     .from('teams')
     .select(`
       id, name, current_song, description, is_active, is_recruiting,
@@ -53,43 +46,13 @@ export default async function TeamsPage({ searchParams }: Props) {
   if (recruiting === 'false') query = query.eq('is_recruiting', false)
 
   const { data: rawTeams } = await query
-  let teams = (rawTeams ?? []) as unknown as TeamData[]
+  let teams = (rawTeams ?? []) as TeamListItem[]
 
-  // "내 팀" 필터: DB 조회 후 클라이언트에서 직접 비교
-  // profile.id 와 auth uid 둘 다 확인 (linked_auth_id 유저 호환)
   if (myteam === 'true') {
-    const meIds = new Set([profile?.id, user.id].filter(Boolean))
-    teams = teams.filter(t =>
-      meIds.has(t.leader_id ?? '') ||
-      t.team_members.some(m => meIds.has(m.user_id))
-    )
+    teams = filterMyTeams(teams, [profile?.id, user.id])
   }
 
-  const teamList = teams.map(t => {
-    const members   = t.team_members ?? []
-    const leader    = t.leader
-    const memberIds = new Set(members.map(m => m.user_id))
-
-    const sessionCounts: Record<string, number> = {}
-    if (leader && !memberIds.has(leader.id)) {
-      for (const s of leader.session ?? []) sessionCounts[s] = (sessionCounts[s] ?? 0) + 1
-    }
-    for (const m of members) {
-      for (const s of m.session_in_team ?? []) sessionCounts[s] = (sessionCounts[s] ?? 0) + 1
-    }
-
-    return {
-      id:              t.id,
-      name:            t.name,
-      current_song:    t.current_song,
-      description:     t.description,
-      is_active:       t.is_active,
-      is_recruiting:   t.is_recruiting,
-      leader,
-      member_count:    members.length + (leader && !memberIds.has(leader.id) ? 1 : 0),
-      session_summary: sessionCounts,
-    }
-  })
+  const teamList = teams.map(toTeamCardData)
 
   const tabStyle = (active: boolean) => ({
     padding: '5px 14px', borderRadius: '9999px', fontSize: '0.83rem',

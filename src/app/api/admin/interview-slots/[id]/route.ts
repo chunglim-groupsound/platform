@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { apiError, apiSuccess } from '@/lib/api/response'
+import { isAdminRole } from '@/lib/constants'
 
 // DELETE /api/admin/interview-slots/[id] — 슬롯 삭제 (선택자 없을 때만)
 export async function DELETE(
@@ -10,11 +11,11 @@ export async function DELETE(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+  if (!user) return apiError('인증 필요', 401)
 
   const { data: caller } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(caller?.role ?? '')) {
-    return NextResponse.json({ error: '권한 없음' }, { status: 403 })
+  if (!isAdminRole(caller?.role)) {
+    return apiError('권한 없음', 403)
   }
 
   // 이미 선택한 신청자가 있으면 삭제 불가
@@ -24,10 +25,10 @@ export async function DELETE(
     .eq('slot_id', id)
 
   if ((count ?? 0) > 0) {
-    return NextResponse.json({ error: '이미 선택한 신청자가 있어 삭제할 수 없습니다.' }, { status: 409 })
+    return apiError('이미 선택한 신청자가 있어 삭제할 수 없습니다.', 409)
   }
 
   const { error } = await supabase.from('interview_slots').delete().eq('id', id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true })
+  if (error) return apiError('서버 오류가 발생했습니다', 500)
+  return apiSuccess({ success: true })
 }

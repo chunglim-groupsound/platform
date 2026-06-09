@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
 import { transitionMemberStatus } from '@/lib/member/transitions'
-import { NextResponse } from 'next/server'
+import { apiError, apiSuccess } from '@/lib/api/response'
+import { isAdminRole } from '@/lib/constants'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   // 1. 호출자 인증 확인
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+    return apiError('인증 필요', 401)
   }
 
   // 2. 호출자 역할 확인 (ADMIN 이상만 허용)
@@ -19,8 +19,8 @@ export async function POST(request: Request) {
     .eq('id', user.id)
     .single()
 
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(caller?.role ?? '')) {
-    return NextResponse.json({ error: '권한 없음' }, { status: 403 })
+  if (!isAdminRole(caller?.role)) {
+    return apiError('권한 없음', 403)
   }
 
   // 3. 상태 전이 실행
@@ -33,8 +33,8 @@ export async function POST(request: Request) {
       changedBy: user.id,
       reason,
     })
-    return NextResponse.json(result)
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 })
+    return apiSuccess(result)
+  } catch (err: unknown) {
+    return apiError((err as Error).message, 400)
   }
 }

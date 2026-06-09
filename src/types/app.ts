@@ -58,5 +58,5 @@ export interface MemberCardData {
   phone: string | null
   department: string | null
   school_year: number | null
-  isLeader?: boolean
+  is_leader?: boolean
 }

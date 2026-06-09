@@ -1,11 +1,12 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Image from 'next/image'
 import Link from 'next/link'
 import { WhitelistBadge } from '@/components/members/WhitelistBadge'
 import { MyInvitationsSection } from '@/components/members/MyInvitationsSection'
 import { MyJoinRequestsSection } from '@/components/members/MyJoinRequestsSection'
+import { hasActiveMemberAccess } from '@/lib/constants'
 
 function isKakaoUrl(url: string | null): boolean {
   return !!url && url.includes('kakaocdn.net')
@@ -59,8 +60,7 @@ export default async function MyProfilePage() {
 
   if (!profile) redirect('/')
 
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(profile.status)) redirect('/status')
+  if (!hasActiveMemberAccess(profile.status)) redirect('/status')
 
   // 카카오 URL 자동 동기화
   let profileImageUrl = profile.profile_image_url
@@ -75,7 +75,7 @@ export default async function MyProfilePage() {
   const isFullMember = ['ACTIVE', 'INACTIVE'].includes(profile.status)
 
   // 소속 팀 + 팀원 조회
-  const { data: teamMemberships } = await supabaseAdmin
+  const { data: teamMemberships } = await createAdminClient()
     .from('team_members')
     .select(`
       team_id,
@@ -110,7 +110,7 @@ export default async function MyProfilePage() {
 
   if (isFullMember) {
     const [invRes, reqRes] = await Promise.all([
-      supabaseAdmin
+      createAdminClient()
         .from('team_invitations')
         .select(`
           id, message, status, created_at,
@@ -121,7 +121,7 @@ export default async function MyProfilePage() {
         .eq('status', 'PENDING')
         .order('created_at', { ascending: false }),
 
-      supabaseAdmin
+      createAdminClient()
         .from('team_join_requests')
         .select(`
           id, message, status, created_at,
@@ -132,8 +132,8 @@ export default async function MyProfilePage() {
         .order('created_at', { ascending: false }),
     ])
 
-    invitations  = (invRes.data  ?? []) as unknown as RawInvitation[]
-    joinRequests = (reqRes.data ?? []) as unknown as RawJoinRequest[]
+    invitations  = (invRes.data  ?? []) as RawInvitation[]
+    joinRequests = (reqRes.data ?? []) as RawJoinRequest[]
   }
 
   return (

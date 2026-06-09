@@ -1,11 +1,12 @@
-import { redirect, notFound } from 'next/navigation'
+﻿import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { canView } from '@/lib/member/privacy'
 import Image from 'next/image'
 import Link from 'next/link'
 import { WhitelistBadge } from '@/components/members/WhitelistBadge'
-import { InviteButton } from '@/components/members/InviteButton'
+import { InviteButton } from '@/components/teams/InviteButton'
+import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
 
 const ROLE_LABEL: Record<string, string> = {
   SUPER_ADMIN: '최고관리자',
@@ -44,8 +45,8 @@ export default async function MemberDetailPage({
 
   if (me?.id === id) redirect('/members/me')
 
-  const isAdmin  = ['ADMIN', 'SUPER_ADMIN'].includes(me?.role ?? '')
-  const isMember = ['ACTIVE', 'INACTIVE', 'PROBATION'].includes(me?.status ?? '')
+  const isAdmin  = isAdminRole(me?.role)
+  const isMember = hasActiveMemberAccess(me?.status)
 
   const { data: target } = await supabase
     .from('users')
@@ -63,7 +64,7 @@ export default async function MemberDetailPage({
   const isSelf = false
 
   // 소속 팀 + 팀원 조회
-  const { data: teamMemberships } = await supabaseAdmin
+  const { data: teamMemberships } = await createAdminClient()
     .from('team_members')
     .select(`
       team_id,
@@ -94,7 +95,7 @@ export default async function MemberDetailPage({
   }).filter((t): t is NonNullable<typeof t> => t !== null)
 
   // 내가 팀장인 팀 목록 (초대 드롭다운용)
-  const { data: myLedTeams } = await supabaseAdmin
+  const { data: myLedTeams } = await createAdminClient()
     .from('teams')
     .select('id, name')
     .eq('leader_id', me?.id ?? '')

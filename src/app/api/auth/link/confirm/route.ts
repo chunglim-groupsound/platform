@@ -1,9 +1,12 @@
-// src/app/api/auth/link/confirm/route.ts
+﻿// src/app/api/auth/link/confirm/route.ts
 // 연동 확정 + 빈 필드 일괄 채우기
 
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { apiError, apiSuccess } from '@/lib/api/response'
+import type { Database } from '@/types/database'
+
+type UsersUpdate = Database['public']['Tables']['users']['Update']
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -11,30 +14,30 @@ export async function POST(request: Request) {
   // 1. 로그인 확인
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+    return apiError('인증 필요', 401)
   }
 
   // 2. 요청 파싱
   const { targetUserId } = await request.json()
   if (!targetUserId) {
-    return NextResponse.json({ error: 'targetUserId가 필요합니다.' }, { status: 400 })
+    return apiError('targetUserId가 필요합니다.', 400)
   }
 
   // 3. 대상 레코드 검증
-  const { data: target, error: fetchError } = await supabaseAdmin
+  const { data: target, error: fetchError } = await createAdminClient()
     .from('users')
     .select('id, kakao_id, linked_auth_id, status, name')
     .eq('id', targetUserId)
     .single()
 
   if (fetchError || !target) {
-    return NextResponse.json({ error: '대상 레코드를 찾을 수 없습니다.' }, { status: 404 })
+    return apiError('대상 레코드를 찾을 수 없습니다.', 404)
   }
   if (!target.kakao_id.startsWith('imported_')) {
-    return NextResponse.json({ error: '임포트 레코드가 아닙니다.' }, { status: 400 })
+    return apiError('임포트 레코드가 아닙니다.', 400)
   }
   if (target.linked_auth_id !== null) {
-    return NextResponse.json({ error: '이미 연동된 레코드입니다.' }, { status: 409 })
+    return apiError('이미 연동된 레코드입니다.', 409)
   }
 
   // 4. 카카오에서 가져올 수 있는 정보 추출
@@ -52,7 +55,7 @@ export async function POST(request: Request) {
   //    - activated_at: 이미 ACTIVE면 지금 시각으로 채움
   //    - privacy_agreed_at: 연동 시점에 동의한 것으로 처리
   //    - last_active_at: 연동 시점 기록
-  const updatePayload: Record<string, unknown> = {
+  const updatePayload: UsersUpdate = {
     linked_auth_id:    user.id,
     kakao_id:          realKakaoId,
     privacy_agreed_at: now,
@@ -74,20 +77,17 @@ export async function POST(request: Request) {
     updatePayload.name = kakaoNickname
   }
 
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await createAdminClient()
     .from('users')
     .update(updatePayload)
     .eq('id', targetUserId)
 
   if (updateError) {
-    return NextResponse.json(
-      { error: '연동 업데이트 실패: ' + updateError.message },
-      { status: 500 }
-    )
+    return apiError('연동 업데이트 실패', 500)
   }
 
   // 6. 트리거가 만든 PENDING 레코드 삭제
-  const { error: deleteError } = await supabaseAdmin
+  const { error: deleteError } = await createAdminClient()
     .from('users')
     .delete()
     .eq('kakao_id', realKakaoId)
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
   }
 
   // 7. member_history 연동 이력 기록
-  await supabaseAdmin
+  await createAdminClient()
     .from('member_history')
     .insert({
       user_id:     targetUserId,
@@ -109,5 +109,5 @@ export async function POST(request: Request) {
       reason:      `카카오 계정 연동 완료 (auth_id: ${user.id})`,
     })
 
-  return NextResponse.json({ success: true })
+  return apiSuccess({ success: true })
 }

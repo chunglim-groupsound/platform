@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { isAdminRole } from '@/lib/constants'
 
 const NAV_ITEMS = [
   { href: '/admin/applications',    label: '가입 신청',    emoji: '📋' },
@@ -21,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
     .maybeSingle()
 
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(profile?.role ?? '')) redirect('/home')
+  if (!isAdminRole(profile?.role)) redirect('/home')
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f9fafb' }}>

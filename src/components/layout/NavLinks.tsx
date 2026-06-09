@@ -21,7 +21,7 @@ export function NavLinks({ isAdmin }: NavLinksProps) {
   const pathname = usePathname()
 
   const isActive = (href: string) => {
-    if (href === '/members') return pathname.startsWith('/members') && !pathname.startsWith('/members/teams')
+    if (href === '/members') return pathname.startsWith('/members')
     if (href === '/home' || href === '/timetable') return pathname === href
     return pathname.startsWith(href)
   }

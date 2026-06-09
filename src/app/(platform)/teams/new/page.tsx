@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { NewTeamForm } from '@/components/members/NewTeamForm'
+import { NewTeamForm } from '@/components/teams/NewTeamForm'
 import Link from 'next/link'
 
 export default async function NewTeamPage() {

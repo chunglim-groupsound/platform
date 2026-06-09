@@ -1,10 +1,7 @@
-// src/app/api/members/[id]/route.ts
-// 프로필 조회 API — 학과·학번·학년 privacy_settings 반영
-
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { isAdminRole, canCreateTeam } from '@/lib/constants'
+import { apiError, apiSuccess } from '@/lib/api/response'
 
-// privacy_settings 공개 범위 판단
 function canView(
   scope: string | undefined,
   isSelf: boolean,
@@ -14,34 +11,30 @@ function canView(
   if (isSelf || isAdmin) return true
   if (scope === 'all')    return true
   if (scope === 'member') return isMember
-  // scope === 'admin' → 운영진만 (isAdmin은 위에서 이미 처리)
   return false
 }
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
   const supabase = await createClient()
 
-  // 1. 조회자 확인
   const { data: { user: caller } } = await supabase.auth.getUser()
   if (!caller) {
-    return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+    return apiError('인증 필요', 401)
   }
 
-  // 2. 조회자 권한 조회 (linked_auth_id 포함)
   const { data: callerProfile } = await supabase
     .from('users')
     .select('role, status')
     .or(`id.eq.${caller.id},linked_auth_id.eq.${caller.id}`)
     .maybeSingle()
 
-  const isAdmin  = ['ADMIN', 'SUPER_ADMIN'].includes(callerProfile?.role   ?? '')
-  const isMember = ['ACTIVE', 'INACTIVE'].includes(callerProfile?.status ?? '')
+  const isAdmin  = isAdminRole(callerProfile?.role)
+  const isMember = canCreateTeam(callerProfile?.status)
 
-  // 3. 대상 회원 조회
   const { data: target } = await supabase
     .from('users')
     .select(`
@@ -56,7 +49,7 @@ export async function GET(
     .single()
 
   if (!target) {
-    return NextResponse.json({ error: '없는 유저' }, { status: 404 })
+    return apiError('없는 유저', 404)
   }
 
   const isSelf = (
@@ -66,8 +59,6 @@ export async function GET(
 
   const privacy = (target.privacy_settings ?? {}) as Record<string, string>
 
-  // 4. privacy_settings 기반 필드 필터링
-  //    민감 필드만 조건부 제거, 나머지는 항상 반환
   const filtered: Record<string, unknown> = {
     id:                target.id,
     nickname:          target.nickname,
@@ -80,43 +71,35 @@ export async function GET(
     created_at:        target.created_at,
   }
 
-  // name (실명) — 기본값 member
   if (canView(privacy.name ?? 'member', isSelf, isMember, isAdmin)) {
     filtered.name = target.name
   }
 
-  // generation
   if (canView(privacy.generation, isSelf, isMember, isAdmin)) {
     filtered.generation = target.generation
   }
 
-  // phone
   if (canView(privacy.phone, isSelf, isMember, isAdmin)) {
     filtered.phone = target.phone
   }
 
-  // department (학과)
   if (canView(privacy.department, isSelf, isMember, isAdmin)) {
     filtered.department = target.department
   }
 
-  // student_id (학번) — 기본값 admin
   if (canView(privacy.student_id ?? 'admin', isSelf, isMember, isAdmin)) {
     filtered.student_id = target.student_id
   }
 
-  // school_year (학년)
   if (canView(privacy.school_year, isSelf, isMember, isAdmin)) {
     filtered.school_year = target.school_year
   }
 
-  // 운영진만 볼 수 있는 추가 필드
   if (isAdmin || isSelf) {
     filtered.probation_started_at = target.probation_started_at
     filtered.activated_at         = target.activated_at
   }
 
-  // 소속 팀 목록 (PROBATION 이상 조회 가능)
   const { data: teamMemberships } = await supabase
     .from('team_members')
     .select('team_id, teams!team_id ( id, name, leader_id )')
@@ -129,5 +112,5 @@ export async function GET(
 
   filtered.teams = teams
 
-  return NextResponse.json(filtered)
+  return apiSuccess(filtered)
 }

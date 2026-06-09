@@ -1,23 +1,13 @@
-// src/middleware.ts
-// linked_auth_id 조건 추가 + /link 경로 분기 포함
-
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isAdminRole, INTERVIEWING_ALLOWED_PATHS } from '@/lib/constants'
 
-// 로그인 없이 접근 가능한 경로
 const PUBLIC_PATHS = ['/', '/auth']
-
-// 로그인은 됐지만 미승인 상태에서도 접근 가능한 경로
 const PENDING_ALLOWED_PATHS = ['/apply', '/link', '/status', '/auth']
-
-// INTERVIEWING 상태에서 접근 가능한 경로
-const INTERVIEWING_ALLOWED_PATHS = ['/notices', '/home', '/timetable', '/status', '/auth']
-
-// 운영진 전용 경로
 const ADMIN_PATHS = ['/admin']
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
   const pathname = request.nextUrl.pathname
 
@@ -48,7 +38,6 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── 2. 로그인 상태 — 프로필 조회 ─────────────────────────────
-  // linked_auth_id도 함께 조건으로 조회
   const { data: profile } = await supabase
     .from('users')
     .select('id, status, role')
@@ -63,30 +52,17 @@ export async function middleware(request: NextRequest) {
     const isAllowed = PENDING_ALLOWED_PATHS.some(p => pathname.startsWith(p))
     if (isAllowed) return response
 
-    // 신청서 제출 여부 확인
-    const { data: application } = await supabase
-      .from('join_applications')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle()
+    const [{ data: application }, { data: period }] = await Promise.all([
+      supabase.from('join_applications').select('id').eq('user_id', user.id).maybeSingle(),
+      supabase.from('recruitment_periods').select('is_open').maybeSingle(),
+    ])
 
     if (application) {
-      // 신청서 제출 완료 → 승인 대기 안내
       return NextResponse.redirect(new URL('/status', request.url))
     }
-
-    // 신청서 미제출 → 모집 기간 확인 후 분기
-    const { data: period } = await supabase
-      .from('recruitment_periods')
-      .select('is_open')
-      .maybeSingle()
-
     if (!period?.is_open) {
-      // 모집 기간 아님 → 안내 페이지
       return NextResponse.redirect(new URL('/status?reason=not_open', request.url))
     }
-
-    // 모집 기간 중 → 연동 확인 페이지로 (기존 부원 여부 확인)
     return NextResponse.redirect(new URL('/link', request.url))
   }
 
@@ -109,7 +85,7 @@ export async function middleware(request: NextRequest) {
 
   // ── 6. 운영진 전용 경로 접근 제어 ────────────────────────────
   if (ADMIN_PATHS.some(p => pathname.startsWith(p))) {
-    if (!['ADMIN', 'SUPER_ADMIN'].includes(role)) {
+    if (!isAdminRole(role)) {
       return NextResponse.redirect(new URL('/home', request.url))
     }
   }
@@ -120,6 +96,5 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|api/).*)',
-    //                                          ↑ api/ 추가
   ],
 }

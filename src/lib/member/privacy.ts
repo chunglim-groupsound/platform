@@ -1,4 +1,15 @@
+import type { Database } from '@/types/database'
 import type { MemberCardData } from '@/types/app'
+
+type UsersRow = Database['public']['Tables']['users']['Row']
+
+export type RawMemberRow = Pick<
+  UsersRow,
+  | 'id' | 'name' | 'nickname' | 'profile_image_url'
+  | 'status' | 'role' | 'is_whitelist' | 'session'
+  | 'generation' | 'phone' | 'department' | 'school_year'
+  | 'privacy_settings'
+> & { is_leader?: boolean }
 
 type PrivacyScope = 'all' | 'member' | 'admin'
 
@@ -17,30 +28,30 @@ export function canView(
 }
 
 export function maskMember(
-  raw: Record<string, unknown>,
+  raw: RawMemberRow,
   isSelf: boolean,
   isMember: boolean,
   isAdmin: boolean
 ): MemberCardData {
-  const privacy = (raw.privacy_settings ?? {}) as Record<string, string>
+  const privacy = (raw.privacy_settings as Record<string, string> | null) ?? {}
   return {
-    id:                raw.id as string,
+    id:                raw.id,
     name: canView(privacy.name, 'member', isSelf, isMember, isAdmin)
-      ? (raw.name as string) : null,
-    nickname:          raw.nickname as string | null,
-    profile_image_url: raw.profile_image_url as string | null,
-    status:            raw.status as MemberCardData['status'],
-    role:              raw.role as MemberCardData['role'],
-    is_whitelist:      raw.is_whitelist as boolean,
-    session:           (raw.session as string[] | null) ?? [],
+      ? raw.name : null,
+    nickname:          raw.nickname,
+    profile_image_url: raw.profile_image_url,
+    status:            raw.status,
+    role:              raw.role,
+    is_whitelist:      raw.is_whitelist,
+    session:           raw.session ?? [],
     generation: canView(privacy.generation, 'member', isSelf, isMember, isAdmin)
-      ? (raw.generation as number | null) : null,
+      ? raw.generation : null,
     phone: canView(privacy.phone, 'admin', isSelf, isMember, isAdmin)
-      ? (raw.phone as string | null) : null,
+      ? raw.phone : null,
     department: canView(privacy.department, 'member', isSelf, isMember, isAdmin)
-      ? (raw.department as string | null) : null,
+      ? raw.department : null,
     school_year: canView(privacy.school_year, 'member', isSelf, isMember, isAdmin)
-      ? (raw.school_year as number | null) : null,
-    isLeader: (raw.isLeader as boolean | undefined) ?? false,
+      ? raw.school_year : null,
+    is_leader: raw.is_leader ?? false,
   }
 }

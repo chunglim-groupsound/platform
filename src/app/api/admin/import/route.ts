@@ -1,7 +1,11 @@
-// src/app/api/admin/import/route.ts
-import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextResponse } from 'next/server'
+﻿// src/app/api/admin/import/route.ts
+import { createAdminClient } from '@/lib/supabase/admin'
+import { apiError, apiSuccess } from '@/lib/api/response'
 import { randomUUID } from 'crypto'
+import type { Database } from '@/types/database'
+
+type MemberRole   = Database['public']['Enums']['member_role']
+type MemberStatus = Database['public']['Enums']['member_status']
 
 interface CsvRow {
   name:         string
@@ -19,7 +23,7 @@ export async function POST(request: Request) {
   const { members }: { members: CsvRow[] } = await request.json()
 
   if (!members || members.length === 0) {
-    return NextResponse.json({ error: '데이터가 없습니다.' }, { status: 400 })
+    return apiError('데이터가 없습니다.', 400)
   }
 
   const formatted = members.map((m) => {
@@ -27,13 +31,8 @@ export async function POST(request: Request) {
       ? m.session.split(',').map((s: string) => s.trim()).filter(Boolean)
       : []
 
-    const status = (m.status?.toUpperCase() ?? 'ACTIVE')
-
-    const role = (() => {
-      if (status === 'ACTIVE')    return 'MEMBER'
-      if (status === 'PROBATION') return 'PROBATION_MEMBER'
-      return 'MEMBER'
-    })()
+    const status = (m.status?.toUpperCase() ?? 'ACTIVE') as MemberStatus
+    const role: MemberRole = status === 'PROBATION' ? 'PROBATION_MEMBER' : 'MEMBER'
 
     return {
       id:             randomUUID(),   // ← auth.users 참조 없이 직접 생성
@@ -52,16 +51,16 @@ export async function POST(request: Request) {
     }
   })
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await createAdminClient()
     .from('users')
     .insert(formatted)
     .select('id, name, generation')
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('서버 오류가 발생했습니다', 500)
   }
 
-  return NextResponse.json({
+  return apiSuccess({
     imported: data?.length ?? formatted.length,
     members:  data,
   })

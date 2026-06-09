@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { MemberCard } from './MemberCard'
+import { MemberCard } from '@/components/members/MemberCard'
 import type { MemberCardData } from '@/types/app'
 
 interface TeamMemberEntry {
@@ -60,7 +60,7 @@ export function TeamMemberList({ members, myId, canEdit, teamId }: TeamMemberLis
                 session: entry.session_in_team.length > 0 ? entry.session_in_team : entry.user.session,
               }}
               isMe={entry.user.id === myId}
-              onClick={(id) => {
+              onClick={(id: string) => {
                 if (id === myId) router.push('/members/me')
                 else router.push(`/members/${id}`)
               }}

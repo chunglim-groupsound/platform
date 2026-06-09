@@ -1,8 +1,9 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { DashboardCards } from '@/components/layout/DashboardCards'
 import Link from 'next/link'
+import { isAdminRole, ACTIVE_STATUSES } from '@/lib/constants'
 
 const ROLE_LABEL: Record<string, string> = {
   SUPER_ADMIN: '최고관리자',
@@ -43,16 +44,16 @@ export default async function HomePage() {
 
   if (!profile) redirect('/')
 
-  const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(profile.role)
+  const isAdmin = isAdminRole(profile.role)
 
   // 부원 수
-  const { count: memberCount } = await supabaseAdmin
+  const { count: memberCount } = await createAdminClient()
     .from('users')
     .select('*', { count: 'exact', head: true })
-    .in('status', ['ACTIVE', 'INACTIVE', 'PROBATION'])
+    .in('status', [...ACTIVE_STATUSES])
 
   // 활성 팀 + 팀원 목록 (팀원 있는 팀만 카운트/표시)
-  const { data: rawTeams } = await supabaseAdmin
+  const { data: rawTeams } = await createAdminClient()
     .from('teams')
     .select(`
       id, name, current_song, is_recruiting,
@@ -62,7 +63,7 @@ export default async function HomePage() {
     .eq('is_active', true)
     .order('created_at', { ascending: true })
 
-  const activeTeams = ((rawTeams ?? []) as unknown as ActiveTeam[])
+  const activeTeams = ((rawTeams ?? []) as ActiveTeam[])
     .filter(t => t.team_members.length > 0)
 
   const teamCount = activeTeams.length

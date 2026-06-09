@@ -1,5 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { hasActiveMemberAccess } from '@/lib/constants'
+import { apiError, apiSuccess } from '@/lib/api/response'
+import type { Database } from '@/types/database'
+
+type UsersUpdate = Database['public']['Tables']['users']['Update']
 
 const ALLOWED_FIELDS = [
   'nickname', 'profile_image_url', 'session', 'genre_preference',
@@ -22,7 +26,7 @@ export async function PATCH(request: Request) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+    return apiError('인증 필요', 401)
   }
 
   const { data: profile } = await supabase
@@ -32,22 +36,20 @@ export async function PATCH(request: Request) {
     .maybeSingle()
 
   if (!profile) {
-    return NextResponse.json({ error: '인증 필요' }, { status: 401 })
+    return apiError('인증 필요', 401)
   }
 
-  const allowed = ['PROBATION', 'ACTIVE', 'INACTIVE']
-  if (!allowed.includes(profile.status)) {
-    return NextResponse.json({ error: '수정 권한이 없습니다' }, { status: 403 })
+  if (!hasActiveMemberAccess(profile.status)) {
+    return apiError('수정 권한이 없습니다', 403)
   }
 
   let body: Record<string, unknown>
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: '잘못된 요청입니다' }, { status: 400 })
+    return apiError('잘못된 요청입니다', 400)
   }
 
-  // 허용된 필드만 추출, 금지 필드 제거
   const patch: Record<string, unknown> = {}
   for (const key of ALLOWED_FIELDS) {
     if (key in body) patch[key] = body[key]
@@ -56,7 +58,6 @@ export async function PATCH(request: Request) {
     if (BLOCKED_FIELDS.has(key)) delete patch[key]
   }
 
-  // 유효성 검증
   const errors: Record<string, string> = {}
 
   const kakaoAvatarUrl = user.user_metadata?.avatar_url as string | undefined
@@ -109,23 +110,23 @@ export async function PATCH(request: Request) {
   }
 
   if (Object.keys(errors).length > 0) {
-    return NextResponse.json({ error: '유효하지 않은 입력값', details: errors }, { status: 400 })
+    return apiError('유효하지 않은 입력값', 400, { details: errors })
   }
 
   if (Object.keys(patch).length === 0) {
-    return NextResponse.json({ error: '변경할 항목이 없습니다' }, { status: 400 })
+    return apiError('변경할 항목이 없습니다', 400)
   }
 
   const { data: updated, error: updateError } = await supabase
     .from('users')
-    .update(patch)
+    .update(patch as UsersUpdate)
     .eq('id', profile.id)
     .select()
     .single()
 
   if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 })
+    return apiError('서버 오류가 발생했습니다', 500)
   }
 
-  return NextResponse.json({ success: true, user: updated })
+  return apiSuccess({ success: true, user: updated })
 }

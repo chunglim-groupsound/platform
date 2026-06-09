@@ -2,33 +2,18 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-
-// 상태별 한국어 라벨
-const STATUS_LABELS: Record<string, string> = {
-  PENDING:      '신청 대기',
-  INTERVIEWING: '면접 중',
-  PROBATION:    '유예',
-  ACTIVE:       '정식',
-  INACTIVE:     '휴면',
-  WITHDRAWN:    '탈퇴',
-}
+import { STATUS_LABELS } from '@/lib/constants'
+import { ALLOWED_TRANSITIONS } from '@/lib/member/transitions'
+import { calcProbationDday } from '@/lib/member/probation'
 
 const TABS = ['전체', 'PENDING', 'INTERVIEWING', 'PROBATION', 'ACTIVE', 'INACTIVE']
 
-export default function MemberListClient({ members }: { members: any[] }) {
+export default function MemberList({ members }: { members: any[] }) {
   const [activeTab, setActiveTab] = useState('전체')
 
   const filtered = activeTab === '전체'
     ? members
     : members.filter(m => m.status === activeTab)
-
-  // 유예 기간 잔여일 계산
-  const getProbationDday = (startedAt: string) => {
-    const start = new Date(startedAt)
-    const end = new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000)
-    const diff = Math.ceil((end.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    return diff > 0 ? `D-${diff}` : '만료'
-  }
 
   return (
     <div>
@@ -73,7 +58,7 @@ export default function MemberListClient({ members }: { members: any[] }) {
               <td>{STATUS_LABELS[member.status]}</td>
               <td>
                 {member.status === 'PROBATION' && member.probation_started_at
-                  ? getProbationDday(member.probation_started_at)
+                  ? calcProbationDday(member.probation_started_at)
                   : '-'}
               </td>
               <td>
@@ -95,16 +80,7 @@ function StatusChangeDropdown({
   memberId: string
   currentStatus: string
 }) {
-  const NEXT_STATUSES: Record<string, string[]> = {
-    PENDING:      ['INTERVIEWING', 'WITHDRAWN'],
-    INTERVIEWING: ['PROBATION', 'WITHDRAWN'],
-    PROBATION:    ['ACTIVE', 'WITHDRAWN'],
-    ACTIVE:       ['INACTIVE', 'WITHDRAWN'],
-    INACTIVE:     ['ACTIVE', 'WITHDRAWN'],
-    WITHDRAWN:    [],
-  }
-
-  const options = NEXT_STATUSES[currentStatus] ?? []
+  const options = ALLOWED_TRANSITIONS[currentStatus] ?? []
   if (options.length === 0) return <span>-</span>
 
   const handleChange = async (toStatus: string) => {

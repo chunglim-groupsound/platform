@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import type { Database } from '@/types/database'
 
-// 허용된 상태 전이 경로 정의
-const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+type UsersUpdate = Database['public']['Tables']['users']['Update']
+type MemberStatus = Database['public']['Enums']['member_status']
+
+export const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   PENDING:      ['INTERVIEWING', 'WITHDRAWN'],
   INTERVIEWING: ['PROBATION', 'WITHDRAWN'],
   PROBATION:    ['ACTIVE', 'WITHDRAWN'],
@@ -17,7 +20,7 @@ export async function transitionMemberStatus({
   reason,
 }: {
   userId: string
-  toStatus: string
+  toStatus: MemberStatus
   changedBy: string | null
   reason?: string
 }) {
@@ -53,7 +56,7 @@ export async function transitionMemberStatus({
 
   const { error: updateError } = await supabase
     .from('users')
-    .update(updateData)
+    .update(updateData as UsersUpdate)
     .eq('id', userId)
 
   if (updateError) throw new Error('상태 업데이트 실패: ' + updateError.message)

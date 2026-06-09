@@ -1,14 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { apiError, apiSuccess } from '@/lib/api/response'
+import { isAdminRole } from '@/lib/constants'
 
 async function requireAdmin() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: NextResponse.json({ error: '인증 필요' }, { status: 401 }), supabase: null, user: null }
+  if (!user) return { error: apiError('인증 필요', 401), supabase: null, user: null }
 
   const { data: caller } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(caller?.role ?? '')) {
-    return { error: NextResponse.json({ error: '권한 없음' }, { status: 403 }), supabase: null, user: null }
+  if (!isAdminRole(caller?.role)) {
+    return { error: apiError('권한 없음', 403), supabase: null, user: null }
   }
 
   return { error: null, supabase, user }
@@ -27,8 +28,8 @@ export async function GET() {
     `)
     .order('slot_at', { ascending: true })
 
-  if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
-  return NextResponse.json(data)
+  if (dbError) return apiError('서버 오류가 발생했습니다', 500)
+  return apiSuccess(data)
 }
 
 // POST /api/admin/interview-slots — 슬롯 생성 (복수)
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
   const slots: { slot_at: string; capacity?: number }[] = body.slots ?? []
 
   if (!slots.length) {
-    return NextResponse.json({ error: '슬롯이 없습니다.' }, { status: 400 })
+    return apiError('슬롯이 없습니다.', 400)
   }
 
   const rows = slots.map(s => ({
@@ -51,6 +52,6 @@ export async function POST(request: Request) {
   }))
 
   const { error: dbError } = await supabase!.from('interview_slots').insert(rows)
-  if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
-  return NextResponse.json({ success: true })
+  if (dbError) return apiError('서버 오류가 발생했습니다', 500)
+  return apiSuccess({ success: true })
 }
