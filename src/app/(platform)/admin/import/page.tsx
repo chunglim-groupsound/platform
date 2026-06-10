@@ -25,8 +25,6 @@ interface CsvRow {
 // ─────────────────────────────────────────────
 
 // EUC-KR 여부 간단 감지
-// UTF-8은 멀티바이트 시퀀스가 0xC0~0xFD로 시작하지만
-// EUC-KR은 0xA1~0xFE 범위의 2바이트 조합을 사용
 function detectEncoding(buffer: ArrayBuffer): 'utf-8' | 'euc-kr' {
   const bytes = new Uint8Array(buffer)
 
@@ -146,29 +144,29 @@ export default function ImportPage() {
   }
 
   return (
-    <div style={{ padding: '32px', maxWidth: '900px' }}>
-      <h2 style={{ fontSize: '20px', fontWeight: 500, marginBottom: '6px' }}>
+    <div className="p-8 max-w-[900px]">
+      <h2 className="text-xl font-medium mb-1.5">
         기존 회원 데이터 일괄 업로드
       </h2>
 
       {/* CSV 형식 안내 */}
-      <div style={styles.formatBox}>
-        <p style={{ fontWeight: 500, marginBottom: '8px', fontSize: '13px' }}>
+      <div className="bg-[#f8f9fa] border border-[#e9ecef] rounded-lg py-4 px-5 mb-5 text-[13px]">
+        <p className="font-medium mb-2 text-[13px]">
           CSV 헤더 형식
         </p>
-        <code style={styles.code}>
+        <code className="block bg-[#eee] py-2 px-3 rounded text-xs font-mono mb-2.5 break-all">
           name, generation, session, department, student_id, school_year, phone, is_whitelist, status
         </code>
-        <ul style={styles.formatList}>
+        <ul className="pl-[18px] text-gray-500 leading-[1.8] m-0">
           <li><strong>필수:</strong> name, generation, session</li>
           <li><strong>선택:</strong> department, student_id, school_year, phone, is_whitelist, status</li>
-          <li>session 복수: 쌍따옴표로 묶기 <code>"기타,보컬"</code></li>
+          <li>session 복수: 쌍따옴표로 묶기 <code>&quot;기타,보컬&quot;</code></li>
         </ul>
 
         {/* 인코딩 안내 */}
-        <div style={styles.encodingTip}>
+        <div className="mt-3 pt-3 border-t border-[#e0e0e0] text-[13px] text-[#444]">
           <strong>한글 파일 저장 방법</strong>
-          <ul style={{ ...styles.formatList, marginTop: '6px' }}>
+          <ul className="pl-[18px] text-gray-500 leading-[1.8] mt-1.5 mb-0">
             <li>Excel: 다른 이름으로 저장 → <strong>CSV UTF-8 (쉼표로 분리)</strong> 선택</li>
             <li>메모장/VSCode: UTF-8 또는 UTF-8 BOM으로 저장</li>
             <li>EUC-KR 파일도 자동 감지하여 변환합니다.</li>
@@ -180,12 +178,12 @@ export default function ImportPage() {
         type="file"
         accept=".csv"
         onChange={handleFile}
-        style={{ marginBottom: '12px' }}
+        className="mb-3"
       />
 
       {/* 인코딩 감지 결과 표시 */}
       {encoding && (
-        <p style={styles.encodingBadge}>
+        <p className="inline-block mb-3 py-1 px-3 bg-[#EFF6FF] border border-[#BFDBFE] rounded-full text-[13px] text-[#1E40AF]">
           감지된 인코딩: <strong>{encoding.toUpperCase()}</strong>
           {encoding === 'euc-kr' && ' — 자동으로 UTF-8로 변환됩니다.'}
         </p>
@@ -193,17 +191,20 @@ export default function ImportPage() {
 
       {preview.length > 0 && (
         <div>
-          <p style={{ marginBottom: '10px', fontSize: '14px' }}>
+          <p className="mb-2.5 text-sm">
             미리보기: <strong>{preview.length}명</strong>
             {preview.length > 5 && ` (상위 5명만 표시)`}
           </p>
 
-          <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
-            <table style={styles.table}>
+          <div className="overflow-x-auto mb-4">
+            <table className="border-collapse w-full text-[13px]">
               <thead>
                 <tr>
                   {PREVIEW_COLS.map(col => (
-                    <th key={col} style={styles.th}>
+                    <th
+                      key={col}
+                      className="border border-[#e0e0e0] py-2 px-3 bg-[#f5f5f5] font-medium text-left whitespace-nowrap"
+                    >
                       {COL_LABELS[col] ?? col}
                     </th>
                   ))}
@@ -213,10 +214,10 @@ export default function ImportPage() {
                 {preview.slice(0, 5).map((row, i) => (
                   <tr key={i}>
                     {PREVIEW_COLS.map(col => (
-                      <td key={col} style={styles.td}>
+                      <td key={col} className="border border-[#e0e0e0] py-2 px-3 whitespace-nowrap">
                         {row[col]
                           ? row[col]
-                          : <span style={{ color: '#ccc' }}>-</span>
+                          : <span className="text-gray-300">-</span>
                         }
                       </td>
                     ))}
@@ -226,7 +227,7 @@ export default function ImportPage() {
                   <tr>
                     <td
                       colSpan={PREVIEW_COLS.length}
-                      style={{ ...styles.td, textAlign: 'center', color: '#aaa' }}
+                      className="border border-[#e0e0e0] py-2 px-3 whitespace-nowrap text-center text-gray-400"
                     >
                       ... 외 {preview.length - 5}명
                     </td>
@@ -239,15 +240,10 @@ export default function ImportPage() {
           <button
             onClick={handleUpload}
             disabled={loading}
+            className="py-2.5 px-6 border-none rounded-md text-sm font-medium text-white"
             style={{
-              padding: '10px 24px',
               background: loading ? '#aaa' : '#4A90E2',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
               cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              fontWeight: 500,
             }}
           >
             {loading ? '업로드 중...' : `${preview.length}명 업로드 실행`}
@@ -256,80 +252,17 @@ export default function ImportPage() {
       )}
 
       {result && (
-        <p style={{
-          marginTop: '16px',
-          fontWeight: 500,
-          padding: '12px 16px',
-          borderRadius: '6px',
-          background: result.startsWith('✅') ? '#f0fff4' : '#fff5f5',
-          color:      result.startsWith('✅') ? '#276749' : '#c53030',
-          border:     `1px solid ${result.startsWith('✅') ? '#9ae6b4' : '#feb2b2'}`,
-        }}>
+        <p
+          className="mt-4 font-medium py-3 px-4 rounded-md"
+          style={{
+            background: result.startsWith('✅') ? '#f0fff4' : '#fff5f5',
+            color:      result.startsWith('✅') ? '#276749' : '#c53030',
+            border:     `1px solid ${result.startsWith('✅') ? '#9ae6b4' : '#feb2b2'}`,
+          }}
+        >
           {result}
         </p>
       )}
     </div>
   )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  formatBox: {
-    background: '#f8f9fa',
-    border: '1px solid #e9ecef',
-    borderRadius: '8px',
-    padding: '16px 20px',
-    marginBottom: '20px',
-    fontSize: '13px',
-  },
-  code: {
-    display: 'block',
-    background: '#eee',
-    padding: '8px 12px',
-    borderRadius: '4px',
-    fontFamily: 'monospace',
-    fontSize: '12px',
-    marginBottom: '10px',
-    wordBreak: 'break-all' as const,
-  },
-  formatList: {
-    paddingLeft: '18px',
-    color: '#555',
-    lineHeight: 1.8,
-    margin: 0,
-  },
-  encodingTip: {
-    marginTop: '12px',
-    paddingTop: '12px',
-    borderTop: '1px solid #e0e0e0',
-    fontSize: '13px',
-    color: '#444',
-  },
-  encodingBadge: {
-    display: 'inline-block',
-    marginBottom: '12px',
-    padding: '4px 12px',
-    background: '#EFF6FF',
-    border: '1px solid #BFDBFE',
-    borderRadius: '20px',
-    fontSize: '13px',
-    color: '#1E40AF',
-  },
-  table: {
-    borderCollapse: 'collapse' as const,
-    width: '100%',
-    fontSize: '13px',
-  },
-  th: {
-    border: '1px solid #e0e0e0',
-    padding: '8px 12px',
-    background: '#f5f5f5',
-    fontWeight: 500,
-    textAlign: 'left' as const,
-    whiteSpace: 'nowrap' as const,
-  },
-  td: {
-    border: '1px solid #e0e0e0',
-    padding: '8px 12px',
-    whiteSpace: 'nowrap' as const,
-  },
 }

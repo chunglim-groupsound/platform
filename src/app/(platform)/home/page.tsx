@@ -1,4 +1,4 @@
-﻿import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { DashboardCards } from '@/components/layout/DashboardCards'
@@ -88,46 +88,44 @@ export default async function HomePage() {
   const visibleCards = cards.filter(c => !c.adminOnly || isAdmin)
 
   return (
-    <main style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 20px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <main className="max-w-[800px] mx-auto py-8 px-5 flex flex-col gap-8">
 
       {/* 환영 배너 */}
-      <section style={{
-        background: 'linear-gradient(135deg, #1e3a5f 0%, #111827 100%)',
-        borderRadius: '16px', padding: '28px', color: '#fff',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        gap: '16px', flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>
+      <section
+        className="rounded-2xl p-7 text-white flex justify-between items-center gap-4 flex-wrap"
+        style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #111827 100%)' }}
+      >
+        <div className="flex flex-col gap-1.5">
+          <div className="text-[0.85rem] text-white/55 font-medium">
             청림그룹사운드
           </div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.3px' }}>
+          <div className="text-[1.4rem] font-extrabold tracking-[-0.3px]">
             안녕하세요, {displayName}님 👋
           </div>
-          <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{ padding: '3px 10px', borderRadius: '9999px', background: 'rgba(255,255,255,0.12)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.8)' }}>
+          <div className="flex gap-2 mt-1 flex-wrap">
+            <span className="py-[3px] px-2.5 rounded-full bg-white/12 text-[0.78rem] text-white/80">
               {ROLE_LABEL[profile.role] ?? profile.role}
             </span>
             {profile.generation != null && (
-              <span style={{ padding: '3px 10px', borderRadius: '9999px', background: 'rgba(255,255,255,0.12)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.8)' }}>
+              <span className="py-[3px] px-2.5 rounded-full bg-white/12 text-[0.78rem] text-white/80">
                 {profile.generation}기
               </span>
             )}
-            <span style={{ padding: '3px 10px', borderRadius: '9999px', background: 'rgba(255,255,255,0.12)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.8)' }}>
+            <span className="py-[3px] px-2.5 rounded-full bg-white/12 text-[0.78rem] text-white/80">
               {STATUS_LABEL[profile.status] ?? profile.status}
             </span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.8rem', fontWeight: 800, lineHeight: 1 }}>{memberCount ?? '-'}</div>
-            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)', marginTop: '4px' }}>총 부원</div>
+        <div className="flex gap-5">
+          <div className="text-center">
+            <div className="text-[1.8rem] font-extrabold leading-none">{memberCount ?? '-'}</div>
+            <div className="text-[0.75rem] text-white/55 mt-1">총 부원</div>
           </div>
-          <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)' }} />
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '1.8rem', fontWeight: 800, lineHeight: 1 }}>{teamCount}</div>
-            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)', marginTop: '4px' }}>활성 팀</div>
+          <div className="w-px bg-white/10" />
+          <div className="text-center">
+            <div className="text-[1.8rem] font-extrabold leading-none">{teamCount}</div>
+            <div className="text-[0.75rem] text-white/55 mt-1">활성 팀</div>
           </div>
         </div>
       </section>
@@ -135,15 +133,15 @@ export default async function HomePage() {
       {/* 활성 팀 목록 */}
       {activeTeams.length > 0 && (
         <section>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-            <h2 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#6b7280', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <div className="flex items-center justify-between mb-3.5">
+            <h2 className="text-[0.9rem] font-bold text-gray-500 m-0 tracking-[0.05em] uppercase">
               활성 팀
             </h2>
-            <Link href="/teams" style={{ fontSize: '0.8rem', color: '#6366f1', textDecoration: 'none', fontWeight: 500 }}>
+            <Link href="/teams" className="text-[0.8rem] text-indigo-500 no-underline font-medium">
               전체 보기 →
             </Link>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="flex flex-col gap-2">
             {activeTeams.map(team => {
               const leaderName = team.leader
                 ? (team.leader.nickname ?? team.leader.name)
@@ -152,30 +150,24 @@ export default async function HomePage() {
                 <Link
                   key={team.id}
                   href={`/teams/${team.id}`}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    padding: '12px 16px', borderRadius: '12px',
-                    border: '1px solid #e5e7eb', background: '#fff',
-                    textDecoration: 'none', color: '#111827',
-                  }}
+                  className="flex items-center gap-3 py-3 px-4 rounded-xl border border-gray-200 bg-white no-underline text-gray-900"
                 >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{team.name}</span>
-                      <span style={{
-                        padding: '1px 7px', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 600, flexShrink: 0,
-                        background: team.is_recruiting ? '#dcfce7' : '#f3f4f6',
-                        color:      team.is_recruiting ? '#15803d' : '#6b7280',
-                        border:     `1px solid ${team.is_recruiting ? '#bbf7d0' : '#e5e7eb'}`,
-                      }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="font-bold text-[0.92rem]">{team.name}</span>
+                      <span className={`py-[1px] px-[7px] rounded-full text-[0.7rem] font-semibold shrink-0 border ${
+                        team.is_recruiting
+                          ? 'bg-green-100 text-green-700 border-green-200'
+                          : 'bg-gray-100 text-gray-500 border-gray-200'
+                      }`}>
                         {team.is_recruiting ? '모집 중' : '모집 완료'}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.78rem', color: '#9ca3af' }}>
+                    <div className="text-[0.78rem] text-gray-400">
                       {team.current_song ? `♪ ${team.current_song}` : (leaderName ? `팀장: ${leaderName}` : '')}
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: '#6b7280', flexShrink: 0 }}>
+                  <div className="text-[0.8rem] text-gray-500 shrink-0">
                     {team.team_members.length}명
                   </div>
                 </Link>
@@ -187,20 +179,17 @@ export default async function HomePage() {
 
       {/* 빠른 이동 */}
       <section>
-        <h2 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#6b7280', marginBottom: '14px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+        <h2 className="text-[0.9rem] font-bold text-gray-500 mb-3.5 tracking-[0.05em] uppercase">
           메뉴
         </h2>
         <DashboardCards cards={visibleCards} />
       </section>
 
       {/* 타임테이블 예고 */}
-      <section style={{
-        border: '1px dashed #d1d5db', borderRadius: '14px',
-        padding: '28px', textAlign: 'center', color: '#9ca3af',
-      }}>
-        <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>🗓</div>
-        <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#6b7280', marginBottom: '4px' }}>합주실 타임테이블</div>
-        <div style={{ fontSize: '0.82rem' }}>예약 시스템 개발 중입니다.</div>
+      <section className="border border-dashed border-gray-300 rounded-2xl p-7 text-center text-gray-400">
+        <div className="text-[1.8rem] mb-2">🗓</div>
+        <div className="font-semibold text-[0.95rem] text-gray-500 mb-1">합주실 타임테이블</div>
+        <div className="text-[0.82rem]">예약 시스템 개발 중입니다.</div>
       </section>
 
     </main>

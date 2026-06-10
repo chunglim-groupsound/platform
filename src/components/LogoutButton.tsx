@@ -22,13 +22,8 @@ export default function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={loading}
+      className="py-1.5 px-3.5 text-[13px] border border-[#e0e0e0] rounded-md bg-white text-gray-500"
       style={{
-        padding: '6px 14px',
-        fontSize: '13px',
-        border: '1px solid #e0e0e0',
-        borderRadius: '6px',
-        background: '#fff',
-        color: '#666',
         cursor: loading ? 'not-allowed' : 'pointer',
         opacity: loading ? 0.6 : 1,
       }}

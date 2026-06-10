@@ -34,72 +34,58 @@ export function NewTeamForm({ redirectBase = '/teams' }: { redirectBase?: string
     }
   }
 
-  const inputStyle = {
-    width: '100%', padding: '9px 12px', borderRadius: '8px',
-    border: '1px solid #d1d5db', fontSize: '0.9rem', boxSizing: 'border-box' as const,
-  }
-
-  const labelStyle = { fontSize: '0.85rem', fontWeight: 600, color: '#374151' }
-
   return (
-    <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={labelStyle}>팀명 <span style={{ color: '#ef4444' }}>*</span></label>
+    <form onSubmit={submit} className="flex flex-col gap-[18px]">
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[0.85rem] font-semibold text-gray-700">팀명 <span className="text-red-500">*</span></label>
         <input
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="팀명을 입력하세요"
           maxLength={50}
-          style={inputStyle}
+          className="w-full py-[9px] px-3 rounded-lg border border-gray-300 text-[0.9rem] box-border"
         />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={labelStyle}>팀 소개 (선택)</label>
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[0.85rem] font-semibold text-gray-700">팀 소개 (선택)</label>
         <textarea
           value={description}
           onChange={e => setDescription(e.target.value)}
           placeholder="팀을 소개하는 문구를 입력하세요"
           rows={3}
           maxLength={200}
-          style={{ ...inputStyle, resize: 'vertical' }}
+          className="w-full py-[9px] px-3 rounded-lg border border-gray-300 text-[0.9rem] box-border resize-y"
         />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={labelStyle}>연습 곡명 (선택)</label>
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[0.85rem] font-semibold text-gray-700">연습 곡명 (선택)</label>
         <input
           value={currentSong}
           onChange={e => setCurrentSong(e.target.value)}
           placeholder="현재 연습 중인 곡을 입력하세요"
           maxLength={100}
-          style={inputStyle}
+          className="w-full py-[9px] px-3 rounded-lg border border-gray-300 text-[0.9rem] box-border"
         />
       </div>
 
       {error && (
-        <p style={{ color: '#dc2626', fontSize: '0.85rem', margin: 0 }}>{error}</p>
+        <p className="text-red-600 text-[0.85rem] m-0">{error}</p>
       )}
 
-      <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+      <div className="flex gap-2.5 justify-end">
         <button
           type="button"
           onClick={() => router.push(redirectBase)}
-          style={{
-            padding: '8px 18px', borderRadius: '8px', fontSize: '0.88rem',
-            border: '1px solid #d1d5db', background: '#fff', color: '#374151', cursor: 'pointer',
-          }}
+          className="py-2 px-[18px] rounded-lg text-[0.88rem] border border-gray-300 bg-white text-gray-700 cursor-pointer"
         >
           취소
         </button>
         <button
           type="submit"
           disabled={loading}
-          style={{
-            padding: '8px 18px', borderRadius: '8px', fontSize: '0.88rem',
-            fontWeight: 600, border: 'none', background: '#6366f1', color: '#fff',
-            cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-          }}
+          className={`py-2 px-[18px] rounded-lg text-[0.88rem] font-semibold border-none bg-indigo-500 text-white ${loading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
         >
           {loading ? '생성 중...' : '팀 만들기'}
         </button>

@@ -25,46 +25,33 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!isAdminRole(profile?.role)) redirect('/home')
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <div className="flex min-h-screen bg-gray-50">
 
       {/* 사이드바 */}
-      <aside style={{
-        width: '200px',
-        flexShrink: 0,
-        backgroundColor: '#111827',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '24px 0',
-        position: 'sticky',
-        top: 0,
-        height: '100vh',
-      }}>
-        <div style={{ padding: '0 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <Link href="/admin/applications" style={{ textDecoration: 'none' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.9)', letterSpacing: '-0.2px' }}>
+      <aside className="w-[200px] shrink-0 bg-gray-900 flex flex-col py-6 sticky top-0 h-screen">
+        <div className="px-5 pb-5 border-b border-white/8">
+          <Link href="/admin/applications" className="no-underline">
+            <span className="text-[13px] font-bold text-white/90 tracking-[-0.2px]">
               운영 관리
             </span>
           </Link>
         </div>
 
-        <nav style={{ flex: 1, padding: '12px 0' }}>
+        <nav className="flex-1 py-3">
           {NAV_ITEMS.map(item => (
             <NavItem key={item.href} href={item.href} emoji={item.emoji} label={item.label} />
           ))}
         </nav>
 
-        <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-          <Link href="/home" style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            fontSize: '12px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
-          }}>
+        <div className="px-5 py-4 border-t border-white/8">
+          <Link href="/home" className="flex items-center gap-2 text-xs text-white/40 no-underline">
             ← 홈으로
           </Link>
         </div>
       </aside>
 
       {/* 본문 */}
-      <main style={{ flex: 1, minWidth: 0, padding: '32px', overflowY: 'auto' }}>
+      <main className="flex-1 min-w-0 p-8 overflow-y-auto">
         {children}
       </main>
 
@@ -76,18 +63,9 @@ function NavItem({ href, emoji, label }: { href: string; emoji: string; label: s
   return (
     <Link
       href={href}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        padding: '10px 20px',
-        fontSize: '13px',
-        color: 'rgba(255,255,255,0.65)',
-        textDecoration: 'none',
-        transition: 'background 0.1s',
-      }}
+      className="flex items-center gap-2.5 py-2.5 px-5 text-[13px] text-white/65 no-underline transition-[background] duration-100"
     >
-      <span style={{ fontSize: '15px' }}>{emoji}</span>
+      <span className="text-[15px]">{emoji}</span>
       {label}
     </Link>
   )

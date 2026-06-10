@@ -1,4 +1,4 @@
-﻿import { redirect, notFound } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
@@ -110,34 +110,27 @@ export default async function TeamDetailPage({
   ]
 
   return (
-    <main style={{ padding: '24px 20px', maxWidth: '680px', margin: '0 auto' }}>
-      <Link href="/teams" style={{ fontSize: '0.85rem', color: '#6b7280', textDecoration: 'none' }}>
+    <main className="py-6 px-5 max-w-[680px] mx-auto">
+      <Link href="/teams" className="text-[0.85rem] text-gray-500 no-underline">
         ← 팀 목록
       </Link>
 
-      <div style={{
-        marginTop: '20px', background: '#f9fafb', borderRadius: '16px', padding: '20px',
-        display: 'flex', flexDirection: 'column', gap: '8px',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
-            <h1 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>{team.name}</h1>
-            <span style={{
-              padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, flexShrink: 0,
-              background: team.is_recruiting ? '#dcfce7' : '#f3f4f6',
-              color:      team.is_recruiting ? '#15803d' : '#6b7280',
-              border:     `1px solid ${team.is_recruiting ? '#bbf7d0' : '#e5e7eb'}`,
-            }}>
+      <div className="mt-5 bg-gray-50 rounded-2xl p-5 flex flex-col gap-2">
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <h1 className="text-[1.4rem] font-extrabold m-0">{team.name}</h1>
+            <span className={`py-0.5 px-2 rounded-full text-[0.72rem] font-semibold shrink-0 border ${
+              team.is_recruiting
+                ? 'bg-green-100 text-green-700 border-green-200'
+                : 'bg-gray-100 text-gray-500 border-gray-200'
+            }`}>
               {team.is_recruiting ? '모집 중' : '모집 완료'}
             </span>
           </div>
-          <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+          <div className="flex gap-2 shrink-0">
             {isMember && !isLeader && <LeaveTeamButton teamId={id} />}
             {canEdit && (
-              <Link href={`/teams/${id}/edit`} style={{
-                padding: '5px 12px', borderRadius: '7px', fontSize: '0.82rem',
-                border: '1px solid #d1d5db', background: '#fff', textDecoration: 'none', color: '#374151',
-              }}>
+              <Link href={`/teams/${id}/edit`} className="py-[5px] px-3 rounded-[7px] text-[0.82rem] border border-gray-300 bg-white no-underline text-gray-700">
                 수정
               </Link>
             )}
@@ -145,16 +138,13 @@ export default async function TeamDetailPage({
         </div>
 
         {team.current_song && (
-          <div style={{
-            display: 'inline-block', padding: '5px 12px', borderRadius: '8px',
-            background: '#f0f9ff', color: '#0369a1', fontSize: '0.85rem', width: 'fit-content',
-          }}>
+          <div className="inline-block py-[5px] px-3 rounded-lg bg-sky-50 text-sky-700 text-[0.85rem] w-fit">
             ♪ 현재 연습 곡: {team.current_song}
           </div>
         )}
 
         {team.description && (
-          <p style={{ fontSize: '0.88rem', color: '#4b5563', margin: 0, lineHeight: '1.6' }}>
+          <p className="text-[0.88rem] text-gray-600 m-0 leading-relaxed">
             {team.description}
           </p>
         )}
@@ -172,8 +162,8 @@ export default async function TeamDetailPage({
 
       {canApply && <JoinRequestSection teamId={id} myRequest={myJoinRequest} />}
 
-      <div style={{ marginTop: '24px' }}>
-        <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '12px' }}>팀원 ({members.length}명)</h2>
+      <div className="mt-6">
+        <h2 className="text-base font-bold mb-3">팀원 ({members.length}명)</h2>
         <TeamMemberList members={members} myId={myId} canEdit={canEdit} teamId={id} />
       </div>
 
@@ -181,12 +171,9 @@ export default async function TeamDetailPage({
         <JoinRequestsPanel teamId={id} requests={joinRequests} />
       )}
 
-      <div style={{ marginTop: '28px' }}>
-        <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '12px' }}>합주 예약 현황</h2>
-        <div style={{
-          padding: '24px', borderRadius: '12px', border: '1px dashed #d1d5db',
-          textAlign: 'center', color: '#9ca3af', fontSize: '0.88rem',
-        }}>
+      <div className="mt-7">
+        <h2 className="text-base font-bold mb-3">합주 예약 현황</h2>
+        <div className="py-6 px-6 rounded-xl border border-dashed border-gray-300 text-center text-gray-400 text-[0.88rem]">
           예약 시스템 연동 후 표시됩니다.
         </div>
       </div>

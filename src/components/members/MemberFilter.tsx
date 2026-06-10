@@ -40,27 +40,20 @@ export function MemberFilter({ value, onChange, isAdmin = false }: MemberFilterP
     value.q || value.sessions.length > 0 || value.generation || value.role || value.isWhitelist
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div className="flex flex-col gap-2">
       {/* 검색창 */}
-      <div style={{ position: 'relative' }}>
+      <div className="relative">
         <input
           type="text"
           placeholder="이름, 활동명, 기수 검색..."
           value={value.q}
           onChange={e => onChange({ ...value, q: e.target.value })}
-          style={{
-            width: '100%', padding: '8px 36px 8px 12px',
-            border: '1px solid #d1d5db', borderRadius: '8px',
-            fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box',
-          }}
+          className="w-full py-2 pr-9 pl-3 border border-gray-300 rounded-lg text-[0.9rem] outline-none box-border"
         />
         {value.q && (
           <button
             onClick={() => onChange({ ...value, q: '' })}
-            style={{
-              position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-              background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: '1rem',
-            }}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-400 text-base"
           >
             ×
           </button>
@@ -68,25 +61,17 @@ export function MemberFilter({ value, onChange, isAdmin = false }: MemberFilterP
       </div>
 
       {/* 필터 토글 버튼 */}
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      <div className="flex gap-2 items-center">
         <button
           onClick={() => setOpen(o => !o)}
-          style={{
-            padding: '6px 14px', borderRadius: '8px', fontSize: '0.85rem',
-            border: '1px solid #d1d5db', background: open ? '#f3f4f6' : '#fff',
-            cursor: 'pointer', fontWeight: 500,
-          }}
+          className={`py-1.5 px-3.5 rounded-lg text-[0.85rem] border border-gray-300 cursor-pointer font-medium ${open ? 'bg-gray-100' : 'bg-white'}`}
         >
           필터 {open ? '▲' : '▼'}
         </button>
         {hasFilter && (
           <button
             onClick={reset}
-            style={{
-              padding: '6px 12px', borderRadius: '8px', fontSize: '0.82rem',
-              border: '1px solid #fca5a5', background: '#fef2f2', color: '#dc2626',
-              cursor: 'pointer',
-            }}
+            className="py-1.5 px-3 rounded-lg text-[0.82rem] border border-red-300 bg-[#fef2f2] text-red-600 cursor-pointer"
           >
             초기화
           </button>
@@ -94,26 +79,20 @@ export function MemberFilter({ value, onChange, isAdmin = false }: MemberFilterP
       </div>
 
       {open && (
-        <div style={{
-          padding: '12px', borderRadius: '10px', border: '1px solid #e5e7eb',
-          background: '#f9fafb', display: 'flex', flexDirection: 'column', gap: '12px',
-        }}>
+        <div className="p-3 rounded-[10px] border border-gray-200 bg-gray-50 flex flex-col gap-3">
           {/* 세션 */}
           <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>세션</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            <div className="text-[0.8rem] font-semibold text-gray-700 mb-1.5">세션</div>
+            <div className="flex flex-wrap gap-1.5">
               {SESSION_OPTIONS.map(s => (
                 <button
                   key={s}
                   onClick={() => toggleSession(s)}
-                  style={{
-                    padding: '4px 12px', borderRadius: '9999px', fontSize: '0.8rem',
-                    border: '1px solid',
-                    borderColor: value.sessions.includes(s) ? '#3b82f6' : '#d1d5db',
-                    background: value.sessions.includes(s) ? '#eff6ff' : '#fff',
-                    color: value.sessions.includes(s) ? '#1d4ed8' : '#374151',
-                    cursor: 'pointer', fontWeight: value.sessions.includes(s) ? 600 : 400,
-                  }}
+                  className={`py-1 px-3 rounded-full text-[0.8rem] border cursor-pointer ${
+                    value.sessions.includes(s)
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
+                      : 'border-gray-300 bg-white text-gray-700 font-normal'
+                  }`}
                 >
                   {s}
                 </button>
@@ -122,8 +101,8 @@ export function MemberFilter({ value, onChange, isAdmin = false }: MemberFilterP
           </div>
 
           {/* 기수 */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', whiteSpace: 'nowrap' }}>
+          <div className="flex gap-2 items-center flex-wrap">
+            <label className="text-[0.8rem] font-semibold text-gray-700 whitespace-nowrap">
               기수
             </label>
             <input
@@ -132,25 +111,19 @@ export function MemberFilter({ value, onChange, isAdmin = false }: MemberFilterP
               min={1}
               value={value.generation}
               onChange={e => onChange({ ...value, generation: e.target.value })}
-              style={{
-                width: '80px', padding: '4px 8px',
-                border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem',
-              }}
+              className="w-20 py-1 px-2 border border-gray-300 rounded-md text-[0.85rem]"
             />
           </div>
 
           {/* 역할 */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', whiteSpace: 'nowrap' }}>
+          <div className="flex gap-2 items-center flex-wrap">
+            <label className="text-[0.8rem] font-semibold text-gray-700 whitespace-nowrap">
               역할
             </label>
             <select
               value={value.role}
               onChange={e => onChange({ ...value, role: e.target.value })}
-              style={{
-                padding: '4px 8px', border: '1px solid #d1d5db', borderRadius: '6px',
-                fontSize: '0.85rem', background: '#fff',
-              }}
+              className="py-1 px-2 border border-gray-300 rounded-md text-[0.85rem] bg-white"
             >
               {ROLE_OPTIONS.map(o => (
                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -159,7 +132,7 @@ export function MemberFilter({ value, onChange, isAdmin = false }: MemberFilterP
           </div>
 
           {/* 화이트리스트 */}
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+          <label className="flex items-center gap-2 cursor-pointer text-[0.85rem]">
             <input
               type="checkbox"
               checked={value.isWhitelist}

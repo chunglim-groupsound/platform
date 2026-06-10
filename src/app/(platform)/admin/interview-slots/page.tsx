@@ -84,38 +84,40 @@ export default function AdminInterviewSlotsPage() {
 
   return (
     <div>
-      <h1 style={pageTitleStyle}>면접 슬롯 관리</h1>
+      <h1 className="text-[22px] font-bold mb-6 text-gray-900">면접 슬롯 관리</h1>
 
       {/* ── 슬롯 생성 ── */}
-      <div style={cardStyle}>
-        <h2 style={sectionTitleStyle}>슬롯 추가</h2>
+      <div className="bg-white rounded-xl py-7 px-8 max-w-[600px] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+        <h2 className="text-[15px] font-semibold mb-[18px] text-gray-900">슬롯 추가</h2>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label style={labelStyle}>슬롯당 최대 인원</label>
+        <div className="mb-4">
+          <label className="block text-[13px] font-medium text-gray-700 mb-2">슬롯당 최대 인원</label>
           <input
             type="number"
             value={capacity}
             onChange={e => setCapacity(Number(e.target.value))}
             min={1}
-            style={{ ...inputStyle, width: '100px' }}
+            className="py-2 px-3 text-sm border border-gray-200 rounded-[7px] text-gray-900 outline-none w-[100px]"
+            style={{ boxSizing: 'border-box' }}
           />
         </div>
 
-        <label style={labelStyle}>면접 일시 (복수 추가 가능)</label>
-        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '12px' }}>
+        <label className="block text-[13px] font-medium text-gray-700 mb-2">면접 일시 (복수 추가 가능)</label>
+        <div className="flex flex-col gap-2 mb-3">
           {newSlots.map((val, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div key={i} className="flex gap-2 items-center">
               <input
                 type="datetime-local"
                 value={val}
                 onChange={e => updateSlotInput(i, e.target.value)}
-                style={inputStyle}
+                className="py-2 px-3 text-sm border border-gray-200 rounded-[7px] text-gray-900 outline-none"
+                style={{ boxSizing: 'border-box' }}
               />
               {newSlots.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeSlotInput(i)}
-                  style={ghostBtnStyle}
+                  className="py-[7px] px-3.5 text-[13px] border border-gray-200 rounded-[7px] bg-white text-gray-700 cursor-pointer"
                 >
                   삭제
                 </button>
@@ -124,17 +126,23 @@ export default function AdminInterviewSlotsPage() {
           ))}
         </div>
 
-        <button type="button" onClick={addSlotInput} style={{ ...ghostBtnStyle, marginBottom: '16px' }}>
+        <button
+          type="button"
+          onClick={addSlotInput}
+          className="py-[7px] px-3.5 text-[13px] border border-gray-200 rounded-[7px] bg-white text-gray-700 cursor-pointer mb-4"
+        >
           + 슬롯 추가
         </button>
 
         {message && (
-          <p style={{
-            fontSize: '13px', padding: '10px 14px', borderRadius: '8px', marginBottom: '12px',
-            backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fff5f5',
-            color: message.type === 'success' ? '#166534' : '#991b1b',
-            border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
-          }}>
+          <p
+            className="text-[13px] py-2.5 px-3.5 rounded-lg mb-3"
+            style={{
+              backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fff5f5',
+              color: message.type === 'success' ? '#166534' : '#991b1b',
+              border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+            }}
+          >
             {message.text}
           </p>
         )}
@@ -142,29 +150,33 @@ export default function AdminInterviewSlotsPage() {
         <button
           onClick={handleCreate}
           disabled={saving}
-          style={{ ...primaryBtnStyle, opacity: saving ? 0.7 : 1 }}
+          className="py-2.5 px-6 text-sm font-semibold bg-gray-900 text-white border-none rounded-lg cursor-pointer"
+          style={{ opacity: saving ? 0.7 : 1 }}
         >
           {saving ? '생성 중...' : '슬롯 생성'}
         </button>
       </div>
 
       {/* ── 슬롯 목록 ── */}
-      <div style={{ marginTop: '28px' }}>
-        <h2 style={sectionTitleStyle}>생성된 슬롯 ({slots.length}개)</h2>
+      <div className="mt-7">
+        <h2 className="text-[15px] font-semibold mb-[18px] text-gray-900">생성된 슬롯 ({slots.length}개)</h2>
 
         {slots.length === 0 ? (
-          <p style={{ fontSize: '14px', color: '#9ca3af' }}>생성된 슬롯이 없습니다.</p>
+          <p className="text-sm text-gray-400">생성된 슬롯이 없습니다.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '10px' }}>
+          <div className="flex flex-col gap-2.5">
             {slots.map(slot => {
               const prefCount = slot.interview_preferences?.[0]?.count ?? 0
               return (
-                <div key={slot.id} style={slotRowStyle}>
+                <div
+                  key={slot.id}
+                  className="flex items-center justify-between py-3.5 px-[18px] bg-white border border-gray-200 rounded-[10px]"
+                >
                   <div>
-                    <p style={{ fontSize: '15px', fontWeight: 600, color: '#111827', margin: 0 }}>
+                    <p className="text-[15px] font-semibold text-gray-900 m-0">
                       {formatSlot(slot.slot_at)}
                     </p>
-                    <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0' }}>
+                    <p className="text-[13px] text-gray-500 mt-1 mb-0">
                       최대 {slot.capacity}명 · 희망자 {prefCount}명
                     </p>
                   </div>
@@ -172,9 +184,8 @@ export default function AdminInterviewSlotsPage() {
                     onClick={() => handleDelete(slot.id)}
                     disabled={deleteLoading === slot.id || prefCount > 0}
                     title={prefCount > 0 ? '희망자가 있어 삭제 불가' : '삭제'}
+                    className="py-1.5 px-3.5 rounded-md text-[13px] border border-gray-200"
                     style={{
-                      padding: '6px 14px', borderRadius: '6px', fontSize: '13px',
-                      border: '1px solid #e5e7eb',
                       background: (prefCount > 0 || deleteLoading === slot.id) ? '#f9fafb' : '#fff',
                       color: prefCount > 0 ? '#d1d5db' : '#dc2626',
                       cursor: (prefCount > 0 || deleteLoading === slot.id) ? 'not-allowed' : 'pointer',
@@ -190,35 +201,4 @@ export default function AdminInterviewSlotsPage() {
       </div>
     </div>
   )
-}
-
-const pageTitleStyle: React.CSSProperties = {
-  fontSize: '22px', fontWeight: 700, marginBottom: '24px', color: '#111827',
-}
-const cardStyle: React.CSSProperties = {
-  background: '#fff', borderRadius: '12px', padding: '28px 32px',
-  maxWidth: '600px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-}
-const sectionTitleStyle: React.CSSProperties = {
-  fontSize: '15px', fontWeight: 600, marginBottom: '18px', color: '#111827',
-}
-const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '8px',
-}
-const inputStyle: React.CSSProperties = {
-  padding: '8px 12px', fontSize: '14px', border: '1px solid #e5e7eb',
-  borderRadius: '7px', color: '#111827', outline: 'none', boxSizing: 'border-box' as const,
-}
-const primaryBtnStyle: React.CSSProperties = {
-  padding: '10px 24px', fontSize: '14px', fontWeight: 600,
-  backgroundColor: '#111827', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer',
-}
-const ghostBtnStyle: React.CSSProperties = {
-  padding: '7px 14px', fontSize: '13px', border: '1px solid #e5e7eb',
-  borderRadius: '7px', backgroundColor: '#fff', color: '#374151', cursor: 'pointer',
-}
-const slotRowStyle: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-  padding: '14px 18px', background: '#fff', border: '1px solid #e5e7eb',
-  borderRadius: '10px',
 }

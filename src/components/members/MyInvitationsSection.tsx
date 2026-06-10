@@ -36,60 +36,50 @@ export function MyInvitationsSection({ invitations }: Props) {
   }
 
   return (
-    <div style={{ marginTop: '28px' }}>
-      <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '12px' }}>
+    <div className="mt-7">
+      <h2 className="text-base font-bold mb-3">
         받은 팀 초대 ({invitations.length}건)
       </h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div className="flex flex-col gap-2.5">
         {invitations.map(inv => (
-          <div key={inv.id} style={{
-            padding: '12px 14px', borderRadius: '10px',
-            border: '1px solid #e5e7eb', background: '#fff',
-            display: 'flex', flexDirection: 'column', gap: '8px',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div key={inv.id} className="py-3 px-3.5 rounded-[10px] border border-gray-200 bg-white flex flex-col gap-2">
+            <div className="flex justify-between items-start">
               <div>
                 {inv.team && (
                   <Link
                     href={`/teams/${inv.team.id}`}
-                    style={{ fontWeight: 600, fontSize: '0.9rem', color: '#4f46e5', textDecoration: 'none' }}
+                    className="font-semibold text-[0.9rem] text-indigo-600 no-underline"
                   >
                     {inv.team.name}
                   </Link>
                 )}
                 {inv.inviter && (
-                  <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '2px 0 0' }}>
+                  <p className="text-[0.8rem] text-gray-500 mt-0.5 mb-0">
                     초대한 사람: {inv.inviter.nickname ?? inv.inviter.name}
                   </p>
                 )}
               </div>
-              <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+              <div className="flex gap-1.5 shrink-0">
                 <button
                   onClick={() => respond(inv.id, 'ACCEPTED')}
                   disabled={loading === inv.id}
-                  style={{
-                    padding: '4px 12px', borderRadius: '7px', fontSize: '0.8rem',
-                    border: 'none', background: '#16a34a', color: '#fff', cursor: 'pointer',
-                    opacity: loading === inv.id ? 0.6 : 1,
-                  }}
+                  className="py-1 px-3 rounded-[7px] text-[0.8rem] border-none bg-green-600 text-white cursor-pointer"
+                  style={{ opacity: loading === inv.id ? 0.6 : 1 }}
                 >
                   수락
                 </button>
                 <button
                   onClick={() => respond(inv.id, 'REJECTED')}
                   disabled={loading === inv.id}
-                  style={{
-                    padding: '4px 12px', borderRadius: '7px', fontSize: '0.8rem',
-                    border: '1px solid #fca5a5', background: '#fff', color: '#dc2626', cursor: 'pointer',
-                    opacity: loading === inv.id ? 0.6 : 1,
-                  }}
+                  className="py-1 px-3 rounded-[7px] text-[0.8rem] border border-red-300 bg-white text-red-600 cursor-pointer"
+                  style={{ opacity: loading === inv.id ? 0.6 : 1 }}
                 >
                   거절
                 </button>
               </div>
             </div>
             {inv.message && (
-              <p style={{ fontSize: '0.83rem', color: '#6b7280', margin: 0 }}>{inv.message}</p>
+              <p className="text-[0.83rem] text-gray-500 m-0">{inv.message}</p>
             )}
           </div>
         ))}

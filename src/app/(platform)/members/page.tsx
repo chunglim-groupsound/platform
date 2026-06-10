@@ -78,39 +78,38 @@ export default function MembersPage() {
   }
 
   return (
-    <main style={{ padding: '24px 20px', maxWidth: '960px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>부원 명단</h1>
+    <main className="py-6 px-5 max-w-[960px] mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-[1.4rem] font-extrabold m-0">부원 명단</h1>
         <button
           onClick={() => router.push('/teams')}
-          style={{
-            padding: '7px 16px', borderRadius: '8px', fontSize: '0.85rem',
-            border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontWeight: 500,
-          }}
+          className="py-[7px] px-4 rounded-lg text-[0.85rem] border border-gray-300 bg-white cursor-pointer font-medium"
         >
           팀 목록 보기
         </button>
       </div>
 
       {loading ? (
-        <div style={{ color: '#9ca3af', textAlign: 'center', padding: '60px 0' }}>불러오는 중...</div>
+        <div className="text-gray-400 text-center py-[60px]">불러오는 중...</div>
       ) : (
         <>
           <AdminSection admins={admins} myId={myId ?? ''} />
 
-          <div style={{ marginBottom: '20px' }}>
+          <div className="mb-5">
             <MemberFilter value={filter} onChange={setFilter} isAdmin={isAdmin} />
           </div>
 
-          <div style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '12px' }}>
+          <div className="text-[0.82rem] text-gray-500 mb-3">
             {filtered.length}명
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-            gap: '12px',
-          }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+              gap: '12px',
+            }}
+          >
             {filtered.map(m => (
               <MemberCard
                 key={m.id}
@@ -122,7 +121,7 @@ export default function MembersPage() {
           </div>
 
           {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', color: '#9ca3af', padding: '48px 0' }}>
+            <div className="text-center text-gray-400 py-12">
               조건에 맞는 부원이 없습니다.
             </div>
           )}

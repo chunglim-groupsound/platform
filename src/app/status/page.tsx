@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import InterviewSlotPicker from '@/components/InterviewSlotPicker'
 
@@ -13,11 +13,11 @@ export default async function StatusPage({ searchParams }: Props) {
 
   if (reason === 'not_open') {
     return (
-      <main style={containerStyle}>
-        <div style={cardStyle}>
-          <p style={{ fontSize: '32px', marginBottom: '16px' }}>🎸</p>
-          <h2 style={titleStyle}>현재 모집 기간이 아닙니다</h2>
-          <p style={descStyle}>
+      <main className="min-h-screen bg-[#f4f5f7] flex items-center justify-center py-10 px-5">
+        <div className="bg-white rounded-xl py-12 px-10 w-full max-w-[480px] text-center shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+          <p className="text-[32px] mb-4">🎸</p>
+          <h2 className="text-[20px] font-semibold mb-3 text-gray-900">현재 모집 기간이 아닙니다</h2>
+          <p className="text-[14px] text-gray-500 leading-[1.7] mb-6">
             신규 부원 모집 기간이 아닙니다.<br />
             다음 모집 공고를 기다려주세요.
           </p>
@@ -79,18 +79,22 @@ export default async function StatusPage({ searchParams }: Props) {
     : (STATUS_MESSAGES[status] ?? '신청 상태를 확인 중입니다.')
 
   return (
-    <main style={containerStyle}>
-      <div style={{ ...cardStyle, maxWidth: isPending || isInterviewing ? '520px' : '480px' }}>
-        <h2 style={titleStyle}>{profile?.name}님</h2>
-        <p style={descStyle}>{statusMessage}</p>
+    <main className="min-h-screen bg-[#f4f5f7] flex items-center justify-center py-10 px-5">
+      {/* maxWidth가 상태에 따라 동적으로 달라지므로 inline style 유지 */}
+      <div
+        className="bg-white rounded-xl py-12 px-10 w-full text-center shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
+        style={{ maxWidth: isPending || isInterviewing ? '520px' : '480px' }}
+      >
+        <h2 className="text-[20px] font-semibold mb-3 text-gray-900">{profile?.name}님</h2>
+        <p className="text-[14px] text-gray-500 leading-[1.7] mb-6">{statusMessage}</p>
 
         {/* 확정 슬롯 표시 — INTERVIEWING 상태일 때만 */}
         {confirmedSlotAt && isInterviewing && (
-          <div style={confirmedBoxStyle}>
-            <p style={{ fontSize: '12px', color: '#1d4ed8', marginBottom: '6px', fontWeight: 600, letterSpacing: '0.02em' }}>
+          <div className="bg-blue-50 border border-blue-200 rounded-[10px] py-4 px-5 mb-6 text-center">
+            <p className="text-[12px] text-blue-700 mb-1.5 font-semibold tracking-[0.02em]">
               확정된 면접 일정
             </p>
-            <p style={{ fontSize: '18px', fontWeight: 700, color: '#111827', marginBottom: '0' }}>
+            <p className="text-[18px] font-bold text-gray-900 mb-0">
               {new Date(confirmedSlotAt).toLocaleString('ko-KR', {
                 month: 'long', day: 'numeric', weekday: 'short',
                 hour: '2-digit', minute: '2-digit',
@@ -101,14 +105,11 @@ export default async function StatusPage({ searchParams }: Props) {
 
         {/* WITHDRAWN 사유 표시 */}
         {isWithdrawn && (
-          <div style={{
-            background: '#fef2f2', border: '1px solid #fecaca',
-            borderRadius: '10px', padding: '16px 20px', marginBottom: '16px', textAlign: 'left',
-          }}>
-            <p style={{ fontSize: '12px', color: '#dc2626', fontWeight: 600, marginBottom: '6px' }}>
+          <div className="bg-red-50 border border-red-200 rounded-[10px] py-4 px-5 mb-4 text-left">
+            <p className="text-[12px] text-red-600 font-semibold mb-1.5">
               제한 사유
             </p>
-            <p style={{ fontSize: '14px', color: '#7f1d1d', margin: 0, lineHeight: 1.6 }}>
+            <p className="text-[14px] text-red-900 m-0 leading-relaxed">
               {withdrawnReason ?? '운영진에게 직접 문의해 주세요.'}
             </p>
           </div>
@@ -116,67 +117,12 @@ export default async function StatusPage({ searchParams }: Props) {
 
         {/* PENDING 상태 + 신청서 있음 + 확정 슬롯 없음 → 희망 일정 선택 */}
         {isPending && application && !confirmedSlotAt && (
-          <div style={slotSectionStyle}>
-            <h3 style={slotTitleStyle}>희망 면접 일정 선택</h3>
+          <div className="mt-2 text-left border-t border-gray-100 pt-6">
+            <h3 className="text-[15px] font-semibold text-gray-900 mb-3.5">희망 면접 일정 선택</h3>
             <InterviewSlotPicker />
           </div>
         )}
       </div>
     </main>
   )
-}
-
-const containerStyle: React.CSSProperties = {
-  minHeight: '100vh',
-  backgroundColor: '#f4f5f7',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '40px 20px',
-}
-
-const cardStyle: React.CSSProperties = {
-  background: '#fff',
-  borderRadius: '12px',
-  padding: '48px 40px',
-  width: '100%',
-  textAlign: 'center',
-  boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-}
-
-const titleStyle: React.CSSProperties = {
-  fontSize: '20px',
-  fontWeight: 600,
-  marginBottom: '12px',
-  color: '#111827',
-}
-
-const descStyle: React.CSSProperties = {
-  fontSize: '14px',
-  color: '#6b7280',
-  lineHeight: 1.7,
-  marginBottom: '24px',
-}
-
-const confirmedBoxStyle: React.CSSProperties = {
-  background: '#eff6ff',
-  border: '1px solid #bfdbfe',
-  borderRadius: '10px',
-  padding: '16px 20px',
-  marginBottom: '24px',
-  textAlign: 'center',
-}
-
-const slotSectionStyle: React.CSSProperties = {
-  marginTop: '8px',
-  textAlign: 'left',
-  borderTop: '1px solid #f3f4f6',
-  paddingTop: '24px',
-}
-
-const slotTitleStyle: React.CSSProperties = {
-  fontSize: '15px',
-  fontWeight: 600,
-  color: '#111827',
-  marginBottom: '14px',
 }

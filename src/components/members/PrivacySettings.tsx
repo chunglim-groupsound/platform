@@ -26,23 +26,22 @@ export function PrivacySettings({ value, onChange }: PrivacySettingsProps) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div className="flex flex-col gap-2.5">
       {PRIVACY_FIELDS.map(field => {
         const current = value[field.key] ?? field.defaultScope
         return (
-          <div key={field.key} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ width: '60px', fontSize: '0.875rem', color: '#374151', flexShrink: 0 }}>
+          <div key={field.key} className="flex items-center gap-3">
+            <span className="w-[60px] text-sm text-gray-700 shrink-0">
               {field.label}
             </span>
-            <div style={{ display: 'flex', gap: '6px' }}>
+            <div className="flex gap-1.5">
               {SCOPE_OPTIONS.filter(o => field.allowedScopes.includes(o.value)).map(opt => (
                 <button
                   key={opt.value}
                   type="button"
                   onClick={() => handleChange(field.key, opt.value)}
+                  className="py-[3px] px-2.5 rounded-full text-[0.78rem] border"
                   style={{
-                    padding: '3px 10px', borderRadius: '9999px', fontSize: '0.78rem',
-                    border: '1px solid',
                     borderColor: current === opt.value ? '#3b82f6' : '#d1d5db',
                     background: current === opt.value ? '#eff6ff' : '#fff',
                     color: current === opt.value ? '#1d4ed8' : '#6b7280',
@@ -56,7 +55,7 @@ export function PrivacySettings({ value, onChange }: PrivacySettingsProps) {
               ))}
             </div>
             {field.key === 'phone' && current === 'all' && (
-              <span style={{ fontSize: '0.75rem', color: '#dc2626' }}>
+              <span className="text-xs text-red-600">
                 ⚠ 모든 사람에게 공개됩니다
               </span>
             )}

@@ -60,41 +60,26 @@ export function ActivationPanel({
   }
 
   return (
-    <div style={{
-      marginTop: '16px',
-      padding: '14px 16px',
-      borderRadius: '12px',
-      border: `1px solid ${activationRequested ? '#fcd34d' : '#e5e7eb'}`,
-      background: activationRequested ? '#fffbeb' : '#f9fafb',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '10px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{
-          fontSize: '0.78rem', fontWeight: 700,
-          padding: '2px 8px', borderRadius: '9999px',
-          background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d',
-        }}>
+    <div className={`mt-4 py-3.5 px-4 rounded-xl flex flex-col gap-2.5 border ${
+      activationRequested ? 'border-yellow-300 bg-yellow-50' : 'border-gray-200 bg-gray-50'
+    }`}>
+      <div className="flex items-center gap-2">
+        <span className="text-[0.78rem] font-bold py-0.5 px-2 rounded-full bg-amber-100 text-amber-800 border border-yellow-300">
           비활성
         </span>
-        <span style={{ fontSize: '0.88rem', color: '#374151' }}>
+        <span className="text-[0.88rem] text-gray-700">
           {activationRequested
             ? '활성화 신청이 접수되었습니다. 관리자 승인을 기다려주세요.'
             : '이 팀은 아직 활성화되지 않았습니다.'}
         </span>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <div className="flex gap-2 flex-wrap">
         {isAdmin && activationRequested && (
           <button
             onClick={approveActivation}
             disabled={loading}
-            style={{
-              padding: '7px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700,
-              border: 'none', background: '#16a34a', color: '#fff',
-              cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-            }}
+            className={`py-[7px] px-4 rounded-lg text-[0.85rem] font-bold border-none bg-green-600 text-white ${loading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
           >
             {loading ? '처리 중...' : '활성화 승인'}
           </button>
@@ -104,11 +89,7 @@ export function ActivationPanel({
           <button
             onClick={requestActivation}
             disabled={loading}
-            style={{
-              padding: '7px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600,
-              border: '1px solid #6366f1', background: '#fff', color: '#6366f1',
-              cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-            }}
+            className={`py-[7px] px-4 rounded-lg text-[0.85rem] font-semibold border border-indigo-500 bg-white text-indigo-500 ${loading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
           >
             {loading ? '신청 중...' : '팀 활성화 신청'}
           </button>
@@ -118,11 +99,7 @@ export function ActivationPanel({
           <button
             onClick={cancelRequest}
             disabled={loading}
-            style={{
-              padding: '7px 16px', borderRadius: '8px', fontSize: '0.85rem',
-              border: '1px solid #d1d5db', background: '#fff', color: '#6b7280',
-              cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-            }}
+            className={`py-[7px] px-4 rounded-lg text-[0.85rem] border border-gray-300 bg-white text-gray-500 ${loading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
           >
             신청 취소
           </button>

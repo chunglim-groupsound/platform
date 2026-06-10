@@ -155,91 +155,74 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
   }, [toast])
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="max-w-[600px] mx-auto py-6 px-4 flex flex-col gap-6">
       {/* 프로필 헤더 */}
-      <div style={{
-        background: '#f9fafb', borderRadius: '12px', padding: '20px',
-        display: 'flex', alignItems: 'center', gap: '16px',
-      }}>
+      <div className="bg-gray-50 rounded-xl p-5 flex items-center gap-4">
         {/* 프로필 이미지 + 선택 버튼 */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <div style={{ position: 'relative', width: 72, height: 72 }}>
+        <div className="flex flex-col items-center gap-2.5 shrink-0">
+          <div className="relative w-[72px] h-[72px]">
             {form.profile_image_url ? (
               <Image
                 src={form.profile_image_url}
                 alt={profile.name}
                 fill
-                style={{ borderRadius: '50%', objectFit: 'cover' }}
+                className="rounded-full object-cover"
               />
             ) : (
-              <div style={{
-                width: 72, height: 72, borderRadius: '50%',
-                background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.8rem', color: '#6b7280',
-              }}>
+              <div className="w-[72px] h-[72px] rounded-full bg-gray-200 flex items-center justify-center text-[1.8rem] text-gray-500">
                 {profile.name[0]}
               </div>
             )}
           </div>
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div className="flex gap-1.5">
             <button
               type="button"
               disabled={!kakaoAvatarUrl}
               onClick={() => setForm(f => ({ ...f, profile_image_url: kakaoAvatarUrl }))}
-              style={{
-                padding: '4px 10px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 600,
-                border: 'none', cursor: kakaoAvatarUrl ? 'pointer' : 'not-allowed',
-                background: form.profile_image_url === kakaoAvatarUrl && kakaoAvatarUrl
-                  ? '#4A90E2' : '#e5e7eb',
-                color: form.profile_image_url === kakaoAvatarUrl && kakaoAvatarUrl
-                  ? '#fff' : '#6b7280',
-              }}
+              className={`py-1 px-2.5 rounded-md text-[0.72rem] font-semibold border-none ${
+                form.profile_image_url === kakaoAvatarUrl && kakaoAvatarUrl
+                  ? 'bg-[#4A90E2] text-white cursor-pointer'
+                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              }`}
             >
               카카오
             </button>
             <button
               type="button"
               onClick={() => setForm(f => ({ ...f, profile_image_url: null }))}
-              style={{
-                padding: '4px 10px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 600,
-                border: 'none', cursor: 'pointer',
-                background: !form.profile_image_url ? '#4A90E2' : '#e5e7eb',
-                color: !form.profile_image_url ? '#fff' : '#6b7280',
-              }}
+              className={`py-1 px-2.5 rounded-md text-[0.72rem] font-semibold border-none cursor-pointer ${
+                !form.profile_image_url
+                  ? 'bg-[#4A90E2] text-white'
+                  : 'bg-gray-200 text-gray-500'
+              }`}
             >
               기본
             </button>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{profile.name}</div>
+        <div className="flex flex-col gap-1">
+          <div className="font-bold text-[1.1rem]">{profile.name}</div>
           {profile.generation && (
-            <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>{profile.generation}기</div>
+            <div className="text-[0.85rem] text-gray-500">{profile.generation}기</div>
           )}
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            <span style={{
-              padding: '2px 8px', borderRadius: '9999px',
-              background: '#e0f2fe', color: '#075985', fontSize: '0.75rem',
-            }}>
+          <div className="flex gap-1.5 flex-wrap">
+            <span className="py-[2px] px-2 rounded-full bg-[#e0f2fe] text-[#075985] text-xs">
               {ROLE_LABEL[profile.role] ?? profile.role}
             </span>
             {profile.is_whitelist && (
-              <span style={{
-                padding: '2px 8px', borderRadius: '9999px',
-                background: '#fef9c3', color: '#854d0e', fontSize: '0.75rem',
-              }}>
+              <span className="py-[2px] px-2 rounded-full bg-[#fef9c3] text-[#854d0e] text-xs">
                 ★ WL
               </span>
             )}
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>이름 · 기수는 운영진만 수정 가능합니다</div>
+          <div className="text-xs text-gray-400">이름 · 기수는 운영진만 수정 가능합니다</div>
         </div>
       </div>
 
       {/* 기본 정보 */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#111827', margin: 0 }}>기본 정보</h3>
+      <section className="flex flex-col gap-3.5">
+        <h3 className="text-[0.95rem] font-bold text-gray-900 m-0">기본 정보</h3>
 
         <Field label="닉네임 (활동명)" error={errors.nickname}>
           <input
@@ -248,30 +231,34 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
             maxLength={20}
             value={form.nickname}
             onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))}
-            style={inputStyle}
+            className={inputClass}
           />
         </Field>
 
         <Field label="세션 *" error={errors.session}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+          <div className="flex flex-wrap gap-1.5">
             {SESSION_OPTIONS.map(s => (
               <button
                 key={s}
                 type="button"
                 onClick={() => toggleSession(s)}
-                style={tagStyle(form.session.includes(s))}
+                className={`py-1 px-3.5 rounded-full text-[0.82rem] border cursor-pointer ${
+                  form.session.includes(s)
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
+                    : 'border-gray-300 bg-white text-gray-700 font-normal'
+                }`}
               >
                 {s}
               </button>
             ))}
           </div>
           {form.session.length > 0 && (
-            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>세션별 경력 연차 (선택)</span>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <div className="mt-2.5 flex flex-col gap-1.5">
+              <span className="text-[0.78rem] text-gray-500">세션별 경력 연차 (선택)</span>
+              <div className="flex flex-wrap gap-2">
                 {form.session.map(s => (
-                  <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.82rem', color: '#374151' }}>
-                    <span style={{ minWidth: '52px' }}>{s}</span>
+                  <label key={s} className="flex items-center gap-1 text-[0.82rem] text-gray-700">
+                    <span className="min-w-[52px]">{s}</span>
                     <input
                       type="number"
                       min={0}
@@ -282,7 +269,7 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
                         ...f,
                         session_years: { ...f.session_years, [s]: e.target.value },
                       }))}
-                      style={{ width: '52px', padding: '4px 6px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.82rem', textAlign: 'center' }}
+                      className="w-[52px] py-1 px-1.5 border border-gray-300 rounded-md text-[0.82rem] text-center"
                     />
                     <span>년</span>
                   </label>
@@ -293,13 +280,17 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
         </Field>
 
         <Field label="선호 장르">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+          <div className="flex flex-wrap gap-1.5">
             {GENRE_OPTIONS.map(g => (
               <button
                 key={g}
                 type="button"
                 onClick={() => toggleGenre(g)}
-                style={tagStyle(form.genre_preference.includes(g))}
+                className={`py-1 px-3.5 rounded-full text-[0.82rem] border cursor-pointer ${
+                  form.genre_preference.includes(g)
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
+                    : 'border-gray-300 bg-white text-gray-700 font-normal'
+                }`}
               >
                 {g}
               </button>
@@ -313,7 +304,7 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
             placeholder="010-0000-0000"
             value={form.phone}
             onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-            style={inputStyle}
+            className={inputClass}
           />
         </Field>
 
@@ -324,7 +315,7 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
             maxLength={50}
             value={form.department}
             onChange={e => setForm(f => ({ ...f, department: e.target.value }))}
-            style={inputStyle}
+            className={inputClass}
           />
         </Field>
 
@@ -335,7 +326,7 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
             maxLength={20}
             value={form.student_id}
             onChange={e => setForm(f => ({ ...f, student_id: e.target.value }))}
-            style={inputStyle}
+            className={inputClass}
           />
         </Field>
 
@@ -343,7 +334,7 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
           <select
             value={form.school_year}
             onChange={e => setForm(f => ({ ...f, school_year: e.target.value }))}
-            style={{ ...inputStyle, width: 'auto' }}
+            className={`${inputClass} w-auto`}
           >
             <option value="">선택 안 함</option>
             {[1, 2, 3, 4, 5].map(y => (
@@ -354,8 +345,8 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
       </section>
 
       {/* 공개 범위 설정 */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#111827', margin: 0 }}>공개 범위 설정</h3>
+      <section className="flex flex-col gap-3.5">
+        <h3 className="text-[0.95rem] font-bold text-gray-900 m-0">공개 범위 설정</h3>
         <PrivacySettings
           value={form.privacy_settings}
           onChange={ps => setForm(f => ({ ...f, privacy_settings: ps }))}
@@ -366,24 +357,19 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
       <button
         onClick={handleSave}
         disabled={!isDirty || saving}
-        style={{
-          padding: '12px', borderRadius: '10px', fontSize: '0.95rem', fontWeight: 600,
-          border: 'none', cursor: isDirty && !saving ? 'pointer' : 'not-allowed',
-          background: isDirty && !saving ? '#1d4ed8' : '#e5e7eb',
-          color: isDirty && !saving ? '#fff' : '#9ca3af',
-          transition: 'background 0.15s',
-        }}
+        className={`p-3 rounded-[10px] text-[0.95rem] font-semibold border-none transition-[background] duration-150 ${
+          isDirty && !saving
+            ? 'bg-blue-700 text-white cursor-pointer'
+            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+        }`}
       >
         {saving ? '저장 중...' : '저장하기'}
       </button>
 
       {toast && (
-        <div style={{
-          position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
-          padding: '10px 20px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 500,
-          background: toast.type === 'ok' ? '#166534' : '#991b1b',
-          color: '#fff', zIndex: 9999, whiteSpace: 'nowrap',
-        }}>
+        <div
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 py-2.5 px-5 rounded-lg text-[0.9rem] font-medium text-white z-[9999] whitespace-nowrap ${toast.type === 'ok' ? 'bg-green-800' : 'bg-red-800'}`}
+        >
           {toast.msg}
         </div>
       )}
@@ -399,32 +385,12 @@ function Field({
   error?: string
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-      <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#374151' }}>{label}</label>
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[0.85rem] font-semibold text-gray-700">{label}</label>
       {children}
-      {error && <span style={{ fontSize: '0.78rem', color: '#dc2626' }}>{error}</span>}
+      {error && <span className="text-[0.78rem] text-red-600">{error}</span>}
     </div>
   )
 }
 
-const inputStyle: React.CSSProperties = {
-  padding: '8px 12px',
-  border: '1px solid #d1d5db',
-  borderRadius: '8px',
-  fontSize: '0.875rem',
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
-}
-
-const tagStyle = (active: boolean): React.CSSProperties => ({
-  padding: '4px 14px',
-  borderRadius: '9999px',
-  fontSize: '0.82rem',
-  border: '1px solid',
-  borderColor: active ? '#3b82f6' : '#d1d5db',
-  background: active ? '#eff6ff' : '#fff',
-  color: active ? '#1d4ed8' : '#374151',
-  cursor: 'pointer',
-  fontWeight: active ? 600 : 400,
-})
+const inputClass = 'py-2 px-3 border border-gray-300 rounded-lg text-sm outline-none w-full'

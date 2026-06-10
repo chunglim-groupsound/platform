@@ -36,51 +36,39 @@ export function JoinRequestsPanel({ teamId, requests: initial }: Props) {
   }
 
   return (
-    <div style={{ marginTop: '28px' }}>
-      <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '12px' }}>
+    <div className="mt-7">
+      <h2 className="text-base font-bold mb-3">
         가입 신청 ({initial.length}건)
       </h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div className="flex flex-col gap-2.5">
         {initial.map(req => (
-          <div key={req.id} style={{
-            padding: '12px 14px', borderRadius: '10px',
-            border: '1px solid #e5e7eb', background: '#fff',
-            display: 'flex', flexDirection: 'column', gap: '8px',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div key={req.id} className="py-3 px-3.5 rounded-[10px] border border-gray-200 bg-white flex flex-col gap-2">
+            <div className="flex justify-between items-center">
               <span
                 onClick={() => router.push(`/members/${req.applicant.id}`)}
-                style={{ fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: '#d1d5db' }}
+                className="font-semibold text-[0.9rem] cursor-pointer underline decoration-gray-300"
               >
                 {req.applicant.nickname ?? req.applicant.name}
               </span>
-              <div style={{ display: 'flex', gap: '6px' }}>
+              <div className="flex gap-1.5">
                 <button
                   onClick={() => respond(req.id, 'ACCEPTED')}
                   disabled={loading === req.id}
-                  style={{
-                    padding: '4px 12px', borderRadius: '7px', fontSize: '0.8rem',
-                    border: 'none', background: '#16a34a', color: '#fff', cursor: 'pointer',
-                    opacity: loading === req.id ? 0.6 : 1,
-                  }}
+                  className={`py-1 px-3 rounded-[7px] text-[0.8rem] border-none bg-green-600 text-white cursor-pointer ${loading === req.id ? 'opacity-60' : ''}`}
                 >
                   수락
                 </button>
                 <button
                   onClick={() => respond(req.id, 'REJECTED')}
                   disabled={loading === req.id}
-                  style={{
-                    padding: '4px 12px', borderRadius: '7px', fontSize: '0.8rem',
-                    border: '1px solid #fca5a5', background: '#fff', color: '#dc2626', cursor: 'pointer',
-                    opacity: loading === req.id ? 0.6 : 1,
-                  }}
+                  className={`py-1 px-3 rounded-[7px] text-[0.8rem] border border-red-300 bg-white text-red-600 cursor-pointer ${loading === req.id ? 'opacity-60' : ''}`}
                 >
                   거절
                 </button>
               </div>
             </div>
             {req.message && (
-              <p style={{ fontSize: '0.83rem', color: '#6b7280', margin: 0 }}>{req.message}</p>
+              <p className="text-[0.83rem] text-gray-500 m-0">{req.message}</p>
             )}
           </div>
         ))}

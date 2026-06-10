@@ -183,8 +183,8 @@ export default function ApplyPage() {
   // ─────────────────────────────────────────────
   if (recruitOpen === null) {
     return (
-      <main style={styles.container}>
-        <div style={{ ...styles.card, textAlign: 'center', color: '#999', padding: '60px 40px' }}>
+      <main className="min-h-screen bg-[#f5f5f5] py-10 px-5">
+        <div className="bg-white rounded-xl p-10 max-w-[600px] mx-auto shadow-[0_2px_12px_rgba(0,0,0,0.08)] text-center text-gray-400 py-[60px]">
           로딩 중...
         </div>
       </main>
@@ -193,11 +193,11 @@ export default function ApplyPage() {
 
   if (!recruitOpen) {
     return (
-      <main style={styles.container}>
-        <div style={{ ...styles.card, textAlign: 'center' }}>
-          <p style={{ fontSize: '32px', marginBottom: '16px' }}>🎸</p>
-          <h2 style={{ ...styles.title, marginBottom: '12px' }}>현재 모집 기간이 아닙니다</h2>
-          <p style={{ fontSize: '14px', color: '#999', lineHeight: 1.7 }}>
+      <main className="min-h-screen bg-[#f5f5f5] py-10 px-5">
+        <div className="bg-white rounded-xl p-10 max-w-[600px] mx-auto shadow-[0_2px_12px_rgba(0,0,0,0.08)] text-center">
+          <p className="text-[32px] mb-4">🎸</p>
+          <h2 className="text-[22px] font-medium mb-3">현재 모집 기간이 아닙니다</h2>
+          <p className="text-sm text-gray-400 leading-[1.7]">
             신규 부원 모집 기간이 아닙니다.<br />
             모집 기간에 다시 방문해주세요.
           </p>
@@ -208,10 +208,10 @@ export default function ApplyPage() {
 
   if (submitted) {
     return (
-      <main style={styles.container}>
-        <div style={styles.card}>
-          <h2 style={{ ...styles.title, marginBottom: '8px' }}>신청서가 제출되었습니다</h2>
-          <p style={{ fontSize: '14px', color: '#999', marginBottom: '28px' }}>
+      <main className="min-h-screen bg-[#f5f5f5] py-10 px-5">
+        <div className="bg-white rounded-xl p-10 max-w-[600px] mx-auto shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+          <h2 className="text-[22px] font-medium mb-2">신청서가 제출되었습니다</h2>
+          <p className="text-sm text-gray-400 mb-7">
             희망 면접 일정을 선택해주세요. 나중에 /status 페이지에서도 변경할 수 있습니다.
           </p>
           <InterviewSlotPicker onSubmitSuccess={() => router.push('/status')} />
@@ -221,11 +221,11 @@ export default function ApplyPage() {
   }
 
   return (
-    <main style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>가입 신청서</h2>
-        <p style={styles.desc}>
-          <span style={styles.required}>*</span> 표시 항목은 필수입니다.
+    <main className="min-h-screen bg-[#f5f5f5] py-10 px-5">
+      <div className="bg-white rounded-xl p-10 max-w-[600px] mx-auto shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+        <h2 className="text-[22px] font-medium mb-1.5">가입 신청서</h2>
+        <p className="text-[13px] text-gray-400 mb-8">
+          <span className="text-[#E74C3C]">*</span> 표시 항목은 필수입니다.
         </p>
 
         {/* ── 기본 정보 섹션 ── */}
@@ -236,7 +236,8 @@ export default function ApplyPage() {
               value={form.name}
               onChange={e => setField('name', e.target.value)}
               placeholder="실명을 입력해주세요"
-              style={styles.input}
+              className="w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md outline-none"
+              style={{ boxSizing: 'border-box' }}
             />
           </Field>
 
@@ -245,7 +246,8 @@ export default function ApplyPage() {
               value={form.nickname}
               onChange={e => setField('nickname', e.target.value)}
               placeholder="활동할 닉네임을 입력해주세요"
-              style={styles.input}
+              className="w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md outline-none"
+              style={{ boxSizing: 'border-box' }}
             />
           </Field>
 
@@ -255,65 +257,73 @@ export default function ApplyPage() {
               value={form.phone}
               onChange={e => setField('phone', e.target.value)}
               placeholder="예) 010-1234-5678"
-              style={styles.input}
+              className="w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md outline-none"
+              style={{ boxSizing: 'border-box' }}
             />
           </Field>
 
           <Field label="프로필 사진" hint="선택">
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div className="flex gap-2.5">
               <button
                 type="button"
                 onClick={() => setField('profile_image_url', kakaoAvatarUrl)}
                 disabled={!kakaoAvatarUrl}
+                className="flex flex-col items-center gap-1.5 py-3 px-4 border-2 border-solid rounded-[10px] cursor-pointer min-w-[96px]"
                 style={{
-                  ...styles.profileOption,
-                  ...(form.profile_image_url ? styles.profileOptionActive : {}),
+                  borderColor: form.profile_image_url ? '#4A90E2' : '#e0e0e0',
+                  background: form.profile_image_url ? '#f0f7ff' : '#fff',
+                  color: form.profile_image_url ? '#4A90E2' : '#555',
                   opacity: kakaoAvatarUrl ? 1 : 0.4,
                   cursor: kakaoAvatarUrl ? 'pointer' : 'not-allowed',
                 }}
               >
                 {kakaoAvatarUrl
-                  ? <img src={kakaoAvatarUrl} alt="카카오 프로필" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                  ? <img src={kakaoAvatarUrl} alt="카카오 프로필" className="w-8 h-8 rounded-full object-cover" />
                   : <DefaultAvatar size={32} />
                 }
-                <span style={{ fontSize: '13px' }}>카카오 프로필</span>
+                <span className="text-[13px]">카카오 프로필</span>
               </button>
               <button
                 type="button"
                 onClick={() => setField('profile_image_url', '')}
+                className="flex flex-col items-center gap-1.5 py-3 px-4 border-2 border-solid rounded-[10px] cursor-pointer min-w-[96px]"
                 style={{
-                  ...styles.profileOption,
-                  ...(!form.profile_image_url ? styles.profileOptionActive : {}),
+                  borderColor: !form.profile_image_url ? '#4A90E2' : '#e0e0e0',
+                  background: !form.profile_image_url ? '#f0f7ff' : '#fff',
+                  color: !form.profile_image_url ? '#4A90E2' : '#555',
                 }}
               >
                 <DefaultAvatar size={32} />
-                <span style={{ fontSize: '13px' }}>기본 프로필</span>
+                <span className="text-[13px]">기본 프로필</span>
               </button>
             </div>
           </Field>
 
           <Field label="기수" required hint="현재 연도 기준 자동 계산">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="flex items-center gap-2">
               <input
                 type="number"
                 value={form.generation}
                 readOnly
-                style={{ ...styles.input, width: '80px', backgroundColor: '#f5f5f5', color: '#555', cursor: 'default' }}
+                className="py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md outline-none w-20 bg-[#f5f5f5] text-[#555] cursor-default"
+                style={{ boxSizing: 'border-box' }}
               />
-              <span style={{ fontSize: '13px', color: '#999' }}>{form.generation}기 ({new Date().getFullYear()}년 기준)</span>
+              <span className="text-[13px] text-gray-400">{form.generation}기 ({new Date().getFullYear()}년 기준)</span>
             </div>
           </Field>
 
           <Field label="세션" required hint="복수 선택 가능">
-            <div style={styles.tagGroup}>
+            <div className="flex flex-wrap gap-2">
               {SESSION_OPTIONS.map(s => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => toggleSession(s)}
+                  className="py-1.5 px-3.5 text-[13px] border rounded-[20px] cursor-pointer"
                   style={{
-                    ...styles.tag,
-                    ...(form.session.includes(s) ? styles.tagActive : {}),
+                    borderColor: form.session.includes(s) ? '#4A90E2' : '#e0e0e0',
+                    background: form.session.includes(s) ? '#4A90E2' : '#fff',
+                    color: form.session.includes(s) ? '#fff' : '#555',
                   }}
                 >
                   {s}
@@ -327,15 +337,17 @@ export default function ApplyPage() {
         {/* ── 선호 장르 섹션 (선택) ── */}
         <Section title="선호 장르" hint="선택 항목입니다">
           <Field label="장르" hint="복수 선택 가능">
-            <div style={styles.tagGroup}>
+            <div className="flex flex-wrap gap-2">
               {GENRE_OPTIONS.map(g => (
                 <button
                   key={g}
                   type="button"
                   onClick={() => toggleGenre(g)}
+                  className="py-1.5 px-3.5 text-[13px] border rounded-[20px] cursor-pointer"
                   style={{
-                    ...styles.tag,
-                    ...(form.genre_preference.includes(g) ? styles.tagActive : {}),
+                    borderColor: form.genre_preference.includes(g) ? '#4A90E2' : '#e0e0e0',
+                    background: form.genre_preference.includes(g) ? '#4A90E2' : '#fff',
+                    color: form.genre_preference.includes(g) ? '#fff' : '#555',
                   }}
                 >
                   {g}
@@ -353,27 +365,30 @@ export default function ApplyPage() {
               value={form.department}
               onChange={e => setField('department', e.target.value)}
               placeholder="예) 컴퓨터공학과"
-              style={styles.input}
+              className="w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md outline-none"
+              style={{ boxSizing: 'border-box' }}
             />
           </Field>
 
-          <div style={styles.row}>
-            <div style={{ flex: 1 }}>
+          <div className="flex gap-3 items-start">
+            <div className="flex-1">
               <Field label="학번">
                 <input
                   value={form.student_id}
                   onChange={e => setField('student_id', e.target.value)}
                   placeholder="예) 20210001"
-                  style={styles.input}
+                  className="w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md outline-none"
+                  style={{ boxSizing: 'border-box' }}
                 />
               </Field>
             </div>
-            <div style={{ width: '140px' }}>
+            <div className="w-[140px]">
               <Field label="학년">
                 <select
                   value={form.school_year}
                   onChange={e => setField('school_year', e.target.value)}
-                  style={styles.select}
+                  className="w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md outline-none bg-white"
+                  style={{ boxSizing: 'border-box' }}
                 >
                   <option value="">선택</option>
                   {SCHOOL_YEAR_OPTIONS.map(o => (
@@ -395,7 +410,8 @@ export default function ApplyPage() {
               onChange={e => setField('motivation', e.target.value)}
               placeholder="청림그룹사운드에 지원하게 된 계기를 알려주세요."
               rows={4}
-              style={styles.textarea}
+              className="w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md outline-none leading-[1.6] resize-y"
+              style={{ boxSizing: 'border-box' }}
             />
           </Field>
 
@@ -405,41 +421,48 @@ export default function ApplyPage() {
               onChange={e => setField('self_intro', e.target.value)}
               placeholder="본인을 자유롭게 소개해주세요."
               rows={4}
-              style={styles.textarea}
+              className="w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md outline-none leading-[1.6] resize-y"
+              style={{ boxSizing: 'border-box' }}
             />
           </Field>
 
         </Section>
 
         {/* ── 개인정보 동의 ── */}
-        <div style={styles.agreeBox}>
-          <p style={styles.agreeTitle}>개인정보 수집 및 이용 동의 <span style={styles.required}>*</span></p>
-          <ul style={styles.agreeList}>
+        <div className="bg-[#f9f9f9] border border-[#eee] rounded-lg p-5 mb-6">
+          <p className="text-sm font-medium mb-3">
+            개인정보 수집 및 이용 동의 <span className="text-[#E74C3C]">*</span>
+          </p>
+          <ul className="text-[13px] text-gray-500 leading-[1.8] pl-[18px] mb-3.5">
             <li>수집 항목: 이름, 기수, 세션 (필수) / 학과, 학번, 학년, 연락처 (선택)</li>
             <li>이용 목적: 동아리 운영 관리 및 부원 간 연락</li>
             <li>보관 기간: 탈퇴 후 30일 이내 식별 정보 삭제</li>
             <li>연락처·학번은 기본적으로 운영진에게만 공개됩니다.</li>
           </ul>
-          <label style={styles.agreeLabel}>
+          <label className="flex items-center text-sm cursor-pointer">
             <input
               type="checkbox"
               checked={agreed}
               onChange={e => setAgreed(e.target.checked)}
-              style={{ marginRight: '8px' }}
+              className="mr-2"
             />
             위 내용을 확인하였으며 동의합니다.
           </label>
         </div>
 
         {/* ── 에러 메시지 ── */}
-        {error && <p style={styles.errorText}>{error}</p>}
+        {error && (
+          <p className="text-[#E74C3C] text-[13px] mb-3 py-2.5 px-3.5 bg-red-50 rounded-md border border-[#fecaca]">
+            {error}
+          </p>
+        )}
 
         {/* ── 제출 버튼 ── */}
         <button
           onClick={handleSubmit}
           disabled={loading}
+          className="block w-full py-3.5 text-[15px] font-medium bg-[#4A90E2] text-white border-none rounded-lg"
           style={{
-            ...styles.submitBtn,
             opacity: loading ? 0.7 : 1,
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
@@ -457,7 +480,7 @@ export default function ApplyPage() {
 // ─────────────────────────────────────────────
 function DefaultAvatar({ size }: { size: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" style={{ borderRadius: '50%', flexShrink: 0 }}>
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className="rounded-full shrink-0">
       <circle cx="16" cy="16" r="16" fill="#e5e7eb" />
       <circle cx="16" cy="13" r="5" fill="#9ca3af" />
       <path d="M6 26c0-5.523 4.477-10 10-10s10 4.477 10 10" fill="#9ca3af" />
@@ -475,10 +498,10 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <div style={styles.section}>
-      <div style={styles.sectionHeader}>
-        <h3 style={styles.sectionTitle}>{title}</h3>
-        {hint && <span style={styles.sectionHint}>{hint}</span>}
+    <div className="mb-8 pb-8 border-b border-[#f0f0f0]">
+      <div className="flex items-baseline gap-2 mb-4">
+        <h3 className="text-[15px] font-medium m-0">{title}</h3>
+        {hint && <span className="text-xs text-gray-400">{hint}</span>}
       </div>
       {children}
     </div>
@@ -497,198 +520,13 @@ function Field({
   children: React.ReactNode
 }) {
   return (
-    <div style={styles.field}>
-      <label style={styles.label}>
+    <div className="mb-[18px]">
+      <label className="block text-[13px] font-medium text-[#444] mb-1.5">
         {label}
-        {required && <span style={styles.required}> *</span>}
-        {hint && <span style={styles.fieldHint}> — {hint}</span>}
+        {required && <span className="text-[#E74C3C]"> *</span>}
+        {hint && <span className="font-normal text-gray-400"> — {hint}</span>}
       </label>
       {children}
     </div>
   )
-}
-
-// ─────────────────────────────────────────────
-// 스타일
-// ─────────────────────────────────────────────
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '40px 20px',
-  },
-  card: {
-    background: '#fff',
-    borderRadius: '12px',
-    padding: '40px',
-    maxWidth: '600px',
-    margin: '0 auto',
-    boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-  },
-  title: {
-    fontSize: '22px',
-    fontWeight: 500,
-    marginBottom: '6px',
-  },
-  desc: {
-    fontSize: '13px',
-    color: '#999',
-    marginBottom: '32px',
-  },
-  required: {
-    color: '#E74C3C',
-  },
-  section: {
-    marginBottom: '32px',
-    paddingBottom: '32px',
-    borderBottom: '1px solid #f0f0f0',
-  },
-  sectionHeader: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: '8px',
-    marginBottom: '16px',
-  },
-  sectionTitle: {
-    fontSize: '15px',
-    fontWeight: 500,
-    margin: 0,
-  },
-  sectionHint: {
-    fontSize: '12px',
-    color: '#aaa',
-  },
-  field: {
-    marginBottom: '18px',
-  },
-  label: {
-    display: 'block',
-    fontSize: '13px',
-    fontWeight: 500,
-    color: '#444',
-    marginBottom: '6px',
-  },
-  fieldHint: {
-    fontWeight: 400,
-    color: '#aaa',
-  },
-  input: {
-    width: '100%',
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '6px',
-    boxSizing: 'border-box' as const,
-    outline: 'none',
-  },
-  select: {
-    width: '100%',
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '6px',
-    boxSizing: 'border-box' as const,
-    background: '#fff',
-    outline: 'none',
-  },
-  textarea: {
-    width: '100%',
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '6px',
-    boxSizing: 'border-box' as const,
-    resize: 'vertical' as const,
-    outline: 'none',
-    lineHeight: 1.6,
-  },
-  row: {
-    display: 'flex',
-    gap: '12px',
-    alignItems: 'flex-start',
-  },
-  tagGroup: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    gap: '8px',
-  },
-  tag: {
-    padding: '6px 14px',
-    fontSize: '13px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '20px',
-    background: '#fff',
-    cursor: 'pointer',
-    color: '#555',
-  },
-  tagActive: {
-    background: '#4A90E2',
-    borderColor: '#4A90E2',
-    color: '#fff',
-  },
-  agreeBox: {
-    background: '#f9f9f9',
-    border: '1px solid #eee',
-    borderRadius: '8px',
-    padding: '20px',
-    marginBottom: '24px',
-  },
-  agreeTitle: {
-    fontSize: '14px',
-    fontWeight: 500,
-    marginBottom: '12px',
-  },
-  agreeList: {
-    fontSize: '13px',
-    color: '#666',
-    lineHeight: 1.8,
-    paddingLeft: '18px',
-    marginBottom: '14px',
-  },
-  agreeLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: '14px',
-    cursor: 'pointer',
-  },
-  errorText: {
-    color: '#E74C3C',
-    fontSize: '13px',
-    marginBottom: '12px',
-    padding: '10px 14px',
-    background: '#fff5f5',
-    borderRadius: '6px',
-    border: '1px solid #fecaca',
-  },
-  submitBtn: {
-    display: 'block',
-    width: '100%',
-    padding: '14px',
-    fontSize: '15px',
-    fontWeight: 500,
-    background: '#4A90E2',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '8px',
-  },
-  profileOption: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    gap: '6px',
-    padding: '12px 16px',
-    borderWidth: '2px',
-    borderStyle: 'solid',
-    borderColor: '#e0e0e0',
-    borderRadius: '10px',
-    background: '#fff',
-    cursor: 'pointer',
-    color: '#555',
-    minWidth: '96px',
-  },
-  profileOptionActive: {
-    borderColor: '#4A90E2',
-    background: '#f0f7ff',
-    color: '#4A90E2',
-  },
 }

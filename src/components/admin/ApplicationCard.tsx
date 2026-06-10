@@ -120,22 +120,22 @@ export default function ApplicationCard({ application }: Props) {
 
   if (done) {
     return (
-      <div style={{ padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '8px', opacity: 0.5, marginBottom: '12px' }}>
-        <span style={{ fontSize: '14px', color: '#6b7280' }}>✅ {member?.name} — 처리 완료</span>
+      <div className="px-4 py-3 border border-gray-200 rounded-lg opacity-50 mb-3">
+        <span className="text-sm text-gray-500">✅ {member?.name} — 처리 완료</span>
       </div>
     )
   }
 
   return (
-    <div style={cardStyle}>
+    <div className="py-5 px-6 border border-gray-200 rounded-[10px] mb-3.5 bg-white">
 
       {/* ── 신청자 기본 정보 ── */}
-      <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' as const }}>
-        <strong style={{ fontSize: '17px', color: '#111827' }}>{member?.name}</strong>
-        <span style={{ fontSize: '13px', color: '#6b7280' }}>
+      <div className="mb-3.5 flex items-baseline gap-2 flex-wrap">
+        <strong className="text-[17px] text-gray-900">{member?.name}</strong>
+        <span className="text-[13px] text-gray-500">
           {member?.generation}기 · {member?.session?.join(', ')}
         </span>
-        <span style={{ fontSize: '12px', color: '#9ca3af', marginLeft: 'auto' }}>
+        <span className="text-xs text-gray-400 ml-auto">
           신청일: {new Date(application.created_at).toLocaleDateString('ko-KR')}
         </span>
       </div>
@@ -148,40 +148,33 @@ export default function ApplicationCard({ application }: Props) {
         <Detail label="자기소개" text={application.self_intro} />
       )}
 
-      <hr style={{ margin: '16px 0', borderColor: '#f3f4f6' }} />
+      <hr className="my-4 border-gray-100" />
 
       {/* ── 면접 슬롯 확정 ── */}
-      <div style={{ marginBottom: '16px' }}>
-        <p style={labelStyle}>
+      <div className="mb-4">
+        <p className="text-[13px] font-semibold text-gray-700 mb-2">
           면접 슬롯 확정
           {preferences.length > 0 && (
-            <span style={{ fontWeight: 400, color: '#6b7280', marginLeft: '6px' }}>
+            <span className="font-normal text-gray-500 ml-1.5">
               (신청자 희망 {preferences.length}개)
             </span>
           )}
         </p>
 
         {slots.length === 0 ? (
-          <p style={{ fontSize: '13px', color: '#9ca3af' }}>생성된 슬롯이 없습니다.</p>
+          <p className="text-[13px] text-gray-400">생성된 슬롯이 없습니다.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '10px' }}>
+          <div className="flex flex-col gap-1.5 mb-2.5">
             {slots.map(slot => {
               const isPref = preferences.includes(slot.id)
               const isConfirmed = selectedSlotId === slot.id
               return (
                 <label
                   key={slot.id}
+                  className="flex items-center gap-2.5 py-[9px] px-3 rounded-[7px] cursor-pointer text-[13px] text-gray-900"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '9px 12px',
                     border: `1.5px solid ${isConfirmed ? '#4A90E2' : '#e5e7eb'}`,
-                    borderRadius: '7px',
                     backgroundColor: isConfirmed ? '#eff6ff' : '#fff',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    color: '#111827',
                   }}
                 >
                   <input
@@ -194,7 +187,7 @@ export default function ApplicationCard({ application }: Props) {
                   />
                   {formatSlot(slot.slot_at)}
                   {isPref && (
-                    <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#4A90E2', fontWeight: 600 }}>
+                    <span className="ml-auto text-[11px] text-[#4A90E2] font-semibold">
                       희망
                     </span>
                   )}
@@ -207,12 +200,10 @@ export default function ApplicationCard({ application }: Props) {
         <button
           onClick={handleSchedule}
           disabled={loading === 'schedule' || !selectedSlotId}
+          className="py-2 px-[18px] rounded-[7px] text-white border-none text-[13px] font-semibold"
           style={{
-            padding: '8px 18px', borderRadius: '7px',
             background: (!selectedSlotId || loading === 'schedule') ? '#d1d5db' : '#4A90E2',
-            color: '#fff', border: 'none',
             cursor: !selectedSlotId ? 'not-allowed' : 'pointer',
-            fontSize: '13px', fontWeight: 600,
           }}
         >
           {loading === 'schedule' ? '처리 중...' : isScheduled ? '슬롯 재확정' : '슬롯 확정'}
@@ -220,34 +211,38 @@ export default function ApplicationCard({ application }: Props) {
       </div>
 
       {/* ── 운영진 메모 ── */}
-      <div style={{ marginBottom: '16px' }}>
-        <p style={labelStyle}>운영진 메모 (내부 전용)</p>
+      <div className="mb-4">
+        <p className="text-[13px] font-semibold text-gray-700 mb-2">운영진 메모 (내부 전용)</p>
         <textarea
           value={adminNote}
           onChange={e => setAdminNote(e.target.value)}
           placeholder="면접 시 참고 내용, 특이사항 등"
           rows={2}
-          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #e5e7eb', resize: 'vertical' as const, fontSize: '13px', boxSizing: 'border-box' as const }}
+          className="w-full p-2 rounded-md border border-gray-200 text-[13px] outline-none resize-y"
+          style={{ boxSizing: 'border-box' }}
         />
       </div>
 
       {/* ── 합격 / 불합격 ── */}
       {!isScheduled && !resultPending && (
-        <p style={{ fontSize: '12px', color: '#dc2626', marginBottom: '8px' }}>
+        <p className="text-xs text-red-600 mb-2">
           면접 슬롯을 먼저 확정해야 합격 처리가 가능합니다.
         </p>
       )}
 
       {resultPending ? (
         /* 인라인 확인 폼 */
-        <div style={{
-          padding: '14px 16px',
-          border: `1.5px solid ${resultPending === 'PASS' ? '#86efac' : '#fca5a5'}`,
-          borderRadius: '8px',
-          backgroundColor: resultPending === 'PASS' ? '#f0fdf4' : '#fff5f5',
-        }}>
-          <p style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px',
-            color: resultPending === 'PASS' ? '#15803d' : '#b91c1c' }}>
+        <div
+          className="py-[14px] px-4 rounded-lg"
+          style={{
+            border: `1.5px solid ${resultPending === 'PASS' ? '#86efac' : '#fca5a5'}`,
+            backgroundColor: resultPending === 'PASS' ? '#f0fdf4' : '#fff5f5',
+          }}
+        >
+          <p
+            className="text-[13px] font-semibold mb-2"
+            style={{ color: resultPending === 'PASS' ? '#15803d' : '#b91c1c' }}
+          >
             {member?.name}님을 {resultPending === 'PASS' ? '합격' : '불합격'} 처리합니다
           </p>
           <textarea
@@ -255,21 +250,16 @@ export default function ApplicationCard({ application }: Props) {
             onChange={e => setResultReason(e.target.value)}
             placeholder={resultPending === 'PASS' ? '합격 사유 (선택)' : '불합격 사유 (선택)'}
             rows={2}
-            style={{
-              width: '100%', padding: '8px 10px', fontSize: '13px',
-              border: '1px solid #e5e7eb', borderRadius: '6px',
-              resize: 'vertical', outline: 'none', boxSizing: 'border-box' as const,
-              marginBottom: '10px', lineHeight: 1.5,
-            }}
+            className="w-full py-2 px-2.5 text-[13px] border border-gray-200 rounded-md outline-none mb-2.5 leading-[1.5] resize-y"
+            style={{ boxSizing: 'border-box' }}
           />
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="flex gap-2">
             <button
               onClick={handleResultConfirm}
               disabled={!!loading}
+              className="py-[7px] px-[18px] rounded-md text-[13px] font-semibold text-white border-none"
               style={{
-                padding: '7px 18px', borderRadius: '6px', fontSize: '13px', fontWeight: 600,
                 background: resultPending === 'PASS' ? '#16a34a' : '#dc2626',
-                color: '#fff', border: 'none',
                 cursor: loading ? 'not-allowed' : 'pointer',
                 opacity: loading ? 0.7 : 1,
               }}
@@ -279,27 +269,21 @@ export default function ApplicationCard({ application }: Props) {
             <button
               onClick={() => { setResultPending(null); setResultReason('') }}
               disabled={!!loading}
-              style={{
-                padding: '7px 18px', borderRadius: '6px', fontSize: '13px',
-                background: '#fff', color: '#6b7280',
-                border: '1px solid #d1d5db', cursor: 'pointer',
-              }}
+              className="py-[7px] px-[18px] rounded-md text-[13px] bg-white text-gray-500 border border-gray-300 cursor-pointer"
             >
               취소
             </button>
           </div>
         </div>
       ) : (
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="flex gap-2">
           <button
             onClick={() => setResultPending('PASS')}
             disabled={!!loading || !isScheduled}
+            className="py-[9px] px-[22px] rounded-[7px] text-white border-none font-semibold text-[13px]"
             style={{
-              padding: '9px 22px', borderRadius: '7px',
               background: (!isScheduled || loading) ? '#d1d5db' : '#16a34a',
-              color: '#fff', border: 'none',
               cursor: (!isScheduled || !!loading) ? 'not-allowed' : 'pointer',
-              fontWeight: 600, fontSize: '13px',
             }}
           >
             합격
@@ -307,12 +291,10 @@ export default function ApplicationCard({ application }: Props) {
           <button
             onClick={() => setResultPending('FAIL')}
             disabled={!!loading}
+            className="py-[9px] px-[22px] rounded-[7px] text-white border-none font-semibold text-[13px]"
             style={{
-              padding: '9px 22px', borderRadius: '7px',
               background: loading ? '#d1d5db' : '#dc2626',
-              color: '#fff', border: 'none',
               cursor: !!loading ? 'not-allowed' : 'pointer',
-              fontWeight: 600, fontSize: '13px',
             }}
           >
             불합격
@@ -326,26 +308,11 @@ export default function ApplicationCard({ application }: Props) {
 
 function Detail({ label, text }: { label: string; text: string }) {
   return (
-    <div style={{ marginBottom: '10px' }}>
-      <p style={labelStyle}>{label}</p>
-      <p style={{ whiteSpace: 'pre-wrap', background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>
+    <div className="mb-2.5">
+      <p className="text-[13px] font-semibold text-gray-700 mb-2">{label}</p>
+      <p className="whitespace-pre-wrap bg-gray-50 py-2.5 px-3 rounded-md text-[13px] text-gray-700 leading-[1.6]">
         {text}
       </p>
     </div>
   )
-}
-
-const cardStyle: React.CSSProperties = {
-  padding: '20px 24px',
-  border: '1px solid #e5e7eb',
-  borderRadius: '10px',
-  marginBottom: '14px',
-  backgroundColor: '#fff',
-}
-
-const labelStyle: React.CSSProperties = {
-  fontSize: '13px',
-  fontWeight: 600,
-  color: '#374151',
-  marginBottom: '8px',
 }

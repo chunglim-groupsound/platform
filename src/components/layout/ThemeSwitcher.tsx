@@ -26,32 +26,20 @@ export function ThemeSwitcher() {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-      }}
-    >
+    <div className="flex items-center gap-1.5">
       {THEMES.map(t => (
         <button
           key={t.id}
           onClick={() => apply(t.id)}
           title={t.label}
+          className="w-5 h-5 rounded-full p-0 cursor-pointer shrink-0 transition-[border-color,outline-color] duration-150"
           style={{
-            width: '20px',
-            height: '20px',
-            borderRadius: '50%',
-            padding: 0,
-            cursor: 'pointer',
-            flexShrink: 0,
             background: `linear-gradient(135deg, ${t.bg} 50%, ${t.accent} 50%)`,
             border: current === t.id
               ? '2px solid rgba(255,255,255,0.85)'
               : '2px solid rgba(255,255,255,0.2)',
             outline: current === t.id ? '1px solid rgba(255,255,255,0.3)' : 'none',
             outlineOffset: '2px',
-            transition: 'border-color 0.15s, outline-color 0.15s',
           }}
         />
       ))}

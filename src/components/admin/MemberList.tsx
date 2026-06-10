@@ -23,7 +23,7 @@ export default function MemberList({ members }: { members: any[] }) {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            style={{ fontWeight: activeTab === tab ? 'bold' : 'normal' }}
+            className={activeTab === tab ? 'font-bold' : 'font-normal'}
           >
             {STATUS_LABELS[tab] ?? tab}
             {tab !== '전체' && (
@@ -49,7 +49,7 @@ export default function MemberList({ members }: { members: any[] }) {
           {filtered.map(member => (
             <tr key={member.id}>
               <td>
-                <Link href={`/admin/members/${member.id}`} style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500 }}>
+                <Link href={`/admin/members/${member.id}`} className="text-blue-600 no-underline font-medium">
                   {member.name}
                 </Link>
               </td>

@@ -159,23 +159,27 @@ export default function LinkPage() {
   // 렌더링
   // ─────────────────────────────────────────────
   return (
-    <main style={styles.container}>
-      <div style={styles.card}>
+    <main className="min-h-screen flex items-center justify-center p-5 bg-[#f5f5f5]">
+      <div className="bg-white rounded-xl p-10 w-full max-w-[480px] shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
 
         {/* ── 선택 화면 ── */}
         {step === 'choice' && (
           <>
-            <h2 style={styles.title}>청림그룹사운드에 오신 것을 환영합니다</h2>
-            <p style={styles.desc}>
+            <h2 className="text-[22px] font-medium mb-2.5">청림그룹사운드에 오신 것을 환영합니다</h2>
+            <p className="text-sm text-gray-500 leading-[1.7] mb-6">
               이전에 활동하셨던 분인가요?<br />
               기존 부원이시라면 기존 정보와 연결해드립니다.
             </p>
-            <button style={{ ...styles.btn, ...styles.btnPrimary }}
-              onClick={() => setStep('search')}>
+            <button
+              className="block w-full py-3 px-3 text-sm font-medium rounded-md border-none cursor-pointer mb-2.5 text-center bg-[#4A90E2] text-white"
+              onClick={() => setStep('search')}
+            >
               기존 부원입니다 — 정보 연동하기
             </button>
-            <button style={{ ...styles.btn, ...styles.btnSecondary }}
-              onClick={() => router.push('/apply')}>
+            <button
+              className="block w-full py-3 px-3 text-sm font-medium rounded-md border-none cursor-pointer mb-2.5 text-center bg-[#f0f0f0] text-[#333]"
+              onClick={() => router.push('/apply')}
+            >
               처음 가입합니다 — 신규 신청하기
             </button>
           </>
@@ -184,28 +188,40 @@ export default function LinkPage() {
         {/* ── 검색 화면 ── */}
         {step === 'search' && (
           <>
-            <h2 style={styles.title}>기존 정보 찾기</h2>
-            <p style={styles.desc}>운영진이 등록한 이름과 기수를 입력해주세요.</p>
+            <h2 className="text-[22px] font-medium mb-2.5">기존 정보 찾기</h2>
+            <p className="text-sm text-gray-500 leading-[1.7] mb-6">운영진이 등록한 이름과 기수를 입력해주세요.</p>
 
-            <label style={styles.label}>이름</label>
+            <label className="flex items-center gap-1.5 text-[13px] font-medium text-[#444] mb-1.5">이름</label>
             <input value={name} onChange={e => setName(e.target.value)}
-              placeholder="홍길동" style={styles.input}
+              placeholder="홍길동"
+              className="block w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md mb-4 outline-none"
+              style={{ boxSizing: 'border-box' }}
               onKeyDown={e => e.key === 'Enter' && handleSearch()} />
 
-            <label style={styles.label}>기수</label>
+            <label className="flex items-center gap-1.5 text-[13px] font-medium text-[#444] mb-1.5">기수</label>
             <input type="number" value={generation}
               onChange={e => setGeneration(e.target.value)}
-              placeholder="예) 15" style={styles.input}
+              placeholder="예) 15"
+              className="block w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md mb-4 outline-none"
+              style={{ boxSizing: 'border-box' }}
               onKeyDown={e => e.key === 'Enter' && handleSearch()} />
 
-            {error && <p style={styles.error}>{error}</p>}
+            {error && (
+              <p className="text-[#E74C3C] text-[13px] mb-3 py-2.5 px-3.5 bg-red-50 rounded-md border border-[#fecaca]">
+                {error}
+              </p>
+            )}
 
-            <button style={{ ...styles.btn, ...styles.btnPrimary }}
-              onClick={handleSearch} disabled={loading}>
+            <button
+              className="block w-full py-3 text-sm font-medium rounded-md border-none cursor-pointer mb-2.5 text-center bg-[#4A90E2] text-white"
+              onClick={handleSearch} disabled={loading}
+            >
               {loading ? '검색 중...' : '검색'}
             </button>
-            <button style={{ ...styles.btn, ...styles.btnGhost }}
-              onClick={() => { setStep('choice'); setError(null) }}>
+            <button
+              className="block w-full py-3 text-sm font-medium rounded-md cursor-pointer mb-2.5 text-center bg-transparent text-gray-400 border border-[#eee]"
+              onClick={() => { setStep('choice'); setError(null) }}
+            >
               뒤로
             </button>
           </>
@@ -214,23 +230,31 @@ export default function LinkPage() {
         {/* ── 후보 목록 ── */}
         {step === 'found' && (
           <>
-            <h2 style={styles.title}>아래 정보가 맞으신가요?</h2>
-            <p style={styles.desc}>본인의 정보를 선택해주세요.</p>
-            {error && <p style={styles.error}>{error}</p>}
+            <h2 className="text-[22px] font-medium mb-2.5">아래 정보가 맞으신가요?</h2>
+            <p className="text-sm text-gray-500 leading-[1.7] mb-6">본인의 정보를 선택해주세요.</p>
+            {error && (
+              <p className="text-[#E74C3C] text-[13px] mb-3 py-2.5 px-3.5 bg-red-50 rounded-md border border-[#fecaca]">
+                {error}
+              </p>
+            )}
             {candidates.map(c => (
-              <div key={c.id} style={styles.candidateCard}>
-                <strong style={{ fontSize: '16px' }}>{c.name}</strong>
-                <span style={{ marginLeft: '8px', color: '#666', fontSize: '14px' }}>
+              <div key={c.id} className="border border-[#eee] rounded-lg p-4 mb-3">
+                <strong className="text-base">{c.name}</strong>
+                <span className="ml-2 text-gray-500 text-sm">
                   {c.generation}기 · {c.session?.join(', ')}
                 </span>
-                <button style={{ ...styles.btn, ...styles.btnSuccess, marginTop: '10px' }}
-                  onClick={() => handleSelect(c)}>
+                <button
+                  className="block w-full py-3 text-sm font-medium rounded-md border-none cursor-pointer mt-2.5 text-center bg-[#27AE60] text-white"
+                  onClick={() => handleSelect(c)}
+                >
                   네, 제 정보입니다
                 </button>
               </div>
             ))}
-            <button style={{ ...styles.btn, ...styles.btnGhost }}
-              onClick={() => { setStep('search'); setError(null) }}>
+            <button
+              className="block w-full py-3 text-sm font-medium rounded-md cursor-pointer mb-2.5 text-center bg-transparent text-gray-400 border border-[#eee]"
+              onClick={() => { setStep('search'); setError(null) }}
+            >
               다시 검색하기
             </button>
           </>
@@ -239,52 +263,56 @@ export default function LinkPage() {
         {/* ── 추가 정보 입력 ── */}
         {step === 'extra' && selected && (
           <>
-            <h2 style={styles.title}>추가 정보 입력</h2>
-            <p style={styles.desc}>
+            <h2 className="text-[22px] font-medium mb-2.5">추가 정보 입력</h2>
+            <p className="text-sm text-gray-500 leading-[1.7] mb-6">
               모두 선택 사항입니다.<br />
               입력하지 않아도 연동을 완료할 수 있으며,<br />
               나중에 프로필 수정에서 변경할 수 있습니다.
             </p>
 
-            <div style={styles.selectedBadge}>
+            <div className="bg-[#f0f7ff] border border-[#d0e8ff] rounded-md py-2.5 px-3.5 text-sm text-[#2c6fad] mb-5">
               ✅ {selected.name} · {selected.generation}기
             </div>
 
             {/* 닉네임 */}
-            <label style={styles.label}>닉네임</label>
+            <label className="flex items-center gap-1.5 text-[13px] font-medium text-[#444] mb-1.5">닉네임</label>
             <input
               value={extraInfo.nickname}
               onChange={e => setExtra('nickname', e.target.value)}
               placeholder="플랫폼에서 사용할 닉네임 (미입력 시 실명 사용)"
-              style={styles.input}
+              className="block w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md mb-4 outline-none"
+              style={{ boxSizing: 'border-box' }}
             />
 
             {/* 학과 */}
-            <label style={styles.label}>학과</label>
+            <label className="flex items-center gap-1.5 text-[13px] font-medium text-[#444] mb-1.5">학과</label>
             <input
               value={extraInfo.department}
               onChange={e => setExtra('department', e.target.value)}
               placeholder="예) 컴퓨터공학과"
-              style={styles.input}
+              className="block w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md mb-4 outline-none"
+              style={{ boxSizing: 'border-box' }}
             />
 
             {/* 학번 + 학년 */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={styles.label}>학번</label>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="flex items-center gap-1.5 text-[13px] font-medium text-[#444] mb-1.5">학번</label>
                 <input
                   value={extraInfo.student_id}
                   onChange={e => setExtra('student_id', e.target.value)}
                   placeholder="예) 20210001"
-                  style={styles.input}
+                  className="block w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md mb-4 outline-none"
+                  style={{ boxSizing: 'border-box' }}
                 />
               </div>
-              <div style={{ width: '130px' }}>
-                <label style={styles.label}>학년</label>
+              <div className="w-[130px]">
+                <label className="flex items-center gap-1.5 text-[13px] font-medium text-[#444] mb-1.5">학년</label>
                 <select
                   value={extraInfo.school_year}
                   onChange={e => setExtra('school_year', e.target.value)}
-                  style={styles.select}
+                  className="block w-full py-2.5 px-3 text-sm border border-[#e0e0e0] rounded-md mb-4 bg-white outline-none"
+                  style={{ boxSizing: 'border-box' }}
                 >
                   <option value="">선택 안 함</option>
                   {SCHOOL_YEAR_OPTIONS.map(o => (
@@ -295,21 +323,21 @@ export default function LinkPage() {
             </div>
 
             {/* 선호 장르 */}
-            <label style={styles.label}>
+            <label className="flex items-center gap-1.5 text-[13px] font-medium text-[#444] mb-1.5">
               선호 장르
-              <span style={styles.optionalBadge}>복수 선택 가능</span>
+              <span className="text-[11px] text-gray-400 font-normal">복수 선택 가능</span>
             </label>
-            <div style={styles.tagGroup}>
+            <div className="flex flex-wrap gap-2 mb-4">
               {GENRE_OPTIONS.map(genre => (
                 <button
                   key={genre}
                   type="button"
                   onClick={() => toggleGenre(genre)}
+                  className="py-1.5 px-3.5 text-[13px] border rounded-[20px] cursor-pointer"
                   style={{
-                    ...styles.tag,
-                    ...(extraInfo.genre_preference.includes(genre)
-                      ? styles.tagActive
-                      : {}),
+                    borderColor: extraInfo.genre_preference.includes(genre) ? '#4A90E2' : '#e0e0e0',
+                    background: extraInfo.genre_preference.includes(genre) ? '#4A90E2' : '#fff',
+                    color: extraInfo.genre_preference.includes(genre) ? '#fff' : '#555',
                   }}
                 >
                   {genre}
@@ -317,17 +345,21 @@ export default function LinkPage() {
               ))}
             </div>
 
-            {error && <p style={styles.error}>{error}</p>}
+            {error && (
+              <p className="text-[#E74C3C] text-[13px] mb-3 py-2.5 px-3.5 bg-red-50 rounded-md border border-[#fecaca]">
+                {error}
+              </p>
+            )}
 
             <button
-              style={{ ...styles.btn, ...styles.btnPrimary, marginTop: '24px' }}
+              className="block w-full py-3 text-sm font-medium rounded-md border-none cursor-pointer mb-2.5 mt-6 text-center bg-[#4A90E2] text-white"
               onClick={handleConfirm}
               disabled={loading}
             >
               {loading ? '처리 중...' : '연동 완료'}
             </button>
             <button
-              style={{ ...styles.btn, ...styles.btnGhost }}
+              className="block w-full py-3 text-sm font-medium rounded-md cursor-pointer mb-2.5 text-center bg-transparent text-gray-400 border border-[#eee]"
               onClick={() => setStep('found')}
               disabled={loading}
             >
@@ -339,20 +371,24 @@ export default function LinkPage() {
         {/* ── 검색 결과 없음 ── */}
         {step === 'notfound' && (
           <>
-            <h2 style={styles.title}>일치하는 정보가 없습니다</h2>
-            <p style={styles.desc}>
+            <h2 className="text-[22px] font-medium mb-2.5">일치하는 정보가 없습니다</h2>
+            <p className="text-sm text-gray-500 leading-[1.7] mb-6">
               이름과 기수를 다시 확인해 주세요.<br />
               운영진이 아직 정보를 등록하지 않았을 수 있습니다.
             </p>
-            <button style={{ ...styles.btn, ...styles.btnSecondary }}
-              onClick={() => setStep('search')}>
+            <button
+              className="block w-full py-3 text-sm font-medium rounded-md border-none cursor-pointer mb-2.5 text-center bg-[#f0f0f0] text-[#333]"
+              onClick={() => setStep('search')}
+            >
               다시 검색하기
             </button>
-            <button style={{ ...styles.btn, ...styles.btnPrimary }}
-              onClick={() => router.push('/apply')}>
+            <button
+              className="block w-full py-3 text-sm font-medium rounded-md border-none cursor-pointer mb-2.5 text-center bg-[#4A90E2] text-white"
+              onClick={() => router.push('/apply')}
+            >
               신규 가입 신청하기
             </button>
-            <p style={{ fontSize: '12px', color: '#aaa', textAlign: 'center', marginTop: '12px' }}>
+            <p className="text-xs text-gray-400 text-center mt-3">
               문의: 운영진에게 카카오톡으로 연락해 주세요.
             </p>
           </>
@@ -361,142 +397,12 @@ export default function LinkPage() {
         {/* ── 처리 중 ── */}
         {step === 'linking' && (
           <>
-            <h2 style={styles.title}>연동 중...</h2>
-            <p style={styles.desc}>잠시만 기다려주세요.</p>
+            <h2 className="text-[22px] font-medium mb-2.5">연동 중...</h2>
+            <p className="text-sm text-gray-500 leading-[1.7] mb-6">잠시만 기다려주세요.</p>
           </>
         )}
 
       </div>
     </main>
   )
-}
-
-// ─────────────────────────────────────────────
-// 스타일
-// ─────────────────────────────────────────────
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '20px',
-    backgroundColor: '#f5f5f5',
-  },
-  card: {
-    background: '#fff',
-    borderRadius: '12px',
-    padding: '40px',
-    width: '100%',
-    maxWidth: '480px',
-    boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-  },
-  title: {
-    fontSize: '22px',
-    fontWeight: 500,
-    marginBottom: '10px',
-  },
-  desc: {
-    fontSize: '14px',
-    color: '#666',
-    lineHeight: 1.7,
-    marginBottom: '24px',
-  },
-  label: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontSize: '13px',
-    fontWeight: 500,
-    color: '#444',
-    marginBottom: '6px',
-  },
-  optionalBadge: {
-    fontSize: '11px',
-    color: '#aaa',
-    fontWeight: 400,
-  },
-  input: {
-    display: 'block',
-    width: '100%',
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '6px',
-    marginBottom: '16px',
-    boxSizing: 'border-box' as const,
-    outline: 'none',
-  },
-  select: {
-    display: 'block',
-    width: '100%',
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '6px',
-    marginBottom: '16px',
-    background: '#fff',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-  },
-  tagGroup: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    gap: '8px',
-    marginBottom: '16px',
-  },
-  tag: {
-    padding: '6px 14px',
-    fontSize: '13px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '20px',
-    background: '#fff',
-    cursor: 'pointer',
-    color: '#555',
-  },
-  tagActive: {
-    background: '#4A90E2',
-    borderColor: '#4A90E2',
-    color: '#fff',
-  },
-  btn: {
-    display: 'block',
-    width: '100%',
-    padding: '12px',
-    fontSize: '14px',
-    fontWeight: 500,
-    borderRadius: '6px',
-    border: 'none',
-    cursor: 'pointer',
-    marginBottom: '10px',
-    textAlign: 'center' as const,
-  },
-  btnPrimary:   { background: '#4A90E2', color: '#fff' },
-  btnSecondary: { background: '#f0f0f0', color: '#333' },
-  btnSuccess:   { background: '#27AE60', color: '#fff' },
-  btnGhost:     { background: 'transparent', color: '#999', border: '1px solid #eee' },
-  candidateCard: {
-    border: '1px solid #eee',
-    borderRadius: '8px',
-    padding: '16px',
-    marginBottom: '12px',
-  },
-  selectedBadge: {
-    background: '#f0f7ff',
-    border: '1px solid #d0e8ff',
-    borderRadius: '6px',
-    padding: '10px 14px',
-    fontSize: '14px',
-    color: '#2c6fad',
-    marginBottom: '20px',
-  },
-  error: {
-    color: '#E74C3C',
-    fontSize: '13px',
-    marginBottom: '12px',
-    padding: '10px 14px',
-    background: '#fff5f5',
-    borderRadius: '6px',
-    border: '1px solid #fecaca',
-  },
 }

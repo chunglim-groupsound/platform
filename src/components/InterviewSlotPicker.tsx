@@ -69,12 +69,12 @@ export default function InterviewSlotPicker({ onSubmitSuccess }: Props) {
   }
 
   if (loading) {
-    return <p style={{ fontSize: '14px', color: '#9ca3af' }}>면접 일정 불러오는 중...</p>
+    return <p className="text-sm text-gray-400">면접 일정 불러오는 중...</p>
   }
 
   if (slots.length === 0) {
     return (
-      <p style={{ fontSize: '14px', color: '#9ca3af', padding: '16px 0' }}>
+      <p className="text-sm text-gray-400 py-4">
         아직 면접 일정이 공개되지 않았습니다. 잠시 후 다시 확인해주세요.
       </p>
     )
@@ -82,11 +82,11 @@ export default function InterviewSlotPicker({ onSubmitSuccess }: Props) {
 
   return (
     <div>
-      <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '12px' }}>
+      <p className="text-[13px] text-gray-500 mb-3">
         희망하는 면접 일정을 복수 선택할 수 있습니다.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+      <div className="flex flex-col gap-2 mb-4">
         {slots.map(slot => {
           const isSelected = selected.includes(slot.id)
           return (
@@ -94,32 +94,19 @@ export default function InterviewSlotPicker({ onSubmitSuccess }: Props) {
               key={slot.id}
               type="button"
               onClick={() => toggleSlot(slot.id)}
+              className="flex items-center gap-2.5 py-3 px-4 rounded-lg cursor-pointer text-left text-sm text-gray-900 transition-[border-color,background-color] duration-150"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '12px 16px',
                 border: `1.5px solid ${isSelected ? '#4A90E2' : '#e5e7eb'}`,
-                borderRadius: '8px',
                 backgroundColor: isSelected ? '#eff6ff' : '#fff',
-                cursor: 'pointer',
-                textAlign: 'left' as const,
-                fontSize: '14px',
-                color: '#111827',
-                transition: 'border-color 0.15s, background-color 0.15s',
               }}
             >
-              <span style={{
-                width: '18px',
-                height: '18px',
-                borderRadius: '4px',
-                border: `2px solid ${isSelected ? '#4A90E2' : '#d1d5db'}`,
-                backgroundColor: isSelected ? '#4A90E2' : '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}>
+              <span
+                className="w-[18px] h-[18px] rounded-[4px] flex items-center justify-center shrink-0"
+                style={{
+                  border: `2px solid ${isSelected ? '#4A90E2' : '#d1d5db'}`,
+                  backgroundColor: isSelected ? '#4A90E2' : '#fff',
+                }}
+              >
                 {isSelected && (
                   <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
                     <path d="M1 4L3.5 6.5L9 1" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -133,15 +120,14 @@ export default function InterviewSlotPicker({ onSubmitSuccess }: Props) {
       </div>
 
       {message && (
-        <p style={{
-          fontSize: '13px',
-          padding: '10px 14px',
-          borderRadius: '8px',
-          marginBottom: '12px',
-          backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fff5f5',
-          color: message.type === 'success' ? '#166534' : '#991b1b',
-          border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
-        }}>
+        <p
+          className="text-[13px] py-2.5 px-3.5 rounded-lg mb-3"
+          style={{
+            backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fff5f5',
+            color: message.type === 'success' ? '#166534' : '#991b1b',
+            border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+          }}
+        >
           {message.text}
         </p>
       )}
@@ -149,14 +135,8 @@ export default function InterviewSlotPicker({ onSubmitSuccess }: Props) {
       <button
         onClick={handleSubmit}
         disabled={saving}
+        className="py-2.5 px-6 text-sm font-semibold bg-gray-900 text-white border-none rounded-lg"
         style={{
-          padding: '10px 24px',
-          fontSize: '14px',
-          fontWeight: 600,
-          backgroundColor: '#111827',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '8px',
           cursor: saving ? 'not-allowed' : 'pointer',
           opacity: saving ? 0.7 : 1,
         }}

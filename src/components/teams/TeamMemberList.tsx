@@ -46,14 +46,14 @@ export function TeamMemberList({ members, myId, canEdit, teamId }: TeamMemberLis
   const visible = members.filter(e => !kicked.has(e.user.id))
 
   if (visible.length === 0) {
-    return <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>팀원이 없습니다.</p>
+    return <p className="text-gray-400 text-[0.9rem]">팀원이 없습니다.</p>
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div className="flex flex-col gap-2">
       {visible.map(entry => (
-        <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ flex: 1 }}>
+        <div key={entry.id} className="flex items-center gap-2">
+          <div className="flex-1">
             <MemberCard
               member={{
                 ...entry.user,
@@ -69,46 +69,29 @@ export function TeamMemberList({ members, myId, canEdit, teamId }: TeamMemberLis
           </div>
 
           {entry.isLeader && (
-            <span style={{
-              flexShrink: 0, padding: '2px 8px', borderRadius: '9999px',
-              fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap',
-              background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d',
-            }}>
+            <span className="shrink-0 py-0.5 px-2 rounded-full text-[0.72rem] font-bold whitespace-nowrap bg-amber-100 text-amber-800 border border-yellow-300">
               팀장
             </span>
           )}
           {!entry.isLeader && entry.isViceLeader && (
-            <span style={{
-              flexShrink: 0, padding: '2px 8px', borderRadius: '9999px',
-              fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap',
-              background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd',
-            }}>
+            <span className="shrink-0 py-0.5 px-2 rounded-full text-[0.72rem] font-bold whitespace-nowrap bg-sky-50 text-sky-700 border border-sky-200">
               부팀장
             </span>
           )}
 
           {canEdit && teamId && !entry.isLeader && (
             confirming === entry.user.id ? (
-              <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+              <div className="flex gap-1 shrink-0">
                 <button
                   onClick={() => kickMember(entry.user.id)}
                   disabled={kicking === entry.user.id}
-                  style={{
-                    padding: '3px 9px', borderRadius: '6px', fontSize: '0.72rem',
-                    fontWeight: 700, border: 'none', background: '#dc2626', color: '#fff',
-                    cursor: kicking ? 'not-allowed' : 'pointer', opacity: kicking ? 0.7 : 1,
-                    whiteSpace: 'nowrap',
-                  }}
+                  className={`py-[3px] px-[9px] rounded-md text-[0.72rem] font-bold border-none bg-red-600 text-white whitespace-nowrap ${kicking ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
                 >
                   {kicking === entry.user.id ? '…' : '확인'}
                 </button>
                 <button
                   onClick={() => setConfirming(null)}
-                  style={{
-                    padding: '3px 9px', borderRadius: '6px', fontSize: '0.72rem',
-                    border: '1px solid #d1d5db', background: '#fff', color: '#374151',
-                    cursor: 'pointer', whiteSpace: 'nowrap',
-                  }}
+                  className="py-[3px] px-[9px] rounded-md text-[0.72rem] border border-gray-300 bg-white text-gray-700 cursor-pointer whitespace-nowrap"
                 >
                   취소
                 </button>
@@ -116,11 +99,7 @@ export function TeamMemberList({ members, myId, canEdit, teamId }: TeamMemberLis
             ) : (
               <button
                 onClick={() => setConfirming(entry.user.id)}
-                style={{
-                  flexShrink: 0, padding: '3px 9px', borderRadius: '6px', fontSize: '0.72rem',
-                  border: '1px solid #fca5a5', background: '#fff', color: '#dc2626',
-                  cursor: 'pointer', whiteSpace: 'nowrap',
-                }}
+                className="shrink-0 py-[3px] px-[9px] rounded-md text-[0.72rem] border border-red-300 bg-white text-red-600 cursor-pointer whitespace-nowrap"
               >
                 추방
               </button>

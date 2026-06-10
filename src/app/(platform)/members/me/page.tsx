@@ -1,4 +1,4 @@
-﻿import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Image from 'next/image'
@@ -136,73 +136,57 @@ export default async function MyProfilePage() {
   }
 
   return (
-    <main style={{ padding: '24px 20px', maxWidth: '600px', margin: '0 auto' }}>
+    <main className="py-6 px-5 max-w-[600px] mx-auto">
       {/* 헤더 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>내 프로필</h1>
-        <Link href="/members/me/edit" style={{
-          padding: '6px 14px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600,
-          border: '1px solid #d1d5db', background: '#fff', textDecoration: 'none', color: '#374151',
-        }}>
+      <div className="flex justify-between items-center mb-5">
+        <h1 className="text-[1.3rem] font-extrabold m-0">내 프로필</h1>
+        <Link href="/members/me/edit" className="py-1.5 px-3.5 rounded-lg text-[0.85rem] font-semibold border border-gray-300 bg-white no-underline text-gray-700">
           수정
         </Link>
       </div>
 
       {/* 프로필 카드 */}
-      <div style={{
-        background: '#f9fafb', borderRadius: '16px',
-        padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-      }}>
-        <div style={{ position: 'relative', width: 80, height: 80 }}>
+      <div className="bg-gray-50 rounded-2xl p-6 flex flex-col items-center gap-3">
+        <div className="relative w-20 h-20">
           {profileImageUrl ? (
             <Image
               src={profileImageUrl}
               alt={profile.name}
               fill
-              style={{ borderRadius: '50%', objectFit: 'cover' }}
+              className="rounded-full object-cover"
             />
           ) : (
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '2rem', color: '#6b7280',
-            }}>
+            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-[2rem] text-gray-500">
               {profile.name[0]}
             </div>
           )}
         </div>
 
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontWeight: 800, fontSize: '1.2rem' }}>
+        <div className="text-center">
+          <div className="font-extrabold text-[1.2rem]">
             {profile.nickname ?? profile.name}
           </div>
           {profile.nickname && (
-            <div style={{ fontSize: '0.82rem', color: '#6b7280' }}>{profile.name}</div>
+            <div className="text-[0.82rem] text-gray-500">{profile.name}</div>
           )}
           {profile.generation != null && (
-            <div style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '2px' }}>{profile.generation}기</div>
+            <div className="text-[0.85rem] text-gray-500 mt-0.5">{profile.generation}기</div>
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <span style={{
-            padding: '3px 10px', borderRadius: '9999px',
-            background: '#e0f2fe', color: '#075985', fontSize: '0.78rem', fontWeight: 600,
-          }}>
+        <div className="flex gap-1.5 flex-wrap justify-center">
+          <span className="py-[3px] px-2.5 rounded-full bg-[#e0f2fe] text-[#075985] text-[0.78rem] font-semibold">
             {ROLE_LABEL[profile.role] ?? profile.role}
           </span>
           {profile.is_whitelist && <WhitelistBadge />}
         </div>
 
         {(profile.session ?? []).length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
+          <div className="flex flex-wrap gap-1.5 justify-center">
             {profile.session!.map((s: string) => {
               const sy = (profile.session_years as Record<string, number> | null)?.[s]
               return (
-                <span key={s} style={{
-                  padding: '3px 10px', borderRadius: '9999px',
-                  background: '#eff6ff', color: '#1d4ed8', fontSize: '0.78rem',
-                }}>
+                <span key={s} className="py-[3px] px-2.5 rounded-full bg-blue-50 text-blue-700 text-[0.78rem]">
                   {s}{sy != null ? ` ${sy}년` : ''}
                 </span>
               )
@@ -212,27 +196,24 @@ export default async function MyProfilePage() {
       </div>
 
       {/* 상세 정보 */}
-      <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '0' }}>
+      <div className="mt-5 flex flex-col gap-0">
         {profile.department && <Row label="학과" value={profile.department} />}
         {profile.school_year != null && <Row label="학년" value={`${profile.school_year}학년`} />}
         {profile.student_id && <Row label="학번" value={profile.student_id} />}
         {profile.phone && (
-          <div style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
-            <span style={{ width: '80px', fontSize: '0.85rem', color: '#6b7280', flexShrink: 0 }}>연락처</span>
-            <a href={`tel:${profile.phone}`} style={{ fontSize: '0.9rem', color: '#2563eb' }}>
+          <div className="flex gap-3 py-2.5 border-b border-gray-100">
+            <span className="w-20 text-[0.85rem] text-gray-500 shrink-0">연락처</span>
+            <a href={`tel:${profile.phone}`} className="text-[0.9rem] text-blue-600">
               {profile.phone}
             </a>
           </div>
         )}
         {(profile.genre_preference ?? []).length > 0 && (
-          <div style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
-            <span style={{ width: '80px', fontSize: '0.85rem', color: '#6b7280', flexShrink: 0 }}>선호 장르</span>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+          <div className="flex gap-3 py-2.5 border-b border-gray-100">
+            <span className="w-20 text-[0.85rem] text-gray-500 shrink-0">선호 장르</span>
+            <div className="flex flex-wrap gap-1">
               {profile.genre_preference!.map((g: string) => (
-                <span key={g} style={{
-                  padding: '2px 8px', borderRadius: '9999px',
-                  background: '#f3f4f6', color: '#374151', fontSize: '0.78rem',
-                }}>
+                <span key={g} className="py-0.5 px-2 rounded-full bg-gray-100 text-gray-700 text-[0.78rem]">
                   {g}
                 </span>
               ))}
@@ -242,45 +223,36 @@ export default async function MyProfilePage() {
       </div>
 
       {/* 소속 팀 */}
-      <div style={{ marginTop: '24px' }}>
-        <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '10px' }}>소속 팀</h2>
+      <div className="mt-6">
+        <h2 className="text-base font-bold mb-2.5">소속 팀</h2>
         {memberTeams.length === 0 ? (
-          <p style={{ fontSize: '0.88rem', color: '#9ca3af' }}>소속 팀 없음</p>
+          <p className="text-[0.88rem] text-gray-400">소속 팀 없음</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className="flex flex-col gap-2.5">
             {memberTeams.map(t => (
               <Link
                 key={t.id}
                 href={`/teams/${t.id}`}
-                style={{
-                  display: 'flex', flexDirection: 'column', gap: '8px',
-                  padding: '12px', borderRadius: '10px', border: '1px solid #e5e7eb',
-                  background: '#fff', textDecoration: 'none', color: '#111827',
-                }}
+                className="flex flex-col gap-2 p-3 rounded-[10px] border border-gray-200 bg-white no-underline text-gray-900"
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 600 }}>{t.name}</span>
+                <div className="flex items-center gap-2">
+                  <span className="flex-1 text-[0.9rem] font-semibold">{t.name}</span>
                   {t.is_leader && (
-                    <span style={{
-                      padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem',
-                      fontWeight: 700, background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d',
-                    }}>
+                    <span className="py-0.5 px-2 rounded-full text-[0.72rem] font-bold bg-amber-100 text-amber-800 border border-yellow-300">
                       팀장
                     </span>
                   )}
                 </div>
                 {t.members.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                  <div className="flex flex-wrap gap-1">
                     {t.members.map(m => (
                       <span
                         key={m.id}
-                        style={{
-                          padding: '2px 8px', borderRadius: '9999px', fontSize: '0.75rem',
-                          background: m.isMe ? '#eff6ff' : '#f3f4f6',
-                          color: m.isMe ? '#1d4ed8' : '#4b5563',
-                          fontWeight: m.isMe ? 600 : 400,
-                          border: m.isMe ? '1px solid #bfdbfe' : '1px solid transparent',
-                        }}
+                        className={`py-0.5 px-2 rounded-full text-[0.75rem] ${
+                          m.isMe
+                            ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200'
+                            : 'bg-gray-100 text-gray-600 font-normal border border-transparent'
+                        }`}
                       >
                         {m.name}
                       </span>
@@ -306,9 +278,9 @@ export default async function MyProfilePage() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
-      <span style={{ width: '80px', fontSize: '0.85rem', color: '#6b7280', flexShrink: 0 }}>{label}</span>
-      <span style={{ fontSize: '0.9rem', color: '#111827' }}>{value}</span>
+    <div className="flex gap-3 py-2.5 border-b border-gray-100">
+      <span className="w-20 text-[0.85rem] text-gray-500 shrink-0">{label}</span>
+      <span className="text-[0.9rem] text-gray-900">{value}</span>
     </div>
   )
 }

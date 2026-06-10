@@ -33,33 +33,33 @@ export default async function PlatformLayout({
   const isAdmin = isAdminRole(profile?.role)
 
   return (
-    <div style={styles.wrapper}>
+    <div className="min-h-screen flex flex-col">
 
       {/* ── 헤더 ── */}
-      <header style={styles.header}>
-        <div style={styles.headerInner}>
+      <header className="sticky top-0 z-[100] bg-surface border-b border-[var(--border-subtle)]">
+        <div className="max-w-[1200px] mx-auto px-6 h-[60px] flex items-center gap-8">
 
           {/* 로고 */}
-          <Link href="/home" style={styles.logoLink}>
+          <Link href="/home" className="flex items-center gap-2.5 no-underline shrink-0">
             <Image
               src="/icon.svg"
               alt="청림그룹사운드 로고"
               width={28}
               height={28}
-              style={{ width: '28px', height: 'auto', filter: 'invert(1)', flexShrink: 0 }}
+              className="w-7 h-auto invert shrink-0"
             />
-            <span style={styles.logoText}>청림그룹사운드</span>
+            <span className="text-[15px] font-bold text-white tracking-[-0.3px]">청림그룹사운드</span>
           </Link>
 
           {/* 네비게이션 */}
           <NavLinks isAdmin={isAdmin} />
 
           {/* 유저 + 테마 + 로그아웃 */}
-          <div style={styles.userArea}>
+          <div className="flex items-center gap-3 ml-auto shrink-0">
             {profile && (
-              <span style={styles.userInfo}>
-                <span style={styles.userName}>{profile.name}</span>
-                <span style={styles.roleBadge}>
+              <span className="flex items-center gap-[7px]">
+                <span className="text-sm text-white/85 font-medium">{profile.name}</span>
+                <span className="text-[11px] py-[2px] px-2 rounded-[10px] bg-white/10 text-white/60 font-medium border border-white/12">
                   {roleLabel[profile.role] ?? profile.role}
                 </span>
               </span>
@@ -72,81 +72,10 @@ export default async function PlatformLayout({
       </header>
 
       {/* ── 본문 ── */}
-      <main style={styles.main}>
+      <main className="flex-1 max-w-[1200px] w-full mx-auto p-8 px-6">
         {children}
       </main>
 
     </div>
   )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  wrapper: {
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: 'var(--background)',
-  },
-  header: {
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 100,
-    backgroundColor: 'var(--surface)',
-    borderBottom: '1px solid var(--border-subtle)',
-  },
-  headerInner: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '0 24px',
-    height: '60px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '32px',
-  },
-  logoLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    textDecoration: 'none',
-    flexShrink: 0,
-  },
-  logoText: {
-    fontSize: '15px',
-    fontWeight: 700,
-    color: '#ffffff',
-    letterSpacing: '-0.3px',
-  },
-  userArea: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    marginLeft: 'auto',
-    flexShrink: 0,
-  },
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '7px',
-  },
-  userName: {
-    fontSize: '14px',
-    color: 'rgba(255,255,255,0.85)',
-    fontWeight: 500,
-  },
-  roleBadge: {
-    fontSize: '11px',
-    padding: '2px 8px',
-    borderRadius: '10px',
-    background: 'rgba(255,255,255,0.1)',
-    color: 'rgba(255,255,255,0.6)',
-    fontWeight: 500,
-    border: '1px solid rgba(255,255,255,0.12)',
-  },
-  main: {
-    flex: 1,
-    maxWidth: '1200px',
-    width: '100%',
-    margin: '0 auto',
-    padding: '32px 24px',
-  },
 }

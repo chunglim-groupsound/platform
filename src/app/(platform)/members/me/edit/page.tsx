@@ -21,7 +21,7 @@ export default async function MyProfileEditPage() {
     .select(`
       id, name, nickname, profile_image_url,
       status, role, generation, is_whitelist,
-      session, genre_preference, phone,
+      session, session_years, genre_preference, phone,
       department, student_id, school_year,
       privacy_settings
     `)
@@ -41,21 +41,24 @@ export default async function MyProfileEditPage() {
     if (!error) profileImageUrl = kakaoAvatarUrl
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { session_years: _sy, privacy_settings: _ps, ...restProfile } = profile
   const typedProfile = {
-    ...profile,
+    ...restProfile,
     profile_image_url: profileImageUrl,
     privacy_settings: (profile.privacy_settings ?? {}) as Record<string, string>,
     session: profile.session ?? [],
+    session_years: (profile.session_years ?? null) as Record<string, number> | null,
     genre_preference: profile.genre_preference ?? [],
   }
 
   return (
     <main>
-      <div style={{ padding: '20px 20px 0', maxWidth: '600px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <Link href="/members/me" style={{ fontSize: '0.85rem', color: '#6b7280', textDecoration: 'none' }}>
+      <div className="pt-5 px-5 pb-0 max-w-[600px] mx-auto flex items-center gap-3">
+        <Link href="/members/me" className="text-[0.85rem] text-gray-500 no-underline">
           ← 내 프로필
         </Link>
-        <h1 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>프로필 수정</h1>
+        <h1 className="text-[1.3rem] font-extrabold m-0">프로필 수정</h1>
       </div>
       <ProfileForm profile={typedProfile} kakaoAvatarUrl={kakaoAvatarUrl} redirectAfterSave="/members/me" />
     </main>

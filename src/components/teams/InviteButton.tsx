@@ -37,34 +37,27 @@ export function InviteButton({ targetId, myTeams }: Props) {
   }
 
   if (sent) return (
-    <p style={{ fontSize: '0.88rem', color: '#16a34a' }}>초대를 보냈습니다.</p>
+    <p className="text-[0.88rem] text-green-600">초대를 보냈습니다.</p>
   )
 
   return (
-    <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '16px' }}>
+    <div className="border-t border-gray-100 pt-4">
       {!showForm ? (
         <button
           onClick={() => setShowForm(true)}
-          style={{
-            padding: '7px 16px', borderRadius: '8px', fontSize: '0.85rem',
-            fontWeight: 600, border: '1px solid #6366f1', background: '#f5f3ff',
-            color: '#4f46e5', cursor: 'pointer',
-          }}
+          className="py-[7px] px-4 rounded-lg text-[0.85rem] font-semibold border border-indigo-500 bg-violet-50 text-indigo-600 cursor-pointer"
         >
           이 팀으로 초대하기
         </button>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <p style={{ fontSize: '0.88rem', fontWeight: 600, margin: 0 }}>팀 초대 보내기</p>
+        <div className="flex flex-col gap-2.5">
+          <p className="text-[0.88rem] font-semibold m-0">팀 초대 보내기</p>
 
           {myTeams.length > 1 && (
             <select
               value={selectedTeamId}
               onChange={e => setSelectedTeamId(e.target.value)}
-              style={{
-                padding: '7px 10px', borderRadius: '7px', border: '1px solid #d1d5db',
-                fontSize: '0.88rem', background: '#fff',
-              }}
+              className="py-[7px] px-2.5 rounded-[7px] border border-gray-300 text-[0.88rem] bg-white"
             >
               {myTeams.map(t => (
                 <option key={t.id} value={t.id}>{t.name}</option>
@@ -72,7 +65,7 @@ export function InviteButton({ targetId, myTeams }: Props) {
             </select>
           )}
           {myTeams.length === 1 && (
-            <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>팀: {myTeams[0].name}</p>
+            <p className="text-[0.85rem] text-gray-500 m-0">팀: {myTeams[0].name}</p>
           )}
 
           <textarea
@@ -80,32 +73,22 @@ export function InviteButton({ targetId, myTeams }: Props) {
             onChange={e => setMessage(e.target.value)}
             placeholder="초대 메시지 (선택)"
             rows={2}
-            style={{
-              width: '100%', padding: '8px 10px', borderRadius: '7px',
-              border: '1px solid #d1d5db', fontSize: '0.85rem', resize: 'vertical', boxSizing: 'border-box',
-            }}
+            className="w-full py-2 px-2.5 rounded-[7px] border border-gray-300 text-[0.85rem] resize-y box-border"
           />
 
-          {error && <p style={{ color: '#dc2626', fontSize: '0.82rem', margin: 0 }}>{error}</p>}
+          {error && <p className="text-red-600 text-[0.82rem] m-0">{error}</p>}
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="flex gap-2">
             <button
               onClick={() => setShowForm(false)}
-              style={{
-                padding: '6px 14px', borderRadius: '7px', fontSize: '0.83rem',
-                border: '1px solid #d1d5db', background: '#fff', color: '#374151', cursor: 'pointer',
-              }}
+              className="py-1.5 px-3.5 rounded-[7px] text-[0.83rem] border border-gray-300 bg-white text-gray-700 cursor-pointer"
             >
               취소
             </button>
             <button
               onClick={send}
               disabled={loading}
-              style={{
-                padding: '6px 14px', borderRadius: '7px', fontSize: '0.83rem',
-                fontWeight: 600, border: 'none', background: '#6366f1', color: '#fff',
-                cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-              }}
+              className={`py-1.5 px-3.5 rounded-[7px] text-[0.83rem] font-semibold border-none bg-indigo-500 text-white ${loading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
             >
               {loading ? '보내는 중...' : '초대 보내기'}
             </button>

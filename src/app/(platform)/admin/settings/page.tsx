@@ -79,71 +79,75 @@ export default function AdminSettingsPage() {
 
   return (
     <div>
-      <h1 style={styles.pageTitle}>설정</h1>
+      <h1 className="text-[22px] font-bold mb-6 text-gray-900">설정</h1>
 
-      <div style={styles.card}>
-        <h2 style={styles.sectionTitle}>모집 기간 관리</h2>
+      <div className="bg-white rounded-xl p-8 max-w-[560px] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+        <h2 className="text-base font-semibold mb-6 text-gray-900">모집 기간 관리</h2>
 
         {/* 현재 상태 배지 */}
-        <div style={styles.statusRow}>
-          <span style={styles.statusLabel}>현재 상태</span>
-          <span style={{
-            ...styles.badge,
-            backgroundColor: current?.is_open ? '#d1fae5' : '#fee2e2',
-            color: current?.is_open ? '#065f46' : '#991b1b',
-          }}>
+        <div className="flex items-center gap-3 mb-6 pb-5 border-b border-gray-100">
+          <span className="text-sm text-gray-500">현재 상태</span>
+          <span
+            className="text-xs font-semibold py-[3px] px-2.5 rounded-xl"
+            style={{
+              backgroundColor: current?.is_open ? '#d1fae5' : '#fee2e2',
+              color: current?.is_open ? '#065f46' : '#991b1b',
+            }}
+          >
             {current === null ? '불러오는 중...' : current.is_open ? '모집 중' : '모집 마감'}
           </span>
         </div>
 
-        <div style={styles.field}>
-          <label style={styles.label}>모집 활성화</label>
-          <div style={styles.toggleRow}>
+        <div className="mb-5 flex-1">
+          <label className="block text-[13px] font-medium text-gray-700 mb-2">모집 활성화</label>
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={() => setIsOpen(v => !v)}
-              style={{
-                ...styles.toggle,
-                backgroundColor: isOpen ? '#4A90E2' : '#d1d5db',
-              }}
+              className="relative w-[44px] h-6 rounded-xl border-none cursor-pointer transition-[background-color] duration-200 p-0"
+              style={{ backgroundColor: isOpen ? '#4A90E2' : '#d1d5db' }}
             >
-              <span style={{
-                ...styles.toggleKnob,
-                transform: isOpen ? 'translateX(20px)' : 'translateX(2px)',
-              }} />
+              <span
+                className="absolute top-[2px] w-5 h-5 rounded-full bg-white transition-transform duration-200 shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                style={{ transform: isOpen ? 'translateX(20px)' : 'translateX(2px)' }}
+              />
             </button>
-            <span style={styles.toggleText}>{isOpen ? '모집 중' : '모집 마감'}</span>
+            <span className="text-sm text-gray-700">{isOpen ? '모집 중' : '모집 마감'}</span>
           </div>
         </div>
 
-        <div style={styles.fieldRow}>
-          <div style={styles.field}>
-            <label style={styles.label}>모집 시작일시</label>
+        <div className="flex gap-4">
+          <div className="mb-5 flex-1">
+            <label className="block text-[13px] font-medium text-gray-700 mb-2">모집 시작일시</label>
             <input
               type="datetime-local"
               value={openAt}
               onChange={e => setOpenAt(e.target.value)}
-              style={styles.input}
+              className="w-full py-[9px] px-3 text-sm border border-gray-200 rounded-lg outline-none text-gray-900 bg-white"
+              style={{ boxSizing: 'border-box' }}
             />
           </div>
-          <div style={styles.field}>
-            <label style={styles.label}>모집 종료일시</label>
+          <div className="mb-5 flex-1">
+            <label className="block text-[13px] font-medium text-gray-700 mb-2">모집 종료일시</label>
             <input
               type="datetime-local"
               value={closeAt}
               onChange={e => setCloseAt(e.target.value)}
-              style={styles.input}
+              className="w-full py-[9px] px-3 text-sm border border-gray-200 rounded-lg outline-none text-gray-900 bg-white"
+              style={{ boxSizing: 'border-box' }}
             />
           </div>
         </div>
 
         {message && (
-          <p style={{
-            ...styles.message,
-            backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fff5f5',
-            color: message.type === 'success' ? '#166534' : '#991b1b',
-            border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
-          }}>
+          <p
+            className="text-[13px] py-2.5 px-3.5 rounded-lg mb-4"
+            style={{
+              backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fff5f5',
+              color: message.type === 'success' ? '#166534' : '#991b1b',
+              border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+            }}
+          >
             {message.text}
           </p>
         )}
@@ -151,122 +155,12 @@ export default function AdminSettingsPage() {
         <button
           onClick={handleSave}
           disabled={loading}
-          style={{ ...styles.saveBtn, opacity: loading ? 0.7 : 1 }}
+          className="py-2.5 px-7 text-sm font-semibold bg-gray-900 text-white border-none rounded-lg cursor-pointer"
+          style={{ opacity: loading ? 0.7 : 1 }}
         >
           {loading ? '저장 중...' : '저장'}
         </button>
       </div>
     </div>
   )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  pageTitle: {
-    fontSize: '22px',
-    fontWeight: 700,
-    marginBottom: '24px',
-    color: '#111827',
-  },
-  card: {
-    background: '#fff',
-    borderRadius: '12px',
-    padding: '32px',
-    maxWidth: '560px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-  },
-  sectionTitle: {
-    fontSize: '16px',
-    fontWeight: 600,
-    marginBottom: '24px',
-    color: '#111827',
-  },
-  statusRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    marginBottom: '24px',
-    paddingBottom: '20px',
-    borderBottom: '1px solid #f3f4f6',
-  },
-  statusLabel: {
-    fontSize: '14px',
-    color: '#6b7280',
-  },
-  badge: {
-    fontSize: '12px',
-    fontWeight: 600,
-    padding: '3px 10px',
-    borderRadius: '12px',
-  },
-  field: {
-    marginBottom: '20px',
-    flex: 1,
-  },
-  fieldRow: {
-    display: 'flex',
-    gap: '16px',
-  },
-  label: {
-    display: 'block',
-    fontSize: '13px',
-    fontWeight: 500,
-    color: '#374151',
-    marginBottom: '8px',
-  },
-  toggleRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  toggle: {
-    position: 'relative' as const,
-    width: '44px',
-    height: '24px',
-    borderRadius: '12px',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-    padding: 0,
-  },
-  toggleKnob: {
-    position: 'absolute' as const,
-    top: '2px',
-    width: '20px',
-    height: '20px',
-    borderRadius: '50%',
-    backgroundColor: '#fff',
-    transition: 'transform 0.2s',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-  },
-  toggleText: {
-    fontSize: '14px',
-    color: '#374151',
-  },
-  input: {
-    width: '100%',
-    padding: '9px 12px',
-    fontSize: '14px',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    boxSizing: 'border-box' as const,
-    outline: 'none',
-    color: '#111827',
-    backgroundColor: '#fff',
-  },
-  message: {
-    fontSize: '13px',
-    padding: '10px 14px',
-    borderRadius: '8px',
-    marginBottom: '16px',
-  },
-  saveBtn: {
-    padding: '10px 28px',
-    fontSize: '14px',
-    fontWeight: 600,
-    backgroundColor: '#111827',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-  },
 }

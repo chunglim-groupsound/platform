@@ -2,8 +2,6 @@
 
 import { useState } from 'react'
 
-const SESSION_OPTIONS = ['보컬', '기타', '베이스', '드럼', '건반', '기타(악기)']
-
 interface SessionYearsEditorProps {
   memberId: string
   initialSessionYears: Record<string, number> | null
@@ -23,7 +21,7 @@ export function SessionYearsEditor({ memberId, initialSessionYears, memberSessio
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null)
 
   if (sessions.length === 0) {
-    return <p style={{ fontSize: '13px', color: '#9ca3af' }}>등록된 세션이 없습니다.</p>
+    return <p className="text-[13px] text-gray-400">등록된 세션이 없습니다.</p>
   }
 
   const handleSave = async () => {
@@ -53,11 +51,11 @@ export function SessionYearsEditor({ memberId, initialSessionYears, memberSessio
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+    <div className="flex flex-col gap-2.5">
+      <div className="flex flex-wrap gap-2.5">
         {sessions.map(s => (
-          <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#374151' }}>
-            <span style={{ minWidth: '60px' }}>{s}</span>
+          <label key={s} className="flex items-center gap-1.5 text-[13px] text-gray-700">
+            <span className="min-w-[60px]">{s}</span>
             <input
               type="number"
               min={0}
@@ -65,29 +63,24 @@ export function SessionYearsEditor({ memberId, initialSessionYears, memberSessio
               placeholder="0"
               value={values[s] ?? ''}
               onChange={e => setValues(v => ({ ...v, [s]: e.target.value }))}
-              style={{
-                width: '56px', padding: '4px 8px', fontSize: '13px',
-                border: '1px solid #d1d5db', borderRadius: '6px', textAlign: 'center',
-              }}
+              className="w-[56px] py-1 px-2 text-[13px] border border-gray-300 rounded-md text-center"
             />
             <span>년</span>
           </label>
         ))}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="flex items-center gap-2.5">
         <button
           onClick={handleSave}
           disabled={saving}
-          style={{
-            padding: '6px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 600,
-            border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
-            background: saving ? '#e5e7eb' : '#1d4ed8', color: saving ? '#9ca3af' : '#fff',
-          }}
+          className={`py-1.5 px-4 rounded-md text-[13px] font-semibold border-none ${
+            saving ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-700 text-white cursor-pointer'
+          }`}
         >
           {saving ? '저장 중...' : '저장'}
         </button>
         {msg && (
-          <span style={{ fontSize: '12px', color: msg.ok ? '#166534' : '#991b1b' }}>
+          <span className={`text-xs ${msg.ok ? 'text-green-800' : 'text-red-800'}`}>
             {msg.text}
           </span>
         )}

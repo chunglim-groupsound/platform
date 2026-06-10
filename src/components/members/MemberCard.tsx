@@ -27,38 +27,25 @@ export function MemberCard({ member, isMe, onClick, variant = 'grid' }: MemberCa
     return (
       <div
         onClick={() => onClick(member.id)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '8px 12px',
-          borderRadius: '8px',
-          background: '#f9fafb',
-          cursor: 'pointer',
-          border: isMe ? '1px solid #3b82f6' : '1px solid #e5e7eb',
-        }}
+        className={`flex items-center gap-2.5 py-2 px-3 rounded-lg bg-gray-50 cursor-pointer border ${isMe ? 'border-blue-500' : 'border-gray-200'}`}
       >
-        <div style={{ position: 'relative', width: 36, height: 36, flexShrink: 0 }}>
+        <div className="relative w-9 h-9 shrink-0">
           {member.profile_image_url ? (
             <Image
               src={member.profile_image_url}
               alt={member.name ?? '비공개'}
               fill
-              style={{ borderRadius: '50%', objectFit: 'cover' }}
+              className="rounded-full object-cover"
             />
           ) : (
-            <div style={{
-              width: 36, height: 36, borderRadius: '50%',
-              background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1rem', color: '#6b7280',
-            }}>
+            <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-base text-gray-500">
               {(member.name ?? '?')[0]}
             </div>
           )}
         </div>
         <div>
-          <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>{displayName}</div>
-          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+          <div className="text-sm font-semibold">{displayName}</div>
+          <div className="text-[0.75rem] text-gray-500">
             {member.session.join(' · ')}
           </div>
         </div>
@@ -69,66 +56,43 @@ export function MemberCard({ member, isMe, onClick, variant = 'grid' }: MemberCa
   return (
     <div
       onClick={() => onClick(member.id)}
-      style={{
-        borderRadius: '12px',
-        border: isMe ? '2px solid #3b82f6' : '1px solid #e5e7eb',
-        background: '#fff',
-        padding: '16px',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '8px',
-        transition: 'box-shadow 0.15s',
-      }}
+      className={`rounded-xl border bg-white p-4 cursor-pointer flex flex-col items-center gap-2 transition-shadow duration-150 ${isMe ? 'border-[2px] border-blue-500' : 'border border-gray-200'}`}
       onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)')}
       onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
     >
-      <div style={{ position: 'relative', width: 64, height: 64 }}>
+      <div className="relative w-16 h-16">
         {member.profile_image_url ? (
           <Image
             src={member.profile_image_url}
             alt={member.name ?? '비공개'}
             fill
-            style={{ borderRadius: '50%', objectFit: 'cover' }}
+            className="rounded-full object-cover"
           />
         ) : (
-          <div style={{
-            width: 64, height: 64, borderRadius: '50%',
-            background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.5rem', color: '#6b7280',
-          }}>
+          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl text-gray-500">
             {(member.name ?? '?')[0]}
           </div>
         )}
       </div>
 
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{displayName}</div>
+      <div className="text-center">
+        <div className="font-bold text-[0.95rem]">{displayName}</div>
         {member.generation != null && (
-          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{member.generation}기</div>
+          <div className="text-[0.75rem] text-gray-500">{member.generation}기</div>
         )}
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'center' }}>
+      <div className="flex flex-wrap gap-1 justify-center">
         {member.session.map(s => (
-          <span key={s} style={{
-            padding: '2px 8px', borderRadius: '9999px',
-            background: '#eff6ff', color: '#1d4ed8',
-            fontSize: '0.72rem', fontWeight: 500,
-          }}>
+          <span key={s} className="py-0.5 px-2 rounded-full bg-blue-50 text-blue-700 text-[0.72rem] font-medium">
             {s}
           </span>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <div className="flex gap-1 flex-wrap justify-center">
         {roleLabel && (
-          <span style={{
-            padding: '2px 8px', borderRadius: '9999px',
-            background: '#fef3c7', color: '#92400e',
-            fontSize: '0.72rem', fontWeight: 600,
-          }}>
+          <span className="py-0.5 px-2 rounded-full bg-amber-100 text-amber-800 text-[0.72rem] font-semibold">
             {roleLabel}
           </span>
         )}
@@ -136,14 +100,14 @@ export function MemberCard({ member, isMe, onClick, variant = 'grid' }: MemberCa
       </div>
 
       {member.department && (
-        <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{member.department}</div>
+        <div className="text-[0.75rem] text-gray-500">{member.department}</div>
       )}
 
       {member.phone && (
         <a
           href={`tel:${member.phone}`}
           onClick={e => e.stopPropagation()}
-          style={{ fontSize: '0.75rem', color: '#2563eb', textDecoration: 'none' }}
+          className="text-[0.75rem] text-blue-600 no-underline"
         >
           {member.phone}
         </a>

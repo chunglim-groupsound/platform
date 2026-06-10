@@ -51,69 +51,50 @@ export function JoinRequestSection({ teamId, myRequest }: Props) {
   if (isAccepted) return null
 
   return (
-    <div style={{
-      marginTop: '16px', padding: '14px 16px', borderRadius: '12px',
-      border: '1px solid #e5e7eb', background: '#fff',
-    }}>
+    <div className="mt-4 py-3.5 px-4 rounded-xl border border-gray-200 bg-white">
       {isPending ? (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.88rem', color: '#6b7280' }}>가입 신청 중...</span>
+        <div className="flex justify-between items-center">
+          <span className="text-[0.88rem] text-gray-500">가입 신청 중...</span>
           <button
             onClick={cancel}
             disabled={loading}
-            style={{
-              padding: '4px 12px', borderRadius: '7px', fontSize: '0.82rem',
-              border: '1px solid #fca5a5', background: '#fff', color: '#dc2626', cursor: 'pointer',
-            }}
+            className="py-1 px-3 rounded-[7px] text-[0.82rem] border border-red-300 bg-white text-red-600 cursor-pointer"
           >
             신청 취소
           </button>
         </div>
       ) : isRejected ? (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.88rem', color: '#9ca3af' }}>가입 신청이 거절되었습니다.</span>
+        <div className="flex justify-between items-center">
+          <span className="text-[0.88rem] text-gray-400">가입 신청이 거절되었습니다.</span>
           <button
             onClick={cancel}
             disabled={loading}
-            style={{
-              padding: '4px 12px', borderRadius: '7px', fontSize: '0.82rem',
-              border: '1px solid #6366f1', background: '#f5f3ff', color: '#4f46e5', cursor: 'pointer',
-            }}
+            className="py-1 px-3 rounded-[7px] text-[0.82rem] border border-indigo-500 bg-violet-50 text-indigo-600 cursor-pointer"
           >
             다시 신청하기
           </button>
         </div>
       ) : showForm ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="flex flex-col gap-2.5">
           <textarea
             value={message}
             onChange={e => setMessage(e.target.value)}
             placeholder="가입 신청 메시지 (선택)"
             rows={3}
-            style={{
-              width: '100%', borderRadius: '8px', border: '1px solid #d1d5db',
-              padding: '8px 10px', fontSize: '0.88rem', resize: 'vertical', boxSizing: 'border-box',
-            }}
+            className="w-full rounded-lg border border-gray-300 py-2 px-2.5 text-[0.88rem] resize-y box-border"
           />
-          {error && <p style={{ color: '#dc2626', fontSize: '0.82rem', margin: 0 }}>{error}</p>}
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+          {error && <p className="text-red-600 text-[0.82rem] m-0">{error}</p>}
+          <div className="flex gap-2 justify-end">
             <button
               onClick={() => setShowForm(false)}
-              style={{
-                padding: '6px 14px', borderRadius: '7px', fontSize: '0.83rem',
-                border: '1px solid #d1d5db', background: '#fff', color: '#374151', cursor: 'pointer',
-              }}
+              className="py-1.5 px-3.5 rounded-[7px] text-[0.83rem] border border-gray-300 bg-white text-gray-700 cursor-pointer"
             >
               취소
             </button>
             <button
               onClick={submit}
               disabled={loading}
-              style={{
-                padding: '6px 14px', borderRadius: '7px', fontSize: '0.83rem',
-                border: 'none', background: '#6366f1', color: '#fff', cursor: 'pointer',
-                opacity: loading ? 0.6 : 1,
-              }}
+              className={`py-1.5 px-3.5 rounded-[7px] text-[0.83rem] border-none bg-indigo-500 text-white cursor-pointer ${loading ? 'opacity-60' : ''}`}
             >
               신청하기
             </button>
@@ -122,11 +103,7 @@ export function JoinRequestSection({ teamId, myRequest }: Props) {
       ) : (
         <button
           onClick={() => setShowForm(true)}
-          style={{
-            width: '100%', padding: '8px', borderRadius: '8px', fontSize: '0.88rem',
-            fontWeight: 600, border: '1px solid #6366f1', background: '#f5f3ff',
-            color: '#4f46e5', cursor: 'pointer',
-          }}
+          className="w-full py-2 rounded-lg text-[0.88rem] font-semibold border border-indigo-500 bg-violet-50 text-indigo-600 cursor-pointer"
         >
           이 팀에 가입 신청하기
         </button>

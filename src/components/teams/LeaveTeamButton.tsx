@@ -27,25 +27,18 @@ export function LeaveTeamButton({ teamId }: LeaveTeamButtonProps) {
 
   if (confirming) {
     return (
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-        <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>정말 나가시겠습니까?</span>
+      <div className="flex gap-2 items-center">
+        <span className="text-[0.85rem] text-gray-500">정말 나가시겠습니까?</span>
         <button
           onClick={leave}
           disabled={loading}
-          style={{
-            padding: '5px 12px', borderRadius: '7px', fontSize: '0.82rem', fontWeight: 700,
-            border: 'none', background: '#dc2626', color: '#fff',
-            cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-          }}
+          className={`py-[5px] px-3 rounded-[7px] text-[0.82rem] font-bold border-none bg-red-600 text-white ${loading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
         >
           {loading ? '처리 중...' : '나가기'}
         </button>
         <button
           onClick={() => setConfirming(false)}
-          style={{
-            padding: '5px 12px', borderRadius: '7px', fontSize: '0.82rem',
-            border: '1px solid #d1d5db', background: '#fff', color: '#374151', cursor: 'pointer',
-          }}
+          className="py-[5px] px-3 rounded-[7px] text-[0.82rem] border border-gray-300 bg-white text-gray-700 cursor-pointer"
         >
           취소
         </button>
@@ -56,10 +49,7 @@ export function LeaveTeamButton({ teamId }: LeaveTeamButtonProps) {
   return (
     <button
       onClick={() => setConfirming(true)}
-      style={{
-        padding: '5px 12px', borderRadius: '7px', fontSize: '0.82rem',
-        border: '1px solid #fca5a5', background: '#fff', color: '#dc2626', cursor: 'pointer',
-      }}
+      className="py-[5px] px-3 rounded-[7px] text-[0.82rem] border border-red-300 bg-white text-red-600 cursor-pointer"
     >
       팀 나가기
     </button>

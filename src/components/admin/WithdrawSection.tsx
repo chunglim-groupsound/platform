@@ -17,9 +17,9 @@ export function WithdrawSection({ memberId, memberName, currentStatus }: Props) 
 
   if (currentStatus === 'WITHDRAWN' || done) {
     return (
-      <section style={sectionStyle}>
-        <h2 style={titleStyle}>탈퇴 처리</h2>
-        <p style={{ fontSize: '13px', color: '#9ca3af' }}>이미 탈퇴 처리된 계정입니다.</p>
+      <section className="mb-8 pb-8 border-b border-[#f0f0f0]">
+        <h2 className="text-[15px] font-medium text-[#333] mb-3.5">탈퇴 처리</h2>
+        <p className="text-[13px] text-gray-400">이미 탈퇴 처리된 계정입니다.</p>
       </section>
     )
   }
@@ -46,27 +46,19 @@ export function WithdrawSection({ memberId, memberName, currentStatus }: Props) 
   }
 
   return (
-    <section style={sectionStyle}>
-      <h2 style={titleStyle}>탈퇴 처리</h2>
+    <section className="mb-8 pb-8 border-b border-[#f0f0f0]">
+      <h2 className="text-[15px] font-medium text-[#333] mb-3.5">탈퇴 처리</h2>
 
       {!confirming ? (
         <button
           onClick={() => setConfirming(true)}
-          style={{
-            padding: '8px 18px', fontSize: '13px', fontWeight: 600,
-            background: '#fff', color: '#dc2626',
-            border: '1.5px solid #fca5a5', borderRadius: '6px', cursor: 'pointer',
-          }}
+          className="py-2 px-[18px] text-[13px] font-semibold bg-white text-red-600 border-[1.5px] border-red-300 rounded-md cursor-pointer"
         >
           탈퇴 처리하기
         </button>
       ) : (
-        <div style={{
-          padding: '16px', border: '1.5px solid #fca5a5',
-          borderRadius: '8px', backgroundColor: '#fff5f5',
-          display: 'flex', flexDirection: 'column', gap: '10px',
-        }}>
-          <p style={{ fontSize: '13px', fontWeight: 600, color: '#b91c1c', margin: 0 }}>
+        <div className="p-4 border-[1.5px] border-red-300 rounded-lg bg-red-50 flex flex-col gap-2.5">
+          <p className="text-[13px] font-semibold text-red-700 m-0">
             {memberName}님을 탈퇴 처리합니다
           </p>
           <textarea
@@ -74,24 +66,19 @@ export function WithdrawSection({ memberId, memberName, currentStatus }: Props) 
             onChange={e => { setReason(e.target.value); setError(null) }}
             placeholder="탈퇴 사유를 입력하세요 (필수)"
             rows={2}
-            style={{
-              width: '100%', padding: '8px 10px', fontSize: '13px',
-              border: '1px solid #fca5a5', borderRadius: '6px',
-              resize: 'vertical', outline: 'none', boxSizing: 'border-box' as const,
-              lineHeight: 1.5, backgroundColor: '#fff',
-            }}
+            className="w-full py-2 px-2.5 text-[13px] border border-red-300 rounded-md outline-none leading-[1.5] bg-white resize-y"
+            style={{ boxSizing: 'border-box' }}
           />
           {error && (
-            <p style={{ fontSize: '13px', color: '#dc2626', margin: 0 }}>{error}</p>
+            <p className="text-[13px] text-red-600 m-0">{error}</p>
           )}
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="flex gap-2">
             <button
               onClick={handleWithdraw}
               disabled={loading}
+              className="py-[7px] px-[18px] text-[13px] font-semibold bg-red-600 text-white border-none rounded-md"
               style={{
-                padding: '7px 18px', fontSize: '13px', fontWeight: 600,
-                background: '#dc2626', color: '#fff', border: 'none',
-                borderRadius: '6px', cursor: loading ? 'not-allowed' : 'pointer',
+                cursor: loading ? 'not-allowed' : 'pointer',
                 opacity: loading ? 0.7 : 1,
               }}
             >
@@ -100,11 +87,7 @@ export function WithdrawSection({ memberId, memberName, currentStatus }: Props) 
             <button
               onClick={() => { setConfirming(false); setReason(''); setError(null) }}
               disabled={loading}
-              style={{
-                padding: '7px 18px', fontSize: '13px',
-                background: '#fff', color: '#6b7280',
-                border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer',
-              }}
+              className="py-[7px] px-[18px] text-[13px] bg-white text-gray-500 border border-gray-300 rounded-md cursor-pointer"
             >
               취소
             </button>
@@ -113,13 +96,4 @@ export function WithdrawSection({ memberId, memberName, currentStatus }: Props) 
       )}
     </section>
   )
-}
-
-const sectionStyle: React.CSSProperties = {
-  marginBottom: '32px',
-  paddingBottom: '32px',
-  borderBottom: '1px solid #f0f0f0',
-}
-const titleStyle: React.CSSProperties = {
-  fontSize: '15px', fontWeight: 500, color: '#333', marginBottom: '14px',
 }

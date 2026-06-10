@@ -15,13 +15,13 @@ export function AdminSection({ admins, myId }: AdminSectionProps) {
   if (admins.length === 0) return null
 
   return (
-    <section style={{ marginBottom: '32px' }}>
-      <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#374151', marginBottom: '12px' }}>
+    <section className="mb-8">
+      <h2 className="text-base font-bold text-gray-700 mb-3">
         운영진
       </h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+      <div className="flex flex-wrap gap-3">
         {admins.map(member => (
-          <div key={member.id} style={{ width: '160px' }}>
+          <div key={member.id} className="w-[160px]">
             <MemberCard
               member={member}
               isMe={member.id === myId}

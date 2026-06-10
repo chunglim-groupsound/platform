@@ -1,4 +1,4 @@
-﻿import { redirect, notFound } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { EditTeamForm } from '@/components/teams/EditTeamForm'
@@ -59,12 +59,12 @@ export default async function EditTeamPage({
     .filter((m): m is { id: string; name: string } => m !== null)
 
   return (
-    <main style={{ padding: '24px 20px', maxWidth: '520px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <Link href={`/teams/${id}`} style={{ fontSize: '0.85rem', color: '#6b7280', textDecoration: 'none' }}>
+    <main className="py-6 px-5 max-w-[520px] mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <Link href={`/teams/${id}`} className="text-[0.85rem] text-gray-500 no-underline">
           ← 팀 상세
         </Link>
-        <h1 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>팀 수정</h1>
+        <h1 className="text-[1.3rem] font-extrabold m-0">팀 수정</h1>
       </div>
       <EditTeamForm
         teamId={id}
