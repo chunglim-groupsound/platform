@@ -4,8 +4,14 @@ import { apiError, apiSuccess } from '@/lib/api/response'
 import { randomUUID } from 'crypto'
 import type { Database } from '@/types/database'
 
-type MemberRole   = Database['public']['Enums']['member_role']
-type MemberStatus = Database['public']['Enums']['member_status']
+type MemberRole      = Database['public']['Enums']['member_role']
+type MemberStatus    = Database['public']['Enums']['member_status']
+type SchoolYearStatus = Database['public']['Enums']['school_year_status']
+
+const SCHOOL_YEAR_MAP: Record<string, SchoolYearStatus> = {
+  '1': 'YEAR_1', '2': 'YEAR_2', '3': 'YEAR_3',
+  '4': 'YEAR_4', '5': 'YEAR_5',
+}
 
 interface CsvRow {
   name:         string
@@ -42,7 +48,7 @@ export async function POST(request: Request) {
       session:        sessionArr,
       department:     m.department?.trim()  || null,
       student_id:     m.student_id?.trim()  || null,
-      school_year:    m.school_year ? Number(m.school_year) : null,
+      school_year:    m.school_year ? (SCHOOL_YEAR_MAP[m.school_year.trim()] ?? null) : null,
       phone:          m.phone?.trim()        || null,
       is_whitelist:   m.is_whitelist === 'true',
       status,

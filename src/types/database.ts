@@ -601,9 +601,57 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          admin_note: string | null
+          body: string
+          category: Database["public"]["Enums"]["report_category"]
+          created_at: string
+          id: string
+          is_anonymous: boolean
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_note?: string | null
+          body: string
+          category: Database["public"]["Enums"]["report_category"]
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_note?: string | null
+          body?: string
+          category?: Database["public"]["Enums"]["report_category"]
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           activated_at: string | null
+          auth_key: string | null
           created_at: string
           department: string | null
           generation: number | null
@@ -621,7 +669,7 @@ export type Database = {
           probation_started_at: string | null
           profile_image_url: string | null
           role: Database["public"]["Enums"]["member_role"]
-          school_year: number | null
+          school_year: Database["public"]["Enums"]["school_year_status"] | null
           session: string[] | null
           session_years: Json | null
           status: Database["public"]["Enums"]["member_status"]
@@ -630,6 +678,7 @@ export type Database = {
         }
         Insert: {
           activated_at?: string | null
+          auth_key?: string | null
           created_at?: string
           department?: string | null
           generation?: number | null
@@ -647,7 +696,7 @@ export type Database = {
           probation_started_at?: string | null
           profile_image_url?: string | null
           role?: Database["public"]["Enums"]["member_role"]
-          school_year?: number | null
+          school_year?: Database["public"]["Enums"]["school_year_status"] | null
           session?: string[] | null
           session_years?: Json | null
           status?: Database["public"]["Enums"]["member_status"]
@@ -656,6 +705,7 @@ export type Database = {
         }
         Update: {
           activated_at?: string | null
+          auth_key?: string | null
           created_at?: string
           department?: string | null
           generation?: number | null
@@ -673,7 +723,7 @@ export type Database = {
           probation_started_at?: string | null
           profile_image_url?: string | null
           role?: Database["public"]["Enums"]["member_role"]
-          school_year?: number | null
+          school_year?: Database["public"]["Enums"]["school_year_status"] | null
           session?: string[] | null
           session_years?: Json | null
           status?: Database["public"]["Enums"]["member_status"]
@@ -752,7 +802,18 @@ export type Database = {
         | "ACTIVE"
         | "INACTIVE"
         | "WITHDRAWN"
+      report_category: "BUG" | "OPINION" | "COMPLAINT" | "OTHER"
+      report_status: "PENDING" | "REVIEWED" | "RESOLVED"
       request_status: "PENDING" | "ACCEPTED" | "REJECTED"
+      school_year_status:
+        | "YEAR_1"
+        | "YEAR_2"
+        | "YEAR_3"
+        | "YEAR_4"
+        | "YEAR_5"
+        | "COMPLETED"
+        | "ON_LEAVE"
+        | "GRADUATED"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -1,7 +1,27 @@
 import type { Metadata } from 'next'
-import { Noto_Sans_KR } from 'next/font/google'
-import Script from 'next/script'
+import { Anton, Space_Grotesk, Space_Mono, Noto_Sans_KR } from 'next/font/google'
 import './globals.css'
+
+const anton = Anton({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-anton',
+  display: 'swap',
+})
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-space-grotesk',
+  display: 'swap',
+})
+
+const spaceMono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-space-mono',
+  display: 'swap',
+})
 
 const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
@@ -28,14 +48,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const fontVars = [
+    anton.variable,
+    spaceGrotesk.variable,
+    spaceMono.variable,
+    notoSansKR.variable,
+  ].join(' ')
+
   return (
-    <html lang="ko" className={`${notoSansKR.variable} h-full`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col">
-        <Script
+    <html lang="ko" className={`${fontVars} h-full`} suppressHydrationWarning>
+      <head>
+        <script
           id="theme-init"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: THEME_INIT }}
         />
+      </head>
+      <body className="min-h-full flex flex-col">
         {children}
       </body>
     </html>

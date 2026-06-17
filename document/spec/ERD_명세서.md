@@ -13,6 +13,7 @@ erDiagram
         uuid id PK
         text kakao_id UK
         uuid linked_auth_id FK
+        text auth_key UK "CSV 가져오기 시 자동 생성, 기존부원 연동용"
         text name
         text nickname
         int generation
@@ -22,7 +23,7 @@ erDiagram
         text[] genre_preference
         text phone
         text department
-        int school_year
+        school_year_status school_year
         member_status status
         member_role role
         bool is_whitelist
@@ -143,6 +144,19 @@ erDiagram
         timestamptz created_at
     }
 
+    reports {
+        uuid id PK
+        uuid user_id FK "nullable - 익명 제출 시 null"
+        report_category category
+        text title
+        text body
+        bool is_anonymous
+        report_status status
+        text admin_note
+        timestamptz created_at
+        timestamptz resolved_at
+    }
+
     users ||--o{ team_members : "소속"
     teams ||--o{ team_members : "구성원"
     users ||--o{ teams : "팀장(leader_id)"
@@ -163,6 +177,7 @@ erDiagram
     users ||--o{ member_history : "변경 대상"
     users ||--o{ member_history : "변경자(changed_by)"
     users ||--o{ audit_logs : "행위자(actor_id)"
+    users ||--o{ reports : "제보자(user_id, nullable)"
 ```
 
 ---
@@ -189,6 +204,20 @@ erDiagram
 
 > 팀장 여부는 `teams.leader_id`로 관리. `TEAM_LEADER` enum 값은 제거됨.
 
+### `school_year_status`
+| 값 | UI 표시 | 노출 범위 |
+|----|---------|---------|
+| `YEAR_1` | 1학년 | 전체 |
+| `YEAR_2` | 2학년 | 전체 |
+| `YEAR_3` | 3학년 | 전체 |
+| `YEAR_4` | 4학년 | 전체 |
+| `YEAR_5` | 5학년 | 전체 |
+| `COMPLETED` | 수료 | 전체 |
+| `ON_LEAVE` | 휴학 | 신규부원 지원서 + 기존부원 프로필 수정만 표시 |
+| `GRADUATED` | 졸업 | 신규부원 지원서 + 기존부원 프로필 수정만 표시 |
+
+> 기본 UI(프로필 보기 등)에서는 `ON_LEAVE`, `GRADUATED` 를 선택 목록에 표시하지 않는다. 단, DB enum에 존재하므로 필터·검색에서 값은 사용 가능.
+
 ### `interview_result`
 | 값 | 설명 |
 |----|------|
@@ -203,6 +232,21 @@ erDiagram
 | `ACCEPTED` | 수락됨 |
 | `REJECTED` | 거절됨 |
 
+### `report_category`
+| 값 | 설명 |
+|----|------|
+| `BUG` | 버그·오류 제보 |
+| `OPINION` | 의견·건의 |
+| `COMPLAINT` | 부원 관련 민원·제보 |
+| `OTHER` | 기타 |
+
+### `report_status`
+| 값 | 설명 |
+|----|------|
+| `PENDING` | 접수됨, 미검토 |
+| `REVIEWED` | 검토 완료 |
+| `RESOLVED` | 처리 완료 |
+
 ---
 
 ## 3. 테이블 상세 설명
@@ -210,9 +254,11 @@ erDiagram
 ### users
 핵심 회원 테이블. Supabase Auth의 `auth.users`와 별도로 관리됨.
 - `linked_auth_id`: 기존 부원(kakao_id로 등록)이 새 Kakao 계정으로 로그인했을 때 연결되는 auth UID
+- `auth_key`: CSV 가져오기 시 자동 생성되는 개인 인증키(`CL{기수}-XXXX-XXXX`). Unique. 기존 부원이 `/link` 화면에서 입력해 계정을 연동한다. 연동 완료 후에도 필드는 유지(운영진 재발급 가능).
 - `session_years` (JSONB): 세션별 경력 연차 — 예: `{"기타": 3, "보컬": 1}`. 본인 및 운영진이 직접 입력. `null` 허용
 - `privacy_settings` (JSONB): `{ name, generation, phone, department, school_year }` 각 필드별 공개 범위 (`'all'|'member'|'admin'`)
 - `session`: 악기/파트 배열 (예: `['기타', '보컬']`)
+- `school_year`: `school_year_status` enum. `int`에서 변경됨.
 - `is_whitelist`: 사전 등록된 명단 여부
 
 ### teams
@@ -234,6 +280,11 @@ erDiagram
 
 ### member_warnings
 경고 누적 시 자동 탈퇴 처리 (3회 초과시). Supabase Edge Function 또는 트리거로 처리.
+
+### reports
+신고·제보 테이블. 카카오 "마음의 편지" 창구 대체.
+- `user_id`: 익명 제출(`is_anonymous: true`) 시 `null`. 비익명이어도 본인 제출이 맞는지는 서버에서 세션으로 확인.
+- `status`: 기본값 `PENDING`. 운영진이 REVIEWED → RESOLVED 처리.
 
 ### audit_logs
 데이터 변경 감사 로그. `before`/`after` JSONB로 이전/이후 값 보관.
@@ -281,3 +332,4 @@ erDiagram
 | `interview_slots` | PENDING 이상 (모집 기간 중) | 운영진만 |
 | `member_warnings` | 운영진만 | 운영진만 |
 | `audit_logs` | 운영진만 | 시스템만 (트리거) |
+| `reports` | 본인 제출 건 / 운영진 전체 | 로그인 사용자 (생성), 운영진 (상태 업데이트) |

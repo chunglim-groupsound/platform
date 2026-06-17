@@ -37,24 +37,35 @@ NextResponse.json({ error: string, ...extras? }, { status: number })
 ## 1. 인증 (Auth)
 
 ### `POST /auth/link/search`
-기존 부원 계정 검색 (이름 + 기수 매칭).
+개인 인증키로 기존 부원 계정 조회.
+
+> 이름 + 기수 방식은 동명이인 탈취 위험으로 폐기. CSV 가져오기(`/admin/import`) 시 부원별 고유 인증키가 자동 생성되며, 운영진이 개인 카카오톡으로 전달한다.
 
 **요청**
 ```json
-{ "name": "홍길동", "generation": 25 }
+{ "auth_key": "CL18-7F3A-9K2D" }
 ```
+
+- `auth_key`: `CL{기수}-{4자리 대문자+숫자}-{4자리 대문자+숫자}` 형식. 대소문자 무관 처리.
 
 **응답 200**
 ```json
-{ "users": [{ "id": "uuid", "name": "홍길동", "generation": 25, "kakao_id": "12345" }] }
+{
+  "user": {
+    "id": "uuid",
+    "name": "홍길동",
+    "generation": 25
+  }
+}
 ```
 
-**응답 404**: 일치하는 부원 없음
+**응답 404**: 인증키와 일치하는 부원 없음  
+**응답 409**: 이미 연동된 부원 (재연동 시도)
 
 ---
 
 ### `POST /auth/link/confirm`
-Kakao Auth UID를 기존 부원 계정에 연결.
+Kakao Auth UID를 기존 부원 계정에 연결. 검색(`/link/search`)으로 반환된 `user.id`를 사용한다.
 
 **요청**
 ```json
@@ -655,7 +666,7 @@ CSV 등록 부원들의 Kakao 계정 연동 여부 조회.
 ---
 
 ### `POST /api/admin/import`
-CSV 파일 부원 일괄 등록.
+CSV 파일 부원 일괄 등록. 등록 시 부원별 고유 `auth_key`를 자동 생성한다.
 
 **요청**: `multipart/form-data` — `file: CSV`
 
@@ -667,13 +678,101 @@ CSV 파일 부원 일괄 등록.
   "success": true,
   "imported": 15,
   "skipped": 2,
-  "errors": ["3행: 기수가 숫자가 아님"]
+  "errors": ["3행: 기수가 숫자가 아님"],
+  "auth_keys": [
+    { "name": "홍길동", "generation": 25, "auth_key": "CL25-A1B2-C3D4" }
+  ]
+}
+```
+
+> `auth_keys` 배열은 응답 1회 한정 반환. 운영진이 즉시 복사해 개인 카카오톡으로 전달한다. 이후 `/api/admin/members/link-status`에서 연동 여부 확인 가능.
+
+---
+
+## 7. 신고·제보 (Reports)
+
+> 기존 카카오톡 "마음의 편지" 창구를 대체·통합. 버그 제보, 의견 제안, 부원 관련 제보를 모두 수용한다.
+
+### `POST /api/reports`
+신고·제보 제출. 로그인 사용자 전용 (비익명 시 `user_id` 자동 연결).
+
+**권한**: 로그인 상태면 누구나 (`PENDING` 포함)
+
+**요청**
+```json
+{
+  "category": "BUG",
+  "title": "타임테이블 예약 버튼이 눌리지 않아요",
+  "body": "크롬 모바일에서 재현됩니다...",
+  "is_anonymous": false
+}
+```
+
+| `category` 값 | 설명 |
+|-------------|------|
+| `BUG` | 버그·오류 제보 |
+| `OPINION` | 의견·건의 |
+| `COMPLAINT` | 부원 관련 민원·제보 |
+| `OTHER` | 기타 |
+
+**응답 201**
+```json
+{ "id": "uuid" }
+```
+
+---
+
+### `GET /api/admin/reports`
+제출된 신고·제보 목록 조회.
+
+**권한**: `ADMIN_ACCESS`
+
+**쿼리 파라미터**
+| 파라미터 | 타입 | 설명 |
+|---------|------|------|
+| `status` | `PENDING\|REVIEWED\|RESOLVED` | 처리 상태 필터 |
+| `category` | `report_category` | 카테고리 필터 |
+
+**응답 200**
+```json
+{
+  "reports": [{
+    "id": "uuid",
+    "category": "BUG",
+    "title": "...",
+    "body": "...",
+    "is_anonymous": false,
+    "reporter_name": "홍길동 | null",
+    "status": "PENDING",
+    "admin_note": null,
+    "created_at": "ISO8601"
+  }]
 }
 ```
 
 ---
 
-## 7. 미구현 / 추후 구현 예정 엔드포인트
+### `PATCH /api/admin/reports/[id]`
+신고·제보 처리 상태 및 운영진 메모 업데이트.
+
+**권한**: `ADMIN_ACCESS`
+
+**요청**
+```json
+{
+  "status": "RESOLVED",
+  "admin_note": "수정 완료"
+}
+```
+
+**응답 200**
+```json
+{ "success": true }
+```
+
+---
+
+## 8. 미구현 / 추후 구현 예정 엔드포인트
 
 | 경로/기능 | 설명 | 현재 상태 |
 |---------|------|---------|

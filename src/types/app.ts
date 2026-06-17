@@ -1,8 +1,9 @@
 import type { Database } from './database'
 
-export type MemberStatus   = Database['public']['Enums']['member_status']
-export type MemberRole     = Database['public']['Enums']['member_role']
-export type RequestStatus  = Database['public']['Enums']['request_status']
+export type MemberStatus    = Database['public']['Enums']['member_status']
+export type MemberRole      = Database['public']['Enums']['member_role']
+export type RequestStatus   = Database['public']['Enums']['request_status']
+export type SchoolYearStatus = Database['public']['Enums']['school_year_status']
 
 export interface Team {
   id: string
@@ -57,6 +58,6 @@ export interface MemberCardData {
   is_whitelist: boolean
   phone: string | null
   department: string | null
-  school_year: number | null
+  school_year: SchoolYearStatus | null
   is_leader?: boolean
 }

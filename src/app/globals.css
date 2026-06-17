@@ -17,6 +17,15 @@
   --color-accent-hover:      var(--accent-hover);
   --color-accent-muted:      var(--accent-muted);
   --color-accent-foreground: var(--accent-foreground);
+  --color-ok:                var(--ok);
+  --color-ok-bright:         var(--ok-bright);
+  --color-bad:               var(--bad);
+
+  /* font family tokens */
+  --font-display: var(--font-anton);
+  --font-sans:    var(--font-space-grotesk);
+  --font-mono:    var(--font-space-mono);
+  --font-kr:      var(--font-noto-kr);
 }
 
 /* ── Worn Denim (default) ─── 네이비 · 스틸블루 ──────────────────────── */
@@ -34,6 +43,9 @@
   --accent-hover:      #7AABDB;
   --accent-muted:      #1E3A5F;
   --accent-foreground: #EDF2FF;
+  --ok:                #3AAA6A;
+  --ok-bright:         #4DD680;
+  --bad:               #E05560;
 
   /* legacy aliases — 기존 var(--color-bg) 등 사용처 호환 */
   --color-bg:             var(--background);
@@ -55,6 +67,9 @@
   --accent-hover:      #A3B4C8;
   --accent-muted:      #2A2F3A;
   --accent-foreground: #F0F2F5;
+  --ok:                #3AAA6A;
+  --ok-bright:         #4DD680;
+  --bad:               #E05560;
 
   /* legacy aliases */
   --color-bg:             var(--background);
@@ -62,9 +77,79 @@
   --color-text-secondary: var(--muted-foreground);
 }
 
+/* ── Crimson Amp ──────────── 레드 · 앰버 ───────────────────────────── */
+[data-theme="crimson-amp"] {
+  --background:        #2A1518;
+  --surface:           #331A1E;
+  --surface-elevated:  #3D2025;
+  --border:            #5C2A30;
+  --border-subtle:     rgba(255, 255, 255, 0.06);
+  --foreground:        #FFF0F0;
+  --muted-foreground:  #C47A80;
+  --subtle-foreground: #7A3A40;
+  --accent:            #E05560;
+  --accent-hover:      #F06870;
+  --accent-muted:      #3D1520;
+  --accent-foreground: #FFF0F0;
+  --ok:                #3AAA6A;
+  --ok-bright:         #4DD680;
+  --bad:               #FF6B6B;
+
+  --color-bg:             var(--background);
+  --color-text:           var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+}
+
+/* ── Velvet Night ─────────── 딥 퍼플 ───────────────────────────────── */
+[data-theme="velvet-night"] {
+  --background:        #1A1525;
+  --surface:           #211A2E;
+  --surface-elevated:  #282038;
+  --border:            #3D2F5A;
+  --border-subtle:     rgba(255, 255, 255, 0.06);
+  --foreground:        #F0EDFF;
+  --muted-foreground:  #8B7AAD;
+  --subtle-foreground: #4D3D6B;
+  --accent:            #9C7FDB;
+  --accent-hover:      #B399EC;
+  --accent-muted:      #2A1F42;
+  --accent-foreground: #F0EDFF;
+  --ok:                #3AAA6A;
+  --ok-bright:         #4DD680;
+  --bad:               #E05560;
+
+  --color-bg:             var(--background);
+  --color-text:           var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+}
+
+/* ── Neon Moss ────────────── 네온 그린 ─────────────────────────────── */
+[data-theme="neon-moss"] {
+  --background:        #121A18;
+  --surface:           #181F1C;
+  --surface-elevated:  #1E2622;
+  --border:            #2A3A33;
+  --border-subtle:     rgba(255, 255, 255, 0.06);
+  --foreground:        #E8F5EE;
+  --muted-foreground:  #6AAF88;
+  --subtle-foreground: #3A6050;
+  --accent:            #4FBF7A;
+  --accent-hover:      #6DD494;
+  --accent-muted:      #192B22;
+  --accent-foreground: #0A1A10;
+  --ok:                #4FBF7A;
+  --ok-bright:         #6DD494;
+  --bad:               #E05560;
+
+  --color-bg:             var(--background);
+  --color-text:           var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+}
+
 /* ── 기타 전역 ─────────────────────────────────────────────────────── */
 :root {
-  --font-body: var(--font-noto-kr), 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-body: var(--font-space-grotesk), var(--font-noto-kr), 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  color-scheme: dark;
 }
 
 * {
@@ -94,4 +179,63 @@ button {
 
 input, textarea, select {
   font-family: inherit;
+}
+
+/* ── number input 스피너 제거 ─────────────────────────────────────── */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* ── date / time picker 스타일 통일 ───────────────────────────────── */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+  background: var(--surface);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.5);
+  cursor: pointer;
+}
+
+/* ── custom scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* ── screenIn keyframe ────────────────────────────────────────────── */
+@keyframes screenIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-screen-in {
+  animation: screenIn 0.25s ease-out both;
 }

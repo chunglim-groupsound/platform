@@ -4,9 +4,21 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { PrivacySettings } from './PrivacySettings'
+import type { SchoolYearStatus } from '@/types/app'
 
 const SESSION_OPTIONS = ['보컬', '기타', '베이스', '드럼', '건반', '기타(악기)']
 const GENRE_OPTIONS   = ['록', '팝', '인디', '재즈', 'R&B', '메탈', '힙합', '발라드', '펑크', '포크']
+
+const SCHOOL_YEAR_OPTIONS: { value: SchoolYearStatus; label: string }[] = [
+  { value: 'YEAR_1',    label: '1학년' },
+  { value: 'YEAR_2',    label: '2학년' },
+  { value: 'YEAR_3',    label: '3학년' },
+  { value: 'YEAR_4',    label: '4학년' },
+  { value: 'YEAR_5',    label: '5학년' },
+  { value: 'COMPLETED', label: '수료' },
+  { value: 'ON_LEAVE',  label: '휴학' },
+  { value: 'GRADUATED', label: '졸업' },
+]
 
 interface ProfileData {
   id: string
@@ -23,7 +35,7 @@ interface ProfileData {
   phone: string | null
   department: string | null
   student_id: string | null
-  school_year: number | null
+  school_year: SchoolYearStatus | null
   privacy_settings: Record<string, string>
 }
 
@@ -36,7 +48,7 @@ interface FormState {
   phone: string
   department: string
   student_id: string
-  school_year: string
+  school_year: SchoolYearStatus | ''
   privacy_settings: Record<string, string>
 }
 
@@ -61,7 +73,7 @@ function toFormState(p: ProfileData): FormState {
     phone:             p.phone ?? '',
     department:        p.department ?? '',
     student_id:        p.student_id ?? '',
-    school_year:       p.school_year?.toString() ?? '',
+    school_year:       (p.school_year ?? '') as SchoolYearStatus | '',
     privacy_settings:  p.privacy_settings ?? {},
   }
 }
@@ -101,8 +113,7 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
       e.nickname = '닉네임은 최대 20자입니다'
     if (form.session.length === 0)
       e.session = '세션은 최소 1개 이상 선택해야 합니다'
-    if (form.school_year && (Number(form.school_year) < 1 || Number(form.school_year) > 5))
-      e.school_year = '학년은 1~5 사이 정수여야 합니다'
+    // school_year is always a valid enum value when set; no range validation needed
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -124,7 +135,7 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
         phone:             form.phone.trim() || null,
         department:        form.department.trim() || null,
         student_id:        form.student_id.trim() || null,
-        school_year:       form.school_year ? Number(form.school_year) : null,
+        school_year:       form.school_year || null,
         privacy_settings:  form.privacy_settings,
       }
       const res = await fetch('/api/members/me', {
@@ -333,12 +344,12 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
         <Field label="학년" error={errors.school_year}>
           <select
             value={form.school_year}
-            onChange={e => setForm(f => ({ ...f, school_year: e.target.value }))}
+            onChange={e => setForm(f => ({ ...f, school_year: e.target.value as SchoolYearStatus | '' }))}
             className={`${inputClass} w-auto`}
           >
             <option value="">선택 안 함</option>
-            {[1, 2, 3, 4, 5].map(y => (
-              <option key={y} value={y}>{y}학년</option>
+            {SCHOOL_YEAR_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
             ))}
           </select>
         </Field>

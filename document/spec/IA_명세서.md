@@ -14,11 +14,13 @@
 │   └── callback                공개 - OAuth 콜백 처리 (Route Handler)
 │
 ├── /status                     인증됨 (모든 상태) - 상태 안내 페이지
-│   └── ?reason=not_open        모집 기간 외 접근 시
+│   └── ?reason=not_open        모집 기간 외 접근 시 (신청서 상태는 /apply 내부에서 처리)
 │
 ├── (auth 그룹) ────────────────── PENDING 상태 회원 전용
-│   ├── /link                   기존 부원 계정 연동 (kakao_id 매칭)
-│   └── /apply                  신규 가입 신청서 작성
+│   ├── /link                   기존 부원 계정 연동 (개인 인증키 입력 → 자동 매칭)
+│   └── /apply                  신규 가입 신청서 작성 + 제출 후 가입 진행 상황 화면
+│                               (클라이언트 상태 전환, URL 유지 — 페이지 로드 시 기존 신청서
+│                                유무를 서버에서 확인해 폼 또는 상태 화면을 렌더링)
 │
 └── (platform 그룹) ─────────────── PROBATION/ACTIVE/INACTIVE 이상
     ├── /home                   대시보드 (INTERVIEWING 접근 가능)
@@ -52,7 +54,7 @@
 /api/
 │
 ├── /auth/
-│   ├── /link/search            POST - 기존 부원 검색 (name + generation)
+│   ├── /link/search            POST - 개인 인증키로 기존 부원 조회
 │   └── /link/confirm           POST - 계정 연동 확정
 │
 ├── /members/
@@ -83,6 +85,8 @@
 │
 ├── /interview-preferences/     GET, POST - 내 면접 희망 슬롯 조회/등록
 │
+├── /reports/                   POST - 신고·제보 제출 (로그인 사용자, PENDING 포함)
+│
 └── /admin/
     ├── /settings/recruitment   GET, PATCH - 모집 기간 관리
     ├── /applications/
@@ -96,7 +100,10 @@
     │   ├── /link-status        GET - CSV 등록된 계정의 연동 상태
     │   ├── /transition         POST - 회원 상태 강제 변경
     │   └── /[id]/warnings      GET, POST - 경고 목록 / 경고 발급
-    └── /import                 POST - CSV 부원 일괄 등록
+    ├── /import                 POST - CSV 부원 일괄 등록 (auth_key 자동 생성)
+    └── /reports/
+        ├── /                   GET - 신고·제보 목록 (상태·카테고리 필터)
+        └── /[id]               PATCH - 처리 상태·메모 업데이트
 ```
 
 ---
@@ -140,12 +147,13 @@
     모집 기간 중
          │
          ▼
-    /link (기존 부원 여부 확인)
-    ├── 기존 부원: linked_auth_id 연결 → PENDING 유지 → 신청서 작성
+    /link (기존 부원 여부 확인 — 개인 인증키 입력)
+    ├── 기존 부원: linked_auth_id 연결 → PENDING 유지 → /apply (신청서 작성)
     └── 신규: /apply → 신청서 작성
          │
          ▼
-   신청서 제출 → PENDING (신청서 있음) → /status (승인 대기)
+   신청서 제출 → PENDING (신청서 있음) → /apply (가입 진행 상황 화면, URL 유지)
+                                         ※ /status?reason=not_open 은 모집 기간 외 안내 전용
          │
     운영진 면접 슬롯 배정
          │
