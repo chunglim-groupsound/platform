@@ -18,8 +18,9 @@ const BLOCKED_FIELDS = new Set([
   'privacy_agreed_at',
 ])
 
-const VALID_SESSIONS = new Set(['보컬', '기타', '베이스', '드럼', '건반', '기타(악기)'])
-const VALID_SCOPES   = new Set(['all', 'member', 'admin'])
+const VALID_SESSIONS    = new Set(['보컬', '기타', '베이스', '드럼', '건반', '기타(악기)'])
+const VALID_SCOPES      = new Set(['all', 'member', 'admin'])
+const VALID_SCHOOL_YEARS = new Set(['YEAR_1', 'YEAR_2', 'YEAR_3', 'YEAR_4', 'YEAR_5', 'COMPLETED', 'ON_LEAVE', 'GRADUATED'])
 
 export async function PATCH(request: Request) {
   const supabase = await createClient()
@@ -86,9 +87,8 @@ export async function PATCH(request: Request) {
   }
 
   if ('school_year' in patch && patch.school_year !== null) {
-    const y = Number(patch.school_year)
-    if (!Number.isInteger(y) || y < 1 || y > 5) {
-      errors.school_year = '학년은 1~5 사이의 정수여야 합니다'
+    if (!VALID_SCHOOL_YEARS.has(String(patch.school_year))) {
+      errors.school_year = '올바른 학년 값을 선택해주세요'
     }
   }
 

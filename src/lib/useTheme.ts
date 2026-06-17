@@ -10,11 +10,11 @@ export type ThemeId =
   | 'neon-moss'
 
 export const THEMES: { id: ThemeId; label: string; bg: string; accent: string }[] = [
-  { id: 'worn-denim',   label: 'Worn Denim',   bg: '#1B2A45', accent: '#5B8EC7' },
-  { id: 'slate-stage',  label: 'Slate Stage',  bg: '#18191D', accent: '#8B9AB0' },
-  { id: 'crimson-amp',  label: 'Crimson Amp',  bg: '#2A1518', accent: '#E05560' },
-  { id: 'velvet-night', label: 'Velvet Night', bg: '#1A1525', accent: '#9C7FDB' },
-  { id: 'neon-moss',    label: 'Neon Moss',    bg: '#121A18', accent: '#4FBF7A' },
+  { id: 'worn-denim',   label: 'Worn Denim',   bg: '#151A26', accent: '#D6A35A' },
+  { id: 'slate-stage',  label: 'Slate Stage',  bg: '#161719', accent: '#AEB7C4' },
+  { id: 'crimson-amp',  label: 'Ember',        bg: '#121A1C', accent: '#E58A6B' },
+  { id: 'velvet-night', label: 'Velvet Night', bg: '#15141F', accent: '#D9B468' },
+  { id: 'neon-moss',    label: 'Green Room',   bg: '#121A14', accent: '#DA8AA0' },
 ]
 
 export function useTheme() {

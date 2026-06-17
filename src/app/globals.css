@@ -28,21 +28,21 @@
   --font-kr:      var(--font-noto-kr);
 }
 
-/* ── Worn Denim (default) ─── 네이비 · 스틸블루 ──────────────────────── */
+/* ── Worn Denim (default) ─── 네이비 · 앰버 골드 ─────────────────────── */
 :root,
 [data-theme="worn-denim"] {
-  --background:        #1B2A45;
-  --surface:           #1F3158;
-  --surface-elevated:  #243966;
-  --border:            #2D4475;
+  --background:        #151A26;
+  --surface:           #1C2433;
+  --surface-elevated:  #26303F;
+  --border:            #323E52;
   --border-subtle:     rgba(255, 255, 255, 0.06);
-  --foreground:        #EDF2FF;
-  --muted-foreground:  #7FA3CC;
-  --subtle-foreground: #4A6B96;
-  --accent:            #5B8EC7;
-  --accent-hover:      #7AABDB;
-  --accent-muted:      #1E3A5F;
-  --accent-foreground: #EDF2FF;
+  --foreground:        #EAEEF6;
+  --muted-foreground:  #8A96AC;
+  --subtle-foreground: #56627A;
+  --accent:            #D6A35A;
+  --accent-hover:      #ECC07B;
+  --accent-muted:      #2C2719;
+  --accent-foreground: #1A1308;
   --ok:                #3AAA6A;
   --ok-bright:         #4DD680;
   --bad:               #E05560;
@@ -55,18 +55,18 @@
 
 /* ── Slate Stage ──────────── 차콜 · 실버 ───────────────────────────── */
 [data-theme="slate-stage"] {
-  --background:        #18191D;
-  --surface:           #22252B;
-  --surface-elevated:  #2A2D36;
-  --border:            #36393F;
+  --background:        #161719;
+  --surface:           #1F2125;
+  --surface-elevated:  #292C31;
+  --border:            #383B42;
   --border-subtle:     rgba(255, 255, 255, 0.05);
-  --foreground:        #F0F2F5;
-  --muted-foreground:  #9CA3AF;
-  --subtle-foreground: #6B7280;
-  --accent:            #8B9AB0;
-  --accent-hover:      #A3B4C8;
-  --accent-muted:      #2A2F3A;
-  --accent-foreground: #F0F2F5;
+  --foreground:        #F1F3F6;
+  --muted-foreground:  #9AA2AD;
+  --subtle-foreground: #686F7A;
+  --accent:            #AEB7C4;
+  --accent-hover:      #C6CEDA;
+  --accent-muted:      #2B2F37;
+  --accent-foreground: #16171A;
   --ok:                #3AAA6A;
   --ok-bright:         #4DD680;
   --bad:               #E05560;
@@ -77,43 +77,20 @@
   --color-text-secondary: var(--muted-foreground);
 }
 
-/* ── Crimson Amp ──────────── 레드 · 앰버 ───────────────────────────── */
+/* ── Crimson Amp (Ember) ──── 틸 · 오렌지 ──────────────────────────── */
 [data-theme="crimson-amp"] {
-  --background:        #2A1518;
-  --surface:           #331A1E;
-  --surface-elevated:  #3D2025;
-  --border:            #5C2A30;
-  --border-subtle:     rgba(255, 255, 255, 0.06);
-  --foreground:        #FFF0F0;
-  --muted-foreground:  #C47A80;
-  --subtle-foreground: #7A3A40;
-  --accent:            #E05560;
-  --accent-hover:      #F06870;
-  --accent-muted:      #3D1520;
-  --accent-foreground: #FFF0F0;
-  --ok:                #3AAA6A;
-  --ok-bright:         #4DD680;
-  --bad:               #FF6B6B;
-
-  --color-bg:             var(--background);
-  --color-text:           var(--foreground);
-  --color-text-secondary: var(--muted-foreground);
-}
-
-/* ── Velvet Night ─────────── 딥 퍼플 ───────────────────────────────── */
-[data-theme="velvet-night"] {
-  --background:        #1A1525;
-  --surface:           #211A2E;
-  --surface-elevated:  #282038;
-  --border:            #3D2F5A;
-  --border-subtle:     rgba(255, 255, 255, 0.06);
-  --foreground:        #F0EDFF;
-  --muted-foreground:  #8B7AAD;
-  --subtle-foreground: #4D3D6B;
-  --accent:            #9C7FDB;
-  --accent-hover:      #B399EC;
-  --accent-muted:      #2A1F42;
-  --accent-foreground: #F0EDFF;
+  --background:        #121A1C;
+  --surface:           #182426;
+  --surface-elevated:  #213034;
+  --border:            #2D4044;
+  --border-subtle:     rgba(255, 255, 255, 0.05);
+  --foreground:        #E8F0F1;
+  --muted-foreground:  #8AA0A3;
+  --subtle-foreground: #586B6E;
+  --accent:            #E58A6B;
+  --accent-hover:      #F2A285;
+  --accent-muted:      #2C1C16;
+  --accent-foreground: #1B0E08;
   --ok:                #3AAA6A;
   --ok-bright:         #4DD680;
   --bad:               #E05560;
@@ -123,22 +100,45 @@
   --color-text-secondary: var(--muted-foreground);
 }
 
-/* ── Neon Moss ────────────── 네온 그린 ─────────────────────────────── */
-[data-theme="neon-moss"] {
-  --background:        #121A18;
-  --surface:           #181F1C;
-  --surface-elevated:  #1E2622;
-  --border:            #2A3A33;
+/* ── Velvet Night ─────────── 딥 네이비 · 골드 ──────────────────────── */
+[data-theme="velvet-night"] {
+  --background:        #15141F;
+  --surface:           #1D1B2A;
+  --surface-elevated:  #272538;
+  --border:            #383650;
   --border-subtle:     rgba(255, 255, 255, 0.06);
-  --foreground:        #E8F5EE;
-  --muted-foreground:  #6AAF88;
-  --subtle-foreground: #3A6050;
-  --accent:            #4FBF7A;
-  --accent-hover:      #6DD494;
-  --accent-muted:      #192B22;
-  --accent-foreground: #0A1A10;
-  --ok:                #4FBF7A;
-  --ok-bright:         #6DD494;
+  --foreground:        #ECEAF4;
+  --muted-foreground:  #9794AE;
+  --subtle-foreground: #605E78;
+  --accent:            #D9B468;
+  --accent-hover:      #EECB87;
+  --accent-muted:      #2A2416;
+  --accent-foreground: #1A1407;
+  --ok:                #3AAA6A;
+  --ok-bright:         #4DD680;
+  --bad:               #E05560;
+
+  --color-bg:             var(--background);
+  --color-text:           var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+}
+
+/* ── Neon Moss (Green Room) ── 다크 그린 · 핑크 로즈 ────────────────── */
+[data-theme="neon-moss"] {
+  --background:        #121A14;
+  --surface:           #18241B;
+  --surface-elevated:  #213026;
+  --border:            #2D4032;
+  --border-subtle:     rgba(255, 255, 255, 0.05);
+  --foreground:        #E7F1E9;
+  --muted-foreground:  #8AA191;
+  --subtle-foreground: #586C5E;
+  --accent:            #DA8AA0;
+  --accent-hover:      #EBA3B6;
+  --accent-muted:      #2B1920;
+  --accent-foreground: #1C0E13;
+  --ok:                #3AAA6A;
+  --ok-bright:         #4DD680;
   --bad:               #E05560;
 
   --color-bg:             var(--background);
@@ -238,4 +238,16 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 .animate-screen-in {
   animation: screenIn 0.25s ease-out both;
+}
+
+/* ── shake keyframe (인증키 오류 등) ──────────────────────────────── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(7px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(3px); }
+}
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
 }

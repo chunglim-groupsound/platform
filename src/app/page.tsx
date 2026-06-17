@@ -102,11 +102,19 @@ export default async function LandingPage() {
         {/* ACTIVITIES */}
         <section className="border-t border-border-subtle py-16 max-md:py-[46px]">
           <div className="max-w-[1100px] mx-auto px-7">
-            <div className="mb-9">
-              <Kicker>우리가 하는 일</Kicker>
-              <h2 className="font-sans font-bold text-[30px] tracking-tight mt-3 mb-0 max-md:text-[25px]">
-                동아리 활동
-              </h2>
+            <div className="flex items-end justify-between gap-4 flex-wrap mb-[34px]">
+              <div>
+                <Kicker>우리가 하는 일</Kicker>
+                <h2 className="font-sans font-bold text-[30px] tracking-tight mt-3 mb-0 whitespace-nowrap max-md:text-[25px]">
+                  동아리 활동
+                </h2>
+              </div>
+              <a
+                href="/home"
+                className="inline-flex items-center gap-2 px-[18px] py-[9px] rounded-md border border-border text-foreground font-sans font-semibold text-[13.5px] hover:border-accent hover:text-accent-hover transition-all duration-150 whitespace-nowrap"
+              >
+                합주 일정 보기
+              </a>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-[18px]">
               {ACTIVITIES.map(({ idx, icon, title, desc }) => (
