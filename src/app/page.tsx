@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { AmbientBackground } from '@/components/ui/AmbientBackground'
 import { ThemePicker } from '@/components/ui/ThemePicker'
 import { Kicker } from '@/components/ui/Kicker'
@@ -14,7 +15,27 @@ function fmtDate(iso: string | null): string {
 export default async function LandingPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user) redirect('/home')
+  if (user) {
+    const adminClient = createAdminClient()
+    const { data: profile } = await adminClient
+      .from('users')
+      .select('id, status')
+      .or(`id.eq.${user.id},linked_auth_id.eq.${user.id}`)
+      .maybeSingle()
+
+    if (!profile || profile.status === 'PENDING') {
+      if (profile) {
+        const { data: application } = await adminClient
+          .from('join_applications')
+          .select('id')
+          .eq('user_id', profile.id)
+          .maybeSingle()
+        if (application) redirect('/apply')
+      }
+      redirect('/join')
+    }
+    redirect('/home')
+  }
 
   const { data: rec } = await supabase
     .from('recruitment_periods')
