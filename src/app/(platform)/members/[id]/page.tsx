@@ -2,18 +2,12 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { canView } from '@/lib/member/privacy'
-import Image from 'next/image'
 import Link from 'next/link'
+import { Avatar } from '@/components/ui/Avatar'
+import { Badge, BadgeAccent } from '@/components/ui/Badge'
 import { WhitelistBadge } from '@/components/members/WhitelistBadge'
 import { InviteButton } from '@/components/teams/InviteButton'
-import { isAdminRole, hasActiveMemberAccess } from '@/lib/constants'
-
-const ROLE_LABEL: Record<string, string> = {
-  SUPER_ADMIN: '최고관리자',
-  ADMIN: '운영진',
-  MEMBER: '일반 부원',
-  PROBATION_MEMBER: '수습 부원',
-}
+import { isAdminRole, hasActiveMemberAccess, ROLE_LABELS } from '@/lib/constants'
 
 interface TeamMemberUser { id: string; name: string; nickname: string | null }
 interface TeamMemberEntry { user_id: string; user: TeamMemberUser | null }
@@ -62,7 +56,6 @@ export default async function MemberDetailPage({
   const privacy = (target.privacy_settings ?? {}) as Record<string, string>
   const isSelf = false
 
-  // 소속 팀 + 팀원 조회
   const { data: teamMemberships } = await createAdminClient()
     .from('team_members')
     .select(`
@@ -86,14 +79,13 @@ export default async function MemberDetailPage({
       name:      t.name,
       is_leader: t.leader_id === id,
       members:   (t.team_members ?? []).map(m => ({
-        id:   m.user_id,
-        name: m.user?.nickname ?? m.user?.name ?? '알 수 없음',
+        id:       m.user_id,
+        name:     m.user?.nickname ?? m.user?.name ?? '알 수 없음',
         isTarget: m.user_id === id,
       })),
     }
   }).filter((t): t is NonNullable<typeof t> => t !== null)
 
-  // 내가 팀장인 팀 목록 (초대 드롭다운용)
   const { data: myLedTeams } = await createAdminClient()
     .from('teams')
     .select('id, name')
@@ -103,52 +95,39 @@ export default async function MemberDetailPage({
   const canInvite = !!myLedTeams && myLedTeams.length > 0 &&
     ['ACTIVE', 'INACTIVE'].includes(me?.status ?? '')
 
+  const displayName = canView(privacy.name ?? 'member', 'member', isSelf, isMember, isAdmin)
+    ? (target.nickname ?? target.name)
+    : (target.nickname ?? '(이름 비공개)')
+
   return (
-    <main className="py-6 px-5 max-w-[600px] mx-auto">
-      <Link href="/members" className="text-[0.85rem] text-gray-500 no-underline">
+    <main className="py-8 px-5 max-w-[600px] mx-auto animate-screen-in">
+      <Link
+        href="/members"
+        className="inline-flex items-center gap-1.5 text-[0.82rem] text-muted-foreground no-underline hover:text-foreground transition-colors mb-6"
+      >
         ← 명단으로
       </Link>
 
-      <div className="mt-5 bg-gray-50 rounded-2xl p-6 flex flex-col items-center gap-3">
-        <div className="relative w-20 h-20">
-          {target.profile_image_url ? (
-            <Image
-              src={target.profile_image_url}
-              alt={target.name}
-              fill
-              className="rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-[2rem] text-gray-500">
-              {target.name[0]}
-            </div>
-          )}
-        </div>
+      {/* 프로필 카드 */}
+      <div className="rounded-2xl border border-[var(--border)] bg-surface p-6 flex flex-col items-center gap-3">
+        <Avatar
+          name={target.name ?? target.nickname ?? '?'}
+          src={target.profile_image_url}
+          size={72}
+        />
 
         <div className="text-center">
-          {canView(privacy.name ?? 'member', 'member', isSelf, isMember, isAdmin) ? (
-            <>
-              <div className="font-extrabold text-[1.2rem]">
-                {target.nickname ?? target.name}
-              </div>
-              {target.nickname && (
-                <div className="text-[0.82rem] text-gray-500">{target.name}</div>
-              )}
-            </>
-          ) : (
-            <div className="font-extrabold text-[1.2rem]">
-              {target.nickname ?? '(이름 비공개)'}
-            </div>
+          <div className="font-extrabold text-[1.2rem] text-foreground">{displayName}</div>
+          {target.nickname && canView(privacy.name ?? 'member', 'member', isSelf, isMember, isAdmin) && (
+            <div className="text-[0.82rem] text-muted-foreground">{target.name}</div>
           )}
           {canView(privacy.generation, 'member', isSelf, isMember, isAdmin) && target.generation != null && (
-            <div className="text-[0.85rem] text-gray-500 mt-0.5">{target.generation}기</div>
+            <div className="text-[0.85rem] text-muted-foreground mt-0.5">{target.generation}기</div>
           )}
         </div>
 
         <div className="flex gap-1.5 flex-wrap justify-center">
-          <span className="py-[3px] px-2.5 rounded-full bg-[#e0f2fe] text-[#075985] text-[0.78rem] font-semibold">
-            {ROLE_LABEL[target.role] ?? target.role}
-          </span>
+          <Badge>{ROLE_LABELS[target.role] ?? target.role}</Badge>
           {target.is_whitelist && <WhitelistBadge />}
         </div>
 
@@ -157,38 +136,37 @@ export default async function MemberDetailPage({
             {target.session!.map((s: string) => {
               const sy = (target.session_years as Record<string, number> | null)?.[s]
               return (
-                <span key={s} className="py-[3px] px-2.5 rounded-full bg-blue-50 text-blue-700 text-[0.78rem]">
+                <BadgeAccent key={s}>
                   {s}{sy != null ? ` ${sy}년` : ''}
-                </span>
+                </BadgeAccent>
               )
             })}
           </div>
         )}
       </div>
 
-      <div className="mt-5 flex flex-col gap-0">
+      {/* 상세 정보 */}
+      <div className="mt-4 flex flex-col rounded-xl border border-[var(--border)] bg-surface overflow-hidden">
         {canView(privacy.department, 'member', isSelf, isMember, isAdmin) && target.department && (
-          <Row label="학과" value={target.department} />
+          <InfoRow label="학과" value={target.department} />
         )}
         {canView(privacy.school_year, 'member', isSelf, isMember, isAdmin) && target.school_year != null && (
-          <Row label="학년" value={`${target.school_year}학년`} />
+          <InfoRow label="학년" value={SCHOOL_YEAR_LABELS[target.school_year] ?? target.school_year} />
         )}
         {canView(privacy.phone, 'admin', isSelf, isMember, isAdmin) && target.phone && (
-          <div className="flex gap-3 py-2.5 border-b border-gray-100">
-            <span className="w-20 text-[0.85rem] text-gray-500 shrink-0">연락처</span>
-            <a href={`tel:${target.phone}`} className="text-[0.9rem] text-blue-600">
+          <div className="flex gap-3 py-3 px-4 border-b border-[var(--border-subtle)] last:border-0">
+            <span className="w-20 text-[0.82rem] text-muted-foreground shrink-0">연락처</span>
+            <a href={`tel:${target.phone}`} className="text-[0.88rem] text-accent no-underline hover:underline">
               {target.phone}
             </a>
           </div>
         )}
         {(target.genre_preference ?? []).length > 0 && (
-          <div className="flex gap-3 py-2.5 border-b border-gray-100">
-            <span className="w-20 text-[0.85rem] text-gray-500 shrink-0">선호 장르</span>
+          <div className="flex gap-3 py-3 px-4 border-b border-[var(--border-subtle)] last:border-0">
+            <span className="w-20 text-[0.82rem] text-muted-foreground shrink-0 pt-0.5">선호 장르</span>
             <div className="flex flex-wrap gap-1">
               {target.genre_preference!.map((g: string) => (
-                <span key={g} className="py-0.5 px-2 rounded-full bg-gray-100 text-gray-700 text-[0.78rem]">
-                  {g}
-                </span>
+                <Badge key={g}>{g}</Badge>
               ))}
             </div>
           </div>
@@ -197,24 +175,22 @@ export default async function MemberDetailPage({
 
       {/* 소속 팀 */}
       <div className="mt-6">
-        <h2 className="text-base font-bold mb-2.5">소속 팀</h2>
+        <p className="text-[0.78rem] font-semibold text-muted-foreground uppercase tracking-[0.12em] font-mono mb-3">
+          소속 팀
+        </p>
         {memberTeams.length === 0 ? (
-          <p className="text-[0.88rem] text-gray-400">소속 팀 없음</p>
+          <p className="text-[0.85rem] text-subtle-foreground">소속 팀 없음</p>
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2">
             {memberTeams.map(t => (
               <Link
                 key={t.id}
                 href={`/teams/${t.id}`}
-                className="flex flex-col gap-2 p-3 rounded-[10px] border border-gray-200 bg-white no-underline text-gray-900"
+                className="flex flex-col gap-2 p-3.5 rounded-xl border border-[var(--border)] bg-surface hover:bg-surface-elevated no-underline transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <span className="flex-1 text-[0.9rem] font-semibold">{t.name}</span>
-                  {t.is_leader && (
-                    <span className="py-0.5 px-2 rounded-full text-[0.72rem] font-bold bg-amber-100 text-amber-800 border border-yellow-300">
-                      팀장
-                    </span>
-                  )}
+                  <span className="flex-1 text-[0.9rem] font-semibold text-foreground">{t.name}</span>
+                  {t.is_leader && <BadgeAccent>팀장</BadgeAccent>}
                 </div>
                 {t.members.length > 0 && (
                   <div className="flex flex-wrap gap-1">
@@ -223,8 +199,8 @@ export default async function MemberDetailPage({
                         key={m.id}
                         className={`py-0.5 px-2 rounded-full text-[0.75rem] ${
                           m.isTarget
-                            ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200'
-                            : 'bg-gray-100 text-gray-600 font-normal border border-transparent'
+                            ? 'bg-accent-muted text-accent font-semibold'
+                            : 'bg-surface-elevated text-muted-foreground'
                         }`}
                       >
                         {m.name}
@@ -247,11 +223,17 @@ export default async function MemberDetailPage({
   )
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+const SCHOOL_YEAR_LABELS: Record<string, string> = {
+  YEAR_1: '1학년', YEAR_2: '2학년', YEAR_3: '3학년',
+  YEAR_4: '4학년', YEAR_5: '5학년', COMPLETED: '수료',
+  ON_LEAVE: '휴학', GRADUATED: '졸업',
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-3 py-2.5 border-b border-gray-100">
-      <span className="w-20 text-[0.85rem] text-gray-500 shrink-0">{label}</span>
-      <span className="text-[0.9rem] text-gray-900">{value}</span>
+    <div className="flex gap-3 py-3 px-4 border-b border-[var(--border-subtle)] last:border-0">
+      <span className="w-20 text-[0.82rem] text-muted-foreground shrink-0">{label}</span>
+      <span className="text-[0.88rem] text-foreground">{value}</span>
     </div>
   )
 }

@@ -2,13 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import { Avatar } from '@/components/ui/Avatar'
+import { Chip } from '@/components/ui/Chip'
+import { Badge, BadgeAccent } from '@/components/ui/Badge'
+import { ButtonPrimary } from '@/components/ui/Button'
 import { PrivacySettings } from './PrivacySettings'
 import type { SchoolYearStatus } from '@/types/app'
 
 const SESSION_OPTIONS = ['보컬', '기타', '베이스', '드럼', '건반', '기타(악기)']
 const GENRE_OPTIONS   = ['록', '팝', '인디', '재즈', 'R&B', '메탈', '힙합', '발라드', '펑크', '포크']
 
+// 수정 화면: 휴학·졸업 숨김 (체크리스트 명세)
 const SCHOOL_YEAR_OPTIONS: { value: SchoolYearStatus; label: string }[] = [
   { value: 'YEAR_1',    label: '1학년' },
   { value: 'YEAR_2',    label: '2학년' },
@@ -16,9 +20,14 @@ const SCHOOL_YEAR_OPTIONS: { value: SchoolYearStatus; label: string }[] = [
   { value: 'YEAR_4',    label: '4학년' },
   { value: 'YEAR_5',    label: '5학년' },
   { value: 'COMPLETED', label: '수료' },
-  { value: 'ON_LEAVE',  label: '휴학' },
-  { value: 'GRADUATED', label: '졸업' },
 ]
+
+const ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN:      '개발 담당',
+  ADMIN:            '운영진',
+  MEMBER:           '정식 부원',
+  PROBATION_MEMBER: '유예 부원',
+}
 
 interface ProfileData {
   id: string
@@ -52,13 +61,6 @@ interface FormState {
   privacy_settings: Record<string, string>
 }
 
-const ROLE_LABEL: Record<string, string> = {
-  SUPER_ADMIN: '최고관리자',
-  ADMIN: '운영진',
-  MEMBER: '일반 부원',
-  PROBATION_MEMBER: '수습 부원',
-}
-
 function toFormState(p: ProfileData): FormState {
   const sy: Record<string, string> = {}
   for (const s of (p.session ?? [])) {
@@ -78,7 +80,11 @@ function toFormState(p: ProfileData): FormState {
   }
 }
 
-export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { profile: ProfileData; kakaoAvatarUrl: string | null; redirectAfterSave?: string }) {
+export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: {
+  profile: ProfileData
+  kakaoAvatarUrl: string | null
+  redirectAfterSave?: string
+}) {
   const router = useRouter()
   const [form, setForm] = useState<FormState>(() => toFormState(profile))
   const [original] = useState<FormState>(() => toFormState(profile))
@@ -113,7 +119,6 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
       e.nickname = '닉네임은 최대 20자입니다'
     if (form.session.length === 0)
       e.session = '세션은 최소 1개 이상 선택해야 합니다'
-    // school_year is always a valid enum value when set; no range validation needed
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -145,9 +150,7 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
       })
       if (res.ok) {
         setToast({ msg: '저장되었습니다', type: 'ok' })
-        if (redirectAfterSave) {
-          setTimeout(() => router.push(redirectAfterSave), 800)
-        }
+        if (redirectAfterSave) setTimeout(() => router.push(redirectAfterSave), 800)
       } else {
         const data = await res.json()
         setToast({ msg: data.error ?? '저장에 실패했습니다', type: 'err' })
@@ -166,76 +169,64 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
   }, [toast])
 
   return (
-    <div className="max-w-[600px] mx-auto py-6 px-4 flex flex-col gap-6">
+    <div className="max-w-[600px] mx-auto py-6 px-5 flex flex-col gap-6">
       {/* 프로필 헤더 */}
-      <div className="bg-gray-50 rounded-xl p-5 flex items-center gap-4">
-        {/* 프로필 이미지 + 선택 버튼 */}
+      <div className="rounded-2xl border border-[var(--border)] bg-surface p-5 flex items-center gap-4">
         <div className="flex flex-col items-center gap-2.5 shrink-0">
-          <div className="relative w-[72px] h-[72px]">
-            {form.profile_image_url ? (
-              <Image
-                src={form.profile_image_url}
-                alt={profile.name}
-                fill
-                className="rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-[72px] h-[72px] rounded-full bg-gray-200 flex items-center justify-center text-[1.8rem] text-gray-500">
-                {profile.name[0]}
-              </div>
-            )}
-          </div>
+          <Avatar
+            name={profile.name}
+            src={form.profile_image_url}
+            size={68}
+          />
           <div className="flex gap-1.5">
             <button
               type="button"
               disabled={!kakaoAvatarUrl}
               onClick={() => setForm(f => ({ ...f, profile_image_url: kakaoAvatarUrl }))}
-              className={`py-1 px-2.5 rounded-md text-[0.72rem] font-semibold border-none ${
-                form.profile_image_url === kakaoAvatarUrl && kakaoAvatarUrl
-                  ? 'bg-[#4A90E2] text-white cursor-pointer'
-                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              }`}
+              className="py-1 px-2.5 rounded-md text-[0.72rem] font-semibold border-none cursor-pointer disabled:cursor-not-allowed transition-colors"
+              style={{
+                background: form.profile_image_url === kakaoAvatarUrl && kakaoAvatarUrl
+                  ? 'var(--accent)' : 'var(--surface-elevated)',
+                color: form.profile_image_url === kakaoAvatarUrl && kakaoAvatarUrl
+                  ? 'var(--accent-foreground)' : 'var(--muted-foreground)',
+              }}
             >
               카카오
             </button>
             <button
               type="button"
               onClick={() => setForm(f => ({ ...f, profile_image_url: null }))}
-              className={`py-1 px-2.5 rounded-md text-[0.72rem] font-semibold border-none cursor-pointer ${
-                !form.profile_image_url
-                  ? 'bg-[#4A90E2] text-white'
-                  : 'bg-gray-200 text-gray-500'
-              }`}
+              className="py-1 px-2.5 rounded-md text-[0.72rem] font-semibold border-none cursor-pointer transition-colors"
+              style={{
+                background: !form.profile_image_url ? 'var(--accent)' : 'var(--surface-elevated)',
+                color: !form.profile_image_url ? 'var(--accent-foreground)' : 'var(--muted-foreground)',
+              }}
             >
               기본
             </button>
           </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <div className="font-bold text-[1.1rem]">{profile.name}</div>
+        <div className="flex flex-col gap-1.5">
+          <div className="font-bold text-[1.05rem] text-foreground">{profile.name}</div>
           {profile.generation && (
-            <div className="text-[0.85rem] text-gray-500">{profile.generation}기</div>
+            <div className="text-[0.82rem] text-muted-foreground">{profile.generation}기</div>
           )}
           <div className="flex gap-1.5 flex-wrap">
-            <span className="py-[2px] px-2 rounded-full bg-[#e0f2fe] text-[#075985] text-xs">
-              {ROLE_LABEL[profile.role] ?? profile.role}
-            </span>
+            <Badge>{ROLE_LABELS[profile.role] ?? profile.role}</Badge>
             {profile.is_whitelist && (
-              <span className="py-[2px] px-2 rounded-full bg-[#fef9c3] text-[#854d0e] text-xs">
-                ★ WL
-              </span>
+              <BadgeAccent>★ WL</BadgeAccent>
             )}
           </div>
-          <div className="text-xs text-gray-400">이름 · 기수는 운영진만 수정 가능합니다</div>
+          <div className="text-[0.75rem] text-subtle-foreground">이름 · 기수는 운영진만 수정 가능합니다</div>
         </div>
       </div>
 
       {/* 기본 정보 */}
-      <section className="flex flex-col gap-3.5">
-        <h3 className="text-[0.95rem] font-bold text-gray-900 m-0">기본 정보</h3>
+      <section className="flex flex-col gap-4">
+        <SectionTitle>기본 정보</SectionTitle>
 
-        <Field label="닉네임 (활동명)" error={errors.nickname}>
+        <Field label="활동명 (닉네임)" error={errors.nickname}>
           <input
             type="text"
             placeholder="미입력 시 실명으로 표시됩니다"
@@ -249,26 +240,21 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
         <Field label="세션 *" error={errors.session}>
           <div className="flex flex-wrap gap-1.5">
             {SESSION_OPTIONS.map(s => (
-              <button
+              <Chip
                 key={s}
-                type="button"
-                onClick={() => toggleSession(s)}
-                className={`py-1 px-3.5 rounded-full text-[0.82rem] border cursor-pointer ${
-                  form.session.includes(s)
-                    ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
-                    : 'border-gray-300 bg-white text-gray-700 font-normal'
-                }`}
+                selected={form.session.includes(s)}
+                onToggle={() => toggleSession(s)}
               >
                 {s}
-              </button>
+              </Chip>
             ))}
           </div>
           {form.session.length > 0 && (
-            <div className="mt-2.5 flex flex-col gap-1.5">
-              <span className="text-[0.78rem] text-gray-500">세션별 경력 연차 (선택)</span>
+            <div className="mt-3 flex flex-col gap-1.5">
+              <span className="text-[0.78rem] text-subtle-foreground">세션별 경력 연차 (선택)</span>
               <div className="flex flex-wrap gap-2">
                 {form.session.map(s => (
-                  <label key={s} className="flex items-center gap-1 text-[0.82rem] text-gray-700">
+                  <label key={s} className="flex items-center gap-1.5 text-[0.82rem] text-foreground">
                     <span className="min-w-[52px]">{s}</span>
                     <input
                       type="number"
@@ -280,9 +266,9 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
                         ...f,
                         session_years: { ...f.session_years, [s]: e.target.value },
                       }))}
-                      className="w-[52px] py-1 px-1.5 border border-gray-300 rounded-md text-[0.82rem] text-center"
+                      className="w-[52px] py-1 px-1.5 border border-[var(--border)] rounded-md text-[0.82rem] text-center bg-surface-elevated text-foreground outline-none focus:border-accent/50"
                     />
-                    <span>년</span>
+                    <span className="text-muted-foreground">년</span>
                   </label>
                 ))}
               </div>
@@ -293,18 +279,13 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
         <Field label="선호 장르">
           <div className="flex flex-wrap gap-1.5">
             {GENRE_OPTIONS.map(g => (
-              <button
+              <Chip
                 key={g}
-                type="button"
-                onClick={() => toggleGenre(g)}
-                className={`py-1 px-3.5 rounded-full text-[0.82rem] border cursor-pointer ${
-                  form.genre_preference.includes(g)
-                    ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
-                    : 'border-gray-300 bg-white text-gray-700 font-normal'
-                }`}
+                selected={form.genre_preference.includes(g)}
+                onToggle={() => toggleGenre(g)}
               >
                 {g}
-              </button>
+              </Chip>
             ))}
           </div>
         </Field>
@@ -356,8 +337,8 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
       </section>
 
       {/* 공개 범위 설정 */}
-      <section className="flex flex-col gap-3.5">
-        <h3 className="text-[0.95rem] font-bold text-gray-900 m-0">공개 범위 설정</h3>
+      <section className="flex flex-col gap-4">
+        <SectionTitle>공개 범위 설정</SectionTitle>
         <PrivacySettings
           value={form.privacy_settings}
           onChange={ps => setForm(f => ({ ...f, privacy_settings: ps }))}
@@ -365,21 +346,20 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
       </section>
 
       {/* 저장 버튼 */}
-      <button
+      <ButtonPrimary
         onClick={handleSave}
         disabled={!isDirty || saving}
-        className={`p-3 rounded-[10px] text-[0.95rem] font-semibold border-none transition-[background] duration-150 ${
-          isDirty && !saving
-            ? 'bg-blue-700 text-white cursor-pointer'
-            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-        }`}
+        size="lg"
+        className="w-full"
       >
         {saving ? '저장 중...' : '저장하기'}
-      </button>
+      </ButtonPrimary>
 
       {toast && (
         <div
-          className={`fixed bottom-6 left-1/2 -translate-x-1/2 py-2.5 px-5 rounded-lg text-[0.9rem] font-medium text-white z-[9999] whitespace-nowrap ${toast.type === 'ok' ? 'bg-green-800' : 'bg-red-800'}`}
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 py-2.5 px-5 rounded-xl text-[0.88rem] font-medium text-white z-[9999] whitespace-nowrap ${
+            toast.type === 'ok' ? 'bg-ok' : 'bg-bad'
+          }`}
         >
           {toast.msg}
         </div>
@@ -388,20 +368,26 @@ export function ProfileForm({ profile, kakaoAvatarUrl, redirectAfterSave }: { pr
   )
 }
 
-function Field({
-  label, children, error,
-}: {
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-[0.78rem] font-semibold text-muted-foreground uppercase tracking-[0.12em] font-mono m-0">
+      {children}
+    </h3>
+  )
+}
+
+function Field({ label, children, error }: {
   label: string
   children: React.ReactNode
   error?: string
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[0.85rem] font-semibold text-gray-700">{label}</label>
+      <label className="text-[0.85rem] font-semibold text-foreground">{label}</label>
       {children}
-      {error && <span className="text-[0.78rem] text-red-600">{error}</span>}
+      {error && <span className="text-[0.78rem] text-bad">{error}</span>}
     </div>
   )
 }
 
-const inputClass = 'py-2 px-3 border border-gray-300 rounded-lg text-sm outline-none w-full'
+const inputClass = 'py-2.5 px-3.5 border border-[var(--border)] rounded-xl text-sm outline-none w-full bg-surface-elevated text-foreground placeholder:text-subtle-foreground focus:border-accent/50 transition-colors'

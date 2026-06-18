@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { Kicker } from '@/components/ui/Kicker'
 import { MemberCard } from './MemberCard'
 import type { MemberCardData } from '@/types/app'
 
@@ -16,12 +17,12 @@ export function AdminSection({ admins, myId }: AdminSectionProps) {
 
   return (
     <section className="mb-8">
-      <h2 className="text-base font-bold text-gray-700 mb-3">
-        운영진
-      </h2>
+      <div className="mb-3">
+        <Kicker>운영진</Kicker>
+      </div>
       <div className="flex flex-wrap gap-3">
         {admins.map(member => (
-          <div key={member.id} className="w-[160px]">
+          <div key={member.id} className="w-[152px]">
             <MemberCard
               member={member}
               isMe={member.id === myId}

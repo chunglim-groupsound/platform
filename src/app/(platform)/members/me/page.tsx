@@ -1,22 +1,24 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import Image from 'next/image'
 import Link from 'next/link'
+import { Avatar } from '@/components/ui/Avatar'
+import { Badge, BadgeAccent } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { Kicker } from '@/components/ui/Kicker'
 import { WhitelistBadge } from '@/components/members/WhitelistBadge'
 import { MyInvitationsSection } from '@/components/members/MyInvitationsSection'
 import { MyJoinRequestsSection } from '@/components/members/MyJoinRequestsSection'
-import { hasActiveMemberAccess } from '@/lib/constants'
+import { hasActiveMemberAccess, ROLE_LABELS } from '@/lib/constants'
 
 function isKakaoUrl(url: string | null): boolean {
   return !!url && url.includes('kakaocdn.net')
 }
 
-const ROLE_LABEL: Record<string, string> = {
-  SUPER_ADMIN: '최고관리자',
-  ADMIN: '운영진',
-  MEMBER: '일반 부원',
-  PROBATION_MEMBER: '수습 부원',
+const SCHOOL_YEAR_LABELS: Record<string, string> = {
+  YEAR_1: '1학년', YEAR_2: '2학년', YEAR_3: '3학년',
+  YEAR_4: '4학년', YEAR_5: '5학년', COMPLETED: '수료',
+  ON_LEAVE: '휴학', GRADUATED: '졸업',
 }
 
 interface TeamRef { id: string; name: string; leader_id: string | null }
@@ -58,7 +60,6 @@ export default async function MyProfilePage() {
     .maybeSingle()
 
   if (!profile) redirect('/')
-
   if (!hasActiveMemberAccess(profile.status)) redirect('/status')
 
   // 카카오 URL 자동 동기화
@@ -97,9 +98,9 @@ export default async function MyProfilePage() {
       name:      t.name,
       is_leader: t.leader_id === profile.id,
       members:   (t.team_members ?? []).map(m => ({
-        id:       m.user_id,
-        name:     m.user?.nickname ?? m.user?.name ?? '알 수 없음',
-        isMe:     m.user_id === profile.id,
+        id:   m.user_id,
+        name: m.user?.nickname ?? m.user?.name ?? '알 수 없음',
+        isMe: m.user_id === profile.id,
       })),
     }
   }).filter((t): t is NonNullable<typeof t> => t !== null)
@@ -135,49 +136,45 @@ export default async function MyProfilePage() {
     joinRequests = (reqRes.data ?? []) as RawJoinRequest[]
   }
 
+  const displayName = profile.nickname ?? profile.name ?? '부원'
+
   return (
-    <main className="py-6 px-5 max-w-[600px] mx-auto">
+    <main className="py-8 px-5 max-w-[600px] mx-auto animate-screen-in">
       {/* 헤더 */}
-      <div className="flex justify-between items-center mb-5">
-        <h1 className="text-[1.3rem] font-extrabold m-0">내 프로필</h1>
-        <Link href="/members/me/edit" className="py-1.5 px-3.5 rounded-lg text-[0.85rem] font-semibold border border-gray-300 bg-white no-underline text-gray-700">
-          수정
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col gap-1.5">
+          <Kicker>내 프로필</Kicker>
+          <h1 className="text-[1.5rem] font-extrabold tracking-[-0.3px] text-foreground m-0 leading-tight">
+            {displayName}
+          </h1>
+        </div>
+        <Link href="/members/me/edit">
+          <Button size="sm">수정</Button>
         </Link>
       </div>
 
       {/* 프로필 카드 */}
-      <div className="bg-gray-50 rounded-2xl p-6 flex flex-col items-center gap-3">
-        <div className="relative w-20 h-20">
-          {profileImageUrl ? (
-            <Image
-              src={profileImageUrl}
-              alt={profile.name}
-              fill
-              className="rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-[2rem] text-gray-500">
-              {profile.name[0]}
-            </div>
-          )}
-        </div>
+      <div className="rounded-2xl border border-[var(--border)] bg-surface p-6 flex flex-col items-center gap-3">
+        <Avatar
+          name={profile.name ?? profile.nickname ?? '?'}
+          src={profileImageUrl}
+          size={72}
+        />
 
         <div className="text-center">
-          <div className="font-extrabold text-[1.2rem]">
+          <div className="font-extrabold text-[1.2rem] text-foreground">
             {profile.nickname ?? profile.name}
           </div>
           {profile.nickname && (
-            <div className="text-[0.82rem] text-gray-500">{profile.name}</div>
+            <div className="text-[0.82rem] text-muted-foreground">{profile.name}</div>
           )}
           {profile.generation != null && (
-            <div className="text-[0.85rem] text-gray-500 mt-0.5">{profile.generation}기</div>
+            <div className="text-[0.85rem] text-muted-foreground mt-0.5">{profile.generation}기</div>
           )}
         </div>
 
         <div className="flex gap-1.5 flex-wrap justify-center">
-          <span className="py-[3px] px-2.5 rounded-full bg-[#e0f2fe] text-[#075985] text-[0.78rem] font-semibold">
-            {ROLE_LABEL[profile.role] ?? profile.role}
-          </span>
+          <Badge>{ROLE_LABELS[profile.role] ?? profile.role}</Badge>
           {profile.is_whitelist && <WhitelistBadge />}
         </div>
 
@@ -186,9 +183,9 @@ export default async function MyProfilePage() {
             {profile.session!.map((s: string) => {
               const sy = (profile.session_years as Record<string, number> | null)?.[s]
               return (
-                <span key={s} className="py-[3px] px-2.5 rounded-full bg-blue-50 text-blue-700 text-[0.78rem]">
+                <BadgeAccent key={s}>
                   {s}{sy != null ? ` ${sy}년` : ''}
-                </span>
+                </BadgeAccent>
               )
             })}
           </div>
@@ -196,26 +193,26 @@ export default async function MyProfilePage() {
       </div>
 
       {/* 상세 정보 */}
-      <div className="mt-5 flex flex-col gap-0">
-        {profile.department && <Row label="학과" value={profile.department} />}
-        {profile.school_year != null && <Row label="학년" value={`${profile.school_year}학년`} />}
-        {profile.student_id && <Row label="학번" value={profile.student_id} />}
+      <div className="mt-4 flex flex-col rounded-xl border border-[var(--border)] bg-surface overflow-hidden">
+        {profile.department && <InfoRow label="학과" value={profile.department} />}
+        {profile.school_year != null && (
+          <InfoRow label="학년" value={SCHOOL_YEAR_LABELS[profile.school_year] ?? profile.school_year} />
+        )}
+        {profile.student_id && <InfoRow label="학번" value={profile.student_id} />}
         {profile.phone && (
-          <div className="flex gap-3 py-2.5 border-b border-gray-100">
-            <span className="w-20 text-[0.85rem] text-gray-500 shrink-0">연락처</span>
-            <a href={`tel:${profile.phone}`} className="text-[0.9rem] text-blue-600">
+          <div className="flex gap-3 py-3 px-4 border-b border-[var(--border-subtle)] last:border-0">
+            <span className="w-20 text-[0.82rem] text-muted-foreground shrink-0">연락처</span>
+            <a href={`tel:${profile.phone}`} className="text-[0.88rem] text-accent no-underline hover:underline">
               {profile.phone}
             </a>
           </div>
         )}
         {(profile.genre_preference ?? []).length > 0 && (
-          <div className="flex gap-3 py-2.5 border-b border-gray-100">
-            <span className="w-20 text-[0.85rem] text-gray-500 shrink-0">선호 장르</span>
+          <div className="flex gap-3 py-3 px-4 border-b border-[var(--border-subtle)] last:border-0">
+            <span className="w-20 text-[0.82rem] text-muted-foreground shrink-0 pt-0.5">선호 장르</span>
             <div className="flex flex-wrap gap-1">
               {profile.genre_preference!.map((g: string) => (
-                <span key={g} className="py-0.5 px-2 rounded-full bg-gray-100 text-gray-700 text-[0.78rem]">
-                  {g}
-                </span>
+                <Badge key={g}>{g}</Badge>
               ))}
             </div>
           </div>
@@ -224,24 +221,22 @@ export default async function MyProfilePage() {
 
       {/* 소속 팀 */}
       <div className="mt-6">
-        <h2 className="text-base font-bold mb-2.5">소속 팀</h2>
+        <p className="text-[0.78rem] font-semibold text-muted-foreground uppercase tracking-[0.12em] font-mono mb-3">
+          소속 팀
+        </p>
         {memberTeams.length === 0 ? (
-          <p className="text-[0.88rem] text-gray-400">소속 팀 없음</p>
+          <p className="text-[0.85rem] text-subtle-foreground">소속 팀 없음</p>
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2">
             {memberTeams.map(t => (
               <Link
                 key={t.id}
                 href={`/teams/${t.id}`}
-                className="flex flex-col gap-2 p-3 rounded-[10px] border border-gray-200 bg-white no-underline text-gray-900"
+                className="flex flex-col gap-2 p-3.5 rounded-xl border border-[var(--border)] bg-surface hover:bg-surface-elevated no-underline transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <span className="flex-1 text-[0.9rem] font-semibold">{t.name}</span>
-                  {t.is_leader && (
-                    <span className="py-0.5 px-2 rounded-full text-[0.72rem] font-bold bg-amber-100 text-amber-800 border border-yellow-300">
-                      팀장
-                    </span>
-                  )}
+                  <span className="flex-1 text-[0.9rem] font-semibold text-foreground">{t.name}</span>
+                  {t.is_leader && <BadgeAccent>팀장</BadgeAccent>}
                 </div>
                 {t.members.length > 0 && (
                   <div className="flex flex-wrap gap-1">
@@ -250,8 +245,8 @@ export default async function MyProfilePage() {
                         key={m.id}
                         className={`py-0.5 px-2 rounded-full text-[0.75rem] ${
                           m.isMe
-                            ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200'
-                            : 'bg-gray-100 text-gray-600 font-normal border border-transparent'
+                            ? 'bg-accent-muted text-accent font-semibold'
+                            : 'bg-surface-elevated text-muted-foreground'
                         }`}
                       >
                         {m.name}
@@ -276,11 +271,11 @@ export default async function MyProfilePage() {
   )
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-3 py-2.5 border-b border-gray-100">
-      <span className="w-20 text-[0.85rem] text-gray-500 shrink-0">{label}</span>
-      <span className="text-[0.9rem] text-gray-900">{value}</span>
+    <div className="flex gap-3 py-3 px-4 border-b border-[var(--border-subtle)] last:border-0">
+      <span className="w-20 text-[0.82rem] text-muted-foreground shrink-0">{label}</span>
+      <span className="text-[0.88rem] text-foreground">{value}</span>
     </div>
   )
 }

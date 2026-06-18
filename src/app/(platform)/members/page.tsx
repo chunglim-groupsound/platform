@@ -6,8 +6,12 @@ import { createClient } from '@/lib/supabase/client'
 import { MemberCard } from '@/components/members/MemberCard'
 import { MemberFilter, type FilterState } from '@/components/members/MemberFilter'
 import { AdminSection } from '@/components/members/AdminSection'
+import { Kicker } from '@/components/ui/Kicker'
+import { Button } from '@/components/ui/Button'
 import type { MemberCardData } from '@/types/app'
 import { isAdminRole } from '@/lib/constants'
+
+const PAGE_SIZE = 48
 
 export default function MembersPage() {
   const router = useRouter()
@@ -16,6 +20,7 @@ export default function MembersPage() {
   const [members, setMembers] = useState<MemberCardData[]>([])
   const [admins,  setAdmins]  = useState<MemberCardData[]>([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(0)
   const [filter, setFilter] = useState<FilterState>({
     q: '', sessions: [], generation: '', role: '', isWhitelist: false,
   })
@@ -44,6 +49,9 @@ export default function MembersPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  // 필터 변경 시 첫 페이지로 리셋
+  useEffect(() => { setPage(0) }, [filter])
+
   const filtered = useMemo(() => {
     let result = members
 
@@ -51,8 +59,7 @@ export default function MembersPage() {
       const q = filter.q.toLowerCase()
       result = result.filter(m =>
         (m.name ?? '').toLowerCase().includes(q) ||
-        (m.nickname ?? '').toLowerCase().includes(q) ||
-        String(m.generation ?? '').includes(q)
+        (m.nickname ?? '').toLowerCase().includes(q)
       )
     }
     if (filter.sessions.length > 0) {
@@ -72,25 +79,31 @@ export default function MembersPage() {
     return result
   }, [members, filter])
 
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+
   const handleClick = (id: string) => {
     if (id === myId) router.push('/members/me')
     else router.push(`/members/${id}`)
   }
 
   return (
-    <main className="py-6 px-5 max-w-[960px] mx-auto">
+    <main className="py-8 px-5 max-w-[960px] mx-auto animate-screen-in">
+      {/* 헤더 */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-[1.4rem] font-extrabold m-0">부원 명단</h1>
-        <button
-          onClick={() => router.push('/teams')}
-          className="py-[7px] px-4 rounded-lg text-[0.85rem] border border-gray-300 bg-white cursor-pointer font-medium"
-        >
-          팀 목록 보기
-        </button>
+        <div className="flex flex-col gap-1.5">
+          <Kicker>청림그룹사운드</Kicker>
+          <h1 className="text-[1.5rem] font-extrabold tracking-[-0.3px] text-foreground m-0 leading-tight">
+            부원 명단
+          </h1>
+        </div>
+        <Button size="sm" onClick={() => router.push('/teams')}>
+          팀 목록
+        </Button>
       </div>
 
       {loading ? (
-        <div className="text-gray-400 text-center py-[60px]">불러오는 중...</div>
+        <div className="text-muted-foreground text-center py-16 text-[0.9rem]">불러오는 중...</div>
       ) : (
         <>
           <AdminSection admins={admins} myId={myId ?? ''} />
@@ -99,18 +112,12 @@ export default function MembersPage() {
             <MemberFilter value={filter} onChange={setFilter} isAdmin={isAdmin} />
           </div>
 
-          <div className="text-[0.82rem] text-gray-500 mb-3">
+          <div className="text-[0.78rem] text-subtle-foreground font-mono mb-4">
             {filtered.length}명
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-              gap: '12px',
-            }}
-          >
-            {filtered.map(m => (
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))' }}>
+            {paged.map(m => (
               <MemberCard
                 key={m.id}
                 member={m}
@@ -121,8 +128,31 @@ export default function MembersPage() {
           </div>
 
           {filtered.length === 0 && (
-            <div className="text-center text-gray-400 py-12">
+            <div className="text-center text-muted-foreground py-16 text-[0.88rem]">
               조건에 맞는 부원이 없습니다.
+            </div>
+          )}
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <Button
+                size="sm"
+                disabled={page === 0}
+                onClick={() => setPage(p => p - 1)}
+              >
+                ← 이전
+              </Button>
+              <span className="text-[0.82rem] text-muted-foreground font-mono px-2">
+                {page + 1} / {totalPages}
+              </span>
+              <Button
+                size="sm"
+                disabled={page >= totalPages - 1}
+                onClick={() => setPage(p => p + 1)}
+              >
+                다음 →
+              </Button>
             </div>
           )}
         </>
