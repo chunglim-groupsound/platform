@@ -27,12 +27,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!mounted) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{
-          width: 34, height: 34, borderRadius: 8, border: '1.5px solid var(--accent)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-hover)',
-          fontFamily: 'var(--font-display)',
-        }}>청</span>
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: '50%',
+          border: '2.5px solid var(--border)',
+          borderTopColor: 'var(--accent)',
+          animation: 'spin 0.75s linear infinite',
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
