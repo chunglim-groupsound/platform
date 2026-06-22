@@ -1,71 +1,34 @@
-import type { Metadata } from 'next'
-import { Anton, Space_Grotesk, Space_Mono, Noto_Sans_KR } from 'next/font/google'
-import './globals.css'
-
-const anton = Anton({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-anton',
-  display: 'swap',
-})
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-space-grotesk',
-  display: 'swap',
-})
-
-const spaceMono = Space_Mono({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-space-mono',
-  display: 'swap',
-})
-
-const notoSansKR = Noto_Sans_KR({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  variable: '--font-noto-kr',
-  display: 'swap',
-})
+import type { Metadata, Viewport } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: '청림그룹사운드',
-  description: '청림그룹사운드 동아리 플랫폼',
-  icons: {
-    icon: '/icon.svg',
-  },
-}
+  description: '청림그룹사운드 밴드 동아리 — 합주실 예약 · 부원 · 팀 · 공지',
+  appleWebApp: { capable: true, title: '청림그룹사운드', statusBarStyle: 'black-translucent' },
+};
 
-const THEME_INIT = `(function(){
-  var t = localStorage.getItem('theme') || 'worn-denim';
-  document.documentElement.setAttribute('data-theme', t);
-})();`
+export const viewport: Viewport = {
+  themeColor: '#151A26',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
-  const fontVars = [
-    anton.variable,
-    spaceGrotesk.variable,
-    spaceMono.variable,
-    notoSansKR.variable,
-  ].join(' ')
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${fontVars} h-full`} suppressHydrationWarning>
+    <html lang="ko" data-theme="worn-denim">
       <head>
-        <script
-          id="theme-init"
-          dangerouslySetInnerHTML={{ __html: THEME_INIT }}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+          rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body>
+        <div className="app-bg"></div>
         {children}
       </body>
     </html>
-  )
+  );
 }

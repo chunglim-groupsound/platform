@@ -1,0 +1,32 @@
+﻿src/components/member-admin.tsx(721,10): error TS7023: 'analyzeCSV' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.
+src/components/member-admin.tsx(949,150): error TS18047: 'stats' is possibly 'null'.
+src/components/member-admin.tsx(949,200): error TS18047: 'stats' is possibly 'null'.
+src/components/member-admin.tsx(950,16): error TS18047: 'stats' is possibly 'null'.
+src/components/member-admin.tsx(953,26): error TS18047: 'stats' is possibly 'null'.
+src/components/members-teams-profile.tsx(479,32): error TS2345: Argument of type 'Member' is not assignable to parameter of type 'import("C:/Users/ropa0/OneDrive/Desktop/Dev/Project/chunglim-groupsound/platform/src/lib/mock-data").Member'.
+  Types of property 'role' are incompatible.
+    Type 'string | null' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+      Type 'string' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+src/components/members-teams-profile.tsx(479,86): error TS2345: Argument of type 'Member' is not assignable to parameter of type 'import("C:/Users/ropa0/OneDrive/Desktop/Dev/Project/chunglim-groupsound/platform/src/lib/mock-data").Member'.
+  Types of property 'role' are incompatible.
+    Type 'string | null' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+      Type 'string' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+src/components/members-teams-profile.tsx(537,34): error TS2345: Argument of type 'Member' is not assignable to parameter of type 'import("C:/Users/ropa0/OneDrive/Desktop/Dev/Project/chunglim-groupsound/platform/src/lib/mock-data").Member'.
+  Types of property 'role' are incompatible.
+    Type 'string | null' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+      Type 'string' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+src/components/members-teams-profile.tsx(570,43): error TS2345: Argument of type 'Member' is not assignable to parameter of type 'import("C:/Users/ropa0/OneDrive/Desktop/Dev/Project/chunglim-groupsound/platform/src/lib/mock-data").Member'.
+  Types of property 'role' are incompatible.
+    Type 'string | null' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+      Type 'string' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+src/components/members-teams-profile.tsx(637,32): error TS2345: Argument of type 'Member' is not assignable to parameter of type 'import("C:/Users/ropa0/OneDrive/Desktop/Dev/Project/chunglim-groupsound/platform/src/lib/mock-data").Member'.
+  Types of property 'role' are incompatible.
+    Type 'string | null' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+      Type 'string' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+src/components/members-teams-profile.tsx(637,80): error TS2345: Argument of type 'Member' is not assignable to parameter of type 'import("C:/Users/ropa0/OneDrive/Desktop/Dev/Project/chunglim-groupsound/platform/src/lib/mock-data").Member'.
+  Types of property 'role' are incompatible.
+    Type 'string | null' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+      Type 'string' is not assignable to type '"ADMIN" | "SUPER_ADMIN" | null'.
+src/components/notifications.tsx(70,60): error TS2322: Type '() => boolean' is not assignable to type 'void | Destructor'.
+  Type '() => boolean' is not assignable to type 'Destructor'.
+    Type 'boolean' is not assignable to type 'void | { [UNDEFINED_VOID_ONLY]: never; }'.

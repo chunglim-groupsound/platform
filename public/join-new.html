@@ -1,0 +1,955 @@
+﻿<!DOCTYPE html>
+<html lang="ko" data-theme="worn-denim">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#151A26" />
+<meta name="apple-mobile-web-app-title" content="청림그룹사운드" />
+<title>신규 부원 지원서 — 청림그룹사운드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+:root,
+[data-theme="worn-denim"] {
+  --background:#151A26; --surface:#1C2433; --surface-elevated:#26303F; --border:#323E52;
+  --border-subtle:rgba(255,255,255,0.06); --foreground:#EAEEF6; --muted-foreground:#8A96AC;
+  --subtle-foreground:#56627A; --accent:#D6A35A; --accent-hover:#ECC07B; --accent-muted:#2C2719; --accent-foreground:#1A1308;
+}
+[data-theme="slate-stage"] {
+  --background:#161719; --surface:#1F2125; --surface-elevated:#292C31; --border:#383B42;
+  --border-subtle:rgba(255,255,255,0.05); --foreground:#F1F3F6; --muted-foreground:#9AA2AD;
+  --subtle-foreground:#686F7A; --accent:#AEB7C4; --accent-hover:#C6CEDA; --accent-muted:#2B2F37; --accent-foreground:#16171A;
+}
+[data-theme="crimson-amp"] {
+  --background:#121A1C; --surface:#182426; --surface-elevated:#213034; --border:#2D4044;
+  --border-subtle:rgba(255,255,255,0.05); --foreground:#E8F0F1; --muted-foreground:#8AA0A3;
+  --subtle-foreground:#586B6E; --accent:#E58A6B; --accent-hover:#F2A285; --accent-muted:#2C1C16; --accent-foreground:#1B0E08;
+}
+[data-theme="velvet-night"] {
+  --background:#15141F; --surface:#1D1B2A; --surface-elevated:#272538; --border:#383650;
+  --border-subtle:rgba(255,255,255,0.06); --foreground:#ECEAF4; --muted-foreground:#9794AE;
+  --subtle-foreground:#605E78; --accent:#D9B468; --accent-hover:#EECB87; --accent-muted:#2A2416; --accent-foreground:#1A1407;
+}
+[data-theme="neon-moss"] {
+  --background:#121A14; --surface:#18241B; --surface-elevated:#213026; --border:#2D4032;
+  --border-subtle:rgba(255,255,255,0.05); --foreground:#E7F1E9; --muted-foreground:#8AA191;
+  --subtle-foreground:#586C5E; --accent:#DA8AA0; --accent-hover:#EBA3B6; --accent-muted:#2B1920; --accent-foreground:#1C0E13;
+}
+:root {
+  --font-display:'Anton','Noto Sans KR',sans-serif;
+  --font-sans:'Space Grotesk','Noto Sans KR',sans-serif;
+  --font-mono:'Space Mono','Noto Sans KR',monospace;
+  --font-kr:'Noto Sans KR','Space Grotesk',sans-serif;
+  --ok:#6FAF8A; --ok-bright:#8AC9A4; --bad:#E08A8A;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; padding:0; }
+body {
+  background:var(--background); color:var(--foreground); font-family:var(--font-kr);
+  font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  min-height:100vh; overflow-x:hidden; display:flex; flex-direction:column;
+}
+::selection { background:var(--accent); color:var(--accent-foreground); }
+a { color:inherit; text-decoration:none; }
+button { font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+input, textarea { font-family:inherit; }
+
+/* native form controls — themed to match */
+:root { color-scheme: dark; }
+input[type="number"] { -moz-appearance:textfield; appearance:textfield; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+
+
+.wrap { max-width:1100px; margin:0 auto; padding:0 28px; position:relative; z-index:1; width:100%; }
+
+.amb { position:fixed; inset:0; pointer-events:none; z-index:0; }
+.amb::before {
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 78% 8%, color-mix(in oklab, var(--accent) 13%, transparent), transparent 42%),
+    radial-gradient(circle at 12% 88%, rgba(255,255,255,0.022), transparent 46%);
+}
+.amb::after {
+  content:""; position:absolute; inset:0; opacity:.5;
+  background-image:linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+  background-size:calc((100%) / 6) 100%;
+  -webkit-mask-image:linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+          mask-image:linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.kicker {
+  font-family:var(--font-mono); font-size:11px; letter-spacing:0.22em; text-transform:uppercase;
+  color:var(--muted-foreground); display:inline-flex; align-items:center; gap:9px;
+}
+.kicker::before { content:""; width:22px; height:1px; background:var(--accent); display:inline-block; }
+.mono { font-family:var(--font-mono); }
+.ico svg { stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; fill:none; }
+
+header.bar {
+  position:sticky; top:0; z-index:50; backdrop-filter:blur(8px);
+  background:color-mix(in oklab, var(--background) 80%, transparent);
+  border-bottom:1px solid var(--border-subtle);
+}
+.bar-inner { height:64px; display:flex; align-items:center; justify-content:space-between; }
+.logo { display:flex; align-items:center; gap:11px; }
+.logo .mark { width:30px; height:30px; border-radius:7px; border:1.5px solid var(--accent); color:var(--accent-hover); display:flex; align-items:center; justify-content:center; }
+.logo .name { font-family:var(--font-sans); font-weight:700; font-size:15.5px; letter-spacing:-0.02em; white-space:nowrap; }
+.theme-picker { position:relative; flex:0 0 auto; }
+.theme-trigger { display:flex; align-items:center; gap:8px; padding:5px 11px 5px 8px; border-radius:22px; border:1px solid var(--border); background:transparent; color:var(--foreground); cursor:pointer; transition:all .14s; }
+.theme-trigger:hover { background:var(--surface-elevated); }
+.theme-trigger .sw { width:17px; height:17px; border-radius:50%; flex:0 0 auto; border:1px solid rgba(255,255,255,0.22); }
+.theme-trigger .lbl { font-family:var(--font-sans); font-size:12.5px; font-weight:600; color:var(--muted-foreground); white-space:nowrap; }
+.theme-trigger .chev { display:flex; color:var(--subtle-foreground); transition:transform .18s; }
+.theme-picker.open .theme-trigger { background:var(--surface-elevated); }
+.theme-picker.open .theme-trigger .chev { transform:rotate(180deg); }
+.theme-menu { position:absolute; top:calc(100% + 10px); right:0; width:214px; z-index:200; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:0 18px 50px rgba(0,0,0,0.45); padding:11px 12px 13px; opacity:0; transform:translateY(-6px); pointer-events:none; transition:opacity .15s ease, transform .15s ease; }
+.theme-picker.open .theme-menu { opacity:1; transform:translateY(0); pointer-events:auto; }
+.theme-menu .tm-title { font-family:var(--font-mono); font-size:9.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--subtle-foreground); margin-bottom:9px; }
+.theme-menu .tm-list { display:flex; flex-direction:column; gap:5px; }
+.theme-opt { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; width:100%; text-align:left; border:1px solid var(--border-subtle); background:transparent; cursor:pointer; transition:all .14s; }
+.theme-opt:hover { background:var(--surface-elevated); }
+.theme-opt[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-muted); }
+.theme-opt .sw { width:18px; height:18px; border-radius:50%; flex:0 0 auto; border:1px solid rgba(255,255,255,0.2); }
+.theme-opt .nm { font-family:var(--font-sans); font-size:12.5px; font-weight:400; color:var(--muted-foreground); white-space:nowrap; }
+.theme-opt[aria-pressed="true"] .nm { font-weight:600; color:var(--accent-hover); }
+.theme-opt .ck { margin-left:auto; display:none; color:var(--accent-hover); }
+.theme-opt[aria-pressed="true"] .ck { display:flex; }
+@media (max-width:760px) { .theme-trigger .lbl { display:none; } .theme-menu { width:202px; } }
+
+main { flex:1; display:flex; align-items:flex-start; padding:46px 0 64px; }
+.panel { max-width:560px; margin:0 auto; width:100%; }
+
+.back { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; color:var(--muted-foreground); font-family:var(--font-sans); font-weight:500; margin-bottom:22px; transition:color .15s; }
+.back:hover { color:var(--accent-hover); }
+
+h1.title {
+  font-family:var(--font-sans); font-weight:700; letter-spacing:-0.025em; line-height:1.18;
+  font-size:clamp(24px, 4.4vw, 30px); margin:14px 0 0;
+}
+.title-sub { margin:12px 0 0; font-size:14px; color:var(--muted-foreground); line-height:1.7; }
+.title-sub b { color:var(--foreground); }
+
+.formcard {
+  margin-top:26px; border:1px solid var(--border-subtle); border-radius:14px; background:var(--surface);
+  padding:30px 30px 28px; position:relative;
+}
+
+.sect-head { display:flex; align-items:center; gap:11px; margin:4px 0 18px; }
+.sect-head .n { font-family:var(--font-mono); font-size:11px; color:var(--accent-hover); letter-spacing:0.1em; }
+.sect-head .t { font-family:var(--font-sans); font-weight:700; font-size:15px; letter-spacing:-0.01em; white-space:nowrap; }
+.sect-head .ln { flex:1; height:1px; background:var(--border-subtle); }
+
+.divider { height:1px; background:var(--border-subtle); margin:24px 0; }
+
+.field { margin-bottom:18px; }
+.field:last-child { margin-bottom:0; }
+.flabel { display:flex; align-items:baseline; gap:8px; margin-bottom:9px; flex-wrap:wrap; }
+.flabel label { font-size:12.5px; font-weight:600; color:var(--foreground); font-family:var(--font-sans); white-space:nowrap; }
+.flabel .h { font-family:var(--font-mono); font-size:10px; color:var(--subtle-foreground); }
+.inp {
+  width:100%; padding:11px 13px; border-radius:9px; border:1px solid var(--border);
+  background:var(--background); color:var(--foreground); font-size:14px; outline:none;
+  font-family:var(--font-kr); transition:border-color .15s ease;
+}
+.inp:focus { border-color:var(--accent); }
+.inp::placeholder { color:var(--subtle-foreground); }
+textarea.inp { resize:vertical; min-height:84px; line-height:1.65; }
+
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.two-col .field { margin-bottom:18px; }
+
+.chips { display:flex; flex-wrap:wrap; gap:7px; }
+.chip {
+  padding:7px 15px; border-radius:20px;
+  border:1px solid var(--border); background:transparent; color:var(--muted-foreground);
+  font-family:var(--font-sans); font-weight:400; font-size:12.5px; cursor:pointer; user-select:none; white-space:nowrap;
+  transition:border-color .14s ease, color .14s ease, background .14s ease;
+}
+.chip:hover { border-color:var(--muted-foreground); color:var(--foreground); }
+.chip[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-muted); color:var(--accent-hover); font-weight:600; }
+
+.seg { display:inline-flex; flex-wrap:wrap; gap:6px; }
+.seg button {
+  padding:9px 14px; border-radius:8px; border:1px solid var(--border); background:var(--background);
+  color:var(--muted-foreground); font-family:var(--font-sans); font-weight:500; font-size:13px;
+  transition:all .15s ease; white-space:nowrap;
+}
+.seg button:hover { border-color:var(--muted-foreground); color:var(--foreground); }
+.seg button[aria-pressed="true"] { border-color:var(--accent); background:var(--accent); color:var(--accent-foreground); font-weight:700; }
+
+.exprows { display:flex; flex-wrap:wrap; gap:14px; margin-top:11px; }
+.exprows:empty { display:none; }
+.exprow { display:flex; align-items:center; gap:8px; }
+.exprow .sn { font-size:12.5px; color:var(--muted-foreground); min-width:40px; }
+.exprow .yr {
+  width:54px; padding:7px 8px; border-radius:7px; border:1px solid var(--border);
+  background:var(--surface); color:var(--foreground); font-size:13px; text-align:center;
+  font-family:var(--font-mono); outline:none;
+}
+.exprow .yr:focus { border-color:var(--accent); }
+.exprow .yu { font-size:12px; color:var(--subtle-foreground); }
+.empty-exp { margin-top:11px; font-size:12px; color:var(--subtle-foreground); font-family:var(--font-mono); }
+
+/* interview slot picker */
+.slot-intro { font-size:12.5px; color:var(--muted-foreground); line-height:1.65; margin-bottom:14px; }
+.slotgroup + .slotgroup { margin-top:16px; }
+.slotgroup .gh { display:flex; align-items:baseline; gap:9px; margin-bottom:9px; }
+.slotgroup .gh .d { font-family:var(--font-sans); font-weight:700; font-size:14px; }
+.slotgroup .gh .w { font-family:var(--font-mono); font-size:11px; color:var(--subtle-foreground); }
+.slotgroup .gh .ln { flex:1; height:1px; background:var(--border-subtle); }
+.slotlist { display:flex; flex-direction:column; gap:8px; }
+.slotopt { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:var(--background); cursor:pointer; user-select:none; transition:all .14s; text-align:left; width:100%; }
+.slotopt:hover:not([disabled]) { border-color:var(--muted-foreground); }
+.slotopt[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-muted); }
+.slotopt[disabled] { opacity:.45; cursor:not-allowed; }
+.slotopt .box { width:20px; height:20px; border-radius:6px; border:1.5px solid var(--border); flex:0 0 auto; display:flex; align-items:center; justify-content:center; color:transparent; transition:all .14s; }
+.slotopt[aria-pressed="true"] .box { border-color:var(--accent); background:var(--accent); color:var(--accent-foreground); }
+.slotopt .tm { font-family:var(--font-mono); font-weight:700; font-size:14px; white-space:nowrap; }
+.slotopt .rm { font-family:var(--font-mono); font-size:11px; color:var(--muted-foreground); margin-left:auto; white-space:nowrap; }
+.slot-empty { font-family:var(--font-mono); font-size:12px; color:var(--subtle-foreground); line-height:1.7; padding:16px; border:1px dashed var(--border); border-radius:10px; }
+
+.btn-primary {
+  width:100%; margin-top:24px; padding:14px; border-radius:10px;
+  background:var(--accent); color:#0E1626; border:1px solid var(--accent);
+  font-family:var(--font-sans); font-weight:700; font-size:15px; letter-spacing:-0.01em;
+  display:inline-flex; align-items:center; justify-content:center; gap:9px;
+  transition:background .15s ease, transform .12s ease;
+}
+.btn-primary:hover { background:var(--accent-hover); }
+.btn-primary:active { transform:translateY(1px); }
+.btn-ghost {
+  width:100%; margin-top:11px; padding:13px; border-radius:10px;
+  background:transparent; color:var(--muted-foreground); border:1px solid var(--border);
+  font-family:var(--font-sans); font-weight:600; font-size:14px;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px; transition:all .15s ease;
+}
+.btn-ghost:hover { border-color:var(--accent); color:var(--accent-hover); }
+
+.formnote { margin-top:16px; font-size:11.5px; color:var(--subtle-foreground); line-height:1.7; text-align:center; }
+
+/* success */
+.success { text-align:center; padding:8px 4px 4px; }
+.success h2 { font-family:var(--font-sans); font-weight:700; font-size:22px; margin:18px 0 0; letter-spacing:-0.02em; }
+.success p { font-size:13.5px; color:var(--muted-foreground); line-height:1.7; margin:11px auto 0; max-width:400px; }
+.summary { margin-top:24px; text-align:left; border:1px solid var(--border-subtle); border-radius:12px; background:var(--surface); padding:20px; display:flex; flex-direction:column; gap:14px; }
+.summary .row { display:flex; gap:12px; align-items:baseline; }
+.summary .row .k { font-family:var(--font-mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--subtle-foreground); flex:0 0 78px; }
+.summary .row .v { font-size:13.5px; color:var(--foreground); flex:1; min-width:0; }
+
+footer { padding:26px 0; border-top:1px solid var(--border-subtle); position:relative; z-index:1; }
+.foot-inner { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.foot-inner span { font-family:var(--font-mono); font-size:11.5px; color:var(--subtle-foreground); letter-spacing:0.04em; }
+
+/* progress stepper */
+.stepper { display:flex; align-items:flex-start; margin:2px 0 24px; }
+.step { display:flex; flex-direction:column; align-items:center; gap:9px; flex:0 0 auto; width:64px; }
+.step .dot { width:38px; height:38px; border-radius:50%; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:14px; font-weight:700; color:var(--subtle-foreground); background:var(--background); transition:all .2s ease; }
+.step .dot svg { width:18px; height:18px; }
+.step .lbl { font-family:var(--font-sans); font-weight:600; font-size:11.5px; color:var(--subtle-foreground); white-space:nowrap; letter-spacing:-0.01em; }
+.step.done .dot { border-color:var(--accent); background:var(--accent-muted); color:var(--accent-hover); }
+.step.done .lbl, .step.wait .lbl { color:var(--muted-foreground); }
+.step.active .dot { border-color:var(--accent); background:var(--accent); color:var(--accent-foreground); box-shadow:0 0 0 4px var(--accent-muted); }
+.step.active .lbl { color:var(--foreground); }
+.step.wait .dot { border-color:var(--accent); color:var(--accent-hover); box-shadow:0 0 0 4px var(--accent-muted); }
+.step.pass .dot { border-color:var(--ok); background:var(--ok); color:#0E1F16; box-shadow:0 0 0 4px color-mix(in oklab,var(--ok) 18%, transparent); }
+.step.pass .lbl { color:var(--ok-bright); }
+.step.fail .dot { border-color:var(--bad); background:var(--bad); color:#2A1212; box-shadow:0 0 0 4px color-mix(in oklab,var(--bad) 16%, transparent); }
+.step.fail .lbl { color:var(--bad); }
+.stepline { flex:1; height:2px; background:var(--border); border-radius:2px; margin-top:18px; transition:background .25s ease; }
+.stepline.filled { background:var(--accent); }
+
+/* status hero */
+.statushero { display:flex; gap:14px; align-items:flex-start; padding:16px 18px; border-radius:12px; border:1px solid var(--border-subtle); background:var(--surface-elevated); margin-bottom:22px; }
+.statushero .hi { width:40px; height:40px; border-radius:10px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; background:var(--surface); color:var(--muted-foreground); }
+.statushero h3 { font-family:var(--font-sans); font-weight:700; font-size:16px; margin:1px 0 0; letter-spacing:-0.02em; }
+.statushero p { margin:7px 0 0; font-size:13px; color:var(--muted-foreground); line-height:1.65; text-wrap:pretty; }
+.statushero.is-accent .hi { background:var(--accent-muted); color:var(--accent-hover); }
+.statushero.is-ok { border-color:color-mix(in oklab,var(--ok) 40%, transparent); background:color-mix(in oklab,var(--ok) 9%, var(--surface)); }
+.statushero.is-ok .hi { background:color-mix(in oklab,var(--ok) 22%, transparent); color:var(--ok-bright); }
+.statushero.is-ok h3 { color:var(--ok-bright); }
+.statushero.is-bad { border-color:color-mix(in oklab,var(--bad) 34%, transparent); background:color-mix(in oklab,var(--bad) 7%, var(--surface)); }
+.statushero.is-bad .hi { background:color-mix(in oklab,var(--bad) 18%, transparent); color:var(--bad); }
+.statushero.is-muted .hi { background:var(--surface); color:var(--muted-foreground); border:1px solid var(--border); }
+
+/* preferred slot list */
+.preflist { display:flex; flex-direction:column; gap:8px; }
+.prefitem { display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:9px; border:1px solid var(--border-subtle); background:var(--background); }
+.prefitem .ico { color:var(--accent-hover); flex:0 0 auto; display:flex; }
+.prefitem .tx { font-family:var(--font-mono); font-size:13px; color:var(--foreground); }
+.prefitem .nt { font-family:var(--font-mono); font-size:11px; color:var(--subtle-foreground); margin-left:auto; }
+#editSlotsBtn { margin-top:14px; }
+.editactions { display:flex; gap:10px; margin-top:18px; }
+.editactions .btn-primary, .editactions .btn-ghost { margin-top:0; }
+.editactions .btn-primary { flex:1; }
+.editactions .btn-ghost { width:auto; flex:0 0 auto; padding-left:22px; padding-right:22px; }
+
+/* confirmed slot card */
+.slotcard { display:flex; align-items:center; gap:18px; padding:18px 20px; border-radius:12px; border:1px solid color-mix(in oklab,var(--accent) 38%, transparent); background:var(--accent-muted); }
+.slotcard.muted { border-color:var(--border); background:var(--surface-elevated); }
+.slotcard .dchip { display:flex; flex-direction:column; align-items:center; gap:2px; min-width:60px; }
+.slotcard .dchip .dm { font-family:var(--font-mono); font-weight:700; font-size:20px; color:var(--accent-hover); letter-spacing:-0.01em; }
+.slotcard.muted .dchip .dm { color:var(--foreground); }
+.slotcard .dchip .dw { font-family:var(--font-mono); font-size:11px; color:var(--muted-foreground); }
+.slotcard .vline { width:1px; align-self:stretch; background:color-mix(in oklab,var(--accent) 28%, transparent); }
+.slotcard.muted .vline { background:var(--border); }
+.slotcard .tinfo .tt { font-family:var(--font-sans); font-weight:700; font-size:18px; letter-spacing:-0.01em; }
+.slotcard .tinfo .tn { font-family:var(--font-mono); font-size:11.5px; color:var(--muted-foreground); margin-top:3px; }
+.statushint { font-size:12px; color:var(--subtle-foreground); line-height:1.6; margin:12px 0 0; }
+
+/* demo preview bar */
+.demobar { margin-top:26px; padding-top:18px; border-top:1px dashed var(--border); }
+.demolabel { display:block; font-size:10px; letter-spacing:0.04em; color:var(--subtle-foreground); margin-bottom:10px; }
+.demoseg { display:flex; flex-wrap:wrap; gap:6px; }
+.demoseg button { padding:7px 13px; border-radius:7px; border:1px solid var(--border); background:var(--background); color:var(--muted-foreground); font-family:var(--font-sans); font-weight:500; font-size:12px; transition:all .14s ease; }
+.demoseg button:hover { border-color:var(--muted-foreground); color:var(--foreground); }
+.demoseg button[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-muted); color:var(--accent-hover); font-weight:700; }
+.demo-reset { margin-top:14px; display:inline-flex; align-items:center; gap:7px; font-family:var(--font-sans); font-weight:600; font-size:12.5px; color:var(--muted-foreground); padding:8px 14px; border-radius:8px; border:1px solid var(--border); background:transparent; transition:all .14s ease; }
+.demo-reset:hover { border-color:var(--accent); color:var(--accent-hover); }
+.demo-reset .ico { display:flex; }
+
+/* status nav + toast */
+#statusView .btn-primary { margin-top:22px; }
+.sttoast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:var(--surface-elevated); border:1px solid var(--border); color:var(--foreground); font-size:13px; padding:11px 18px; border-radius:10px; z-index:80; box-shadow:0 10px 30px rgba(0,0,0,0.35); }
+
+[hidden] { display:none !important; }
+
+@media (max-width:560px) {
+  .wrap { padding:0 18px; }
+  .bar-inner { height:58px; }
+  main { padding:30px 0 48px; }
+  .formcard { padding:24px 20px; }
+  .two-col { grid-template-columns:1fr; gap:0; }
+}
+</style>
+</head>
+<body>
+<div class="amb"></div>
+
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<rect width="100" height="100" fill="#151A26"/>
+<circle cx="42" cy="40" r="11" fill="none" stroke="#D6A35A" stroke-width="3"/>
+<path d="M26 66a16 16 0 0 1 32 0" fill="none" stroke="#8A96AC" stroke-width="3"/>
+<path d="M64 38v12M58 44h12" stroke="#ECC07B" stroke-width="3" stroke-linecap="round"/>
+</svg>
+</template>
+
+<header class="bar">
+  <div class="wrap bar-inner">
+    <a class="logo" href="landing.html">
+      <span class="mark ico"><svg width="17" height="17" viewBox="0 0 24 24"><circle cx="8.5" cy="15.5" r="4"/><circle cx="8.5" cy="15.5" r="1"/><path d="m11.3 12.6 6-6M15.2 4.7l1.7-1.7 2.1 2.1-1.7 1.7M16.9 6.4l1.4 1.4"/></svg></span>
+      <span class="name">청림그룹사운드</span>
+    </a>
+    <div class="theme-picker" id="themePicker">
+      <button class="theme-trigger" id="themeTrigger" aria-haspopup="true" aria-expanded="false">
+        <span class="sw" id="ttSwatch" style="background:linear-gradient(135deg,#151A26 50%,#D6A35A 50%);"></span>
+        <span class="lbl" id="ttLabel">Worn Denim</span>
+        <span class="chev ico"><svg width="13" height="13" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span>
+      </button>
+      <div class="theme-menu" id="themeMenu" role="menu">
+        <div class="tm-title">테마 변경</div>
+        <div class="tm-list">
+          <button class="theme-opt" data-theme-id="worn-denim" aria-pressed="true"><span class="sw" style="background:linear-gradient(135deg,#151A26 50%,#D6A35A 50%);"></span><span class="nm">Worn Denim</span><span class="ck ico"><svg width="15" height="15" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span></button>
+          <button class="theme-opt" data-theme-id="slate-stage" aria-pressed="false"><span class="sw" style="background:linear-gradient(135deg,#161719 50%,#AEB7C4 50%);"></span><span class="nm">Slate Stage</span><span class="ck ico"><svg width="15" height="15" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span></button>
+          <button class="theme-opt" data-theme-id="crimson-amp" aria-pressed="false"><span class="sw" style="background:linear-gradient(135deg,#121A1C 50%,#E58A6B 50%);"></span><span class="nm">Ember</span><span class="ck ico"><svg width="15" height="15" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span></button>
+          <button class="theme-opt" data-theme-id="velvet-night" aria-pressed="false"><span class="sw" style="background:linear-gradient(135deg,#15141F 50%,#D9B468 50%);"></span><span class="nm">Velvet Night</span><span class="ck ico"><svg width="15" height="15" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span></button>
+          <button class="theme-opt" data-theme-id="neon-moss" aria-pressed="false"><span class="sw" style="background:linear-gradient(135deg,#121A14 50%,#DA8AA0 50%);"></span><span class="nm">Green Room</span><span class="ck ico"><svg width="15" height="15" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap panel">
+    <a class="back" href="join.html">
+      <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></span>
+      가입 방식 다시 선택
+    </a>
+
+    <div class="kicker" id="kicker">신규 부원 · 지원서</div>
+
+    <!-- FORM -->
+    <section id="formView">
+      <h1 class="title">지원서를 작성할게요</h1>
+      <p class="title-sub">세션과 간단한 소개, 그리고 <b>희망 면접 시간대</b>를 골라주세요. 운영진이 희망 시간 중 하나로 면접을 확정해 카카오로 안내드립니다.</p>
+
+      <div class="formcard">
+        <!-- 01 프로필 -->
+        <div class="sect-head"><span class="n">01</span><span class="t">프로필</span><span class="ln"></span></div>
+
+        <div class="field">
+          <div class="flabel"><label for="fName">이름</label><span class="h">필수 · 실명</span></div>
+          <input class="inp" id="fName" maxlength="20" placeholder="예) 김도윤" />
+        </div>
+        <div class="field">
+          <div class="flabel"><label for="fNick">닉네임 (활동명)</label><span class="h">선택 · 최대 20자</span></div>
+          <input class="inp" id="fNick" maxlength="20" placeholder="미입력 시 실명으로 표시됩니다" />
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 02 음악 활동 -->
+        <div class="sect-head"><span class="n">02</span><span class="t">음악 활동</span><span class="ln"></span></div>
+
+        <div class="field">
+          <div class="flabel"><label>지원 세션</label><span class="h">필수 · 중복 선택 가능</span></div>
+          <div class="chips" id="sessionChips">
+            <button type="button" class="chip" data-val="보컬">보컬</button>
+            <button type="button" class="chip" data-val="기타">기타</button>
+            <button type="button" class="chip" data-val="베이스">베이스</button>
+            <button type="button" class="chip" data-val="드럼">드럼</button>
+            <button type="button" class="chip" data-val="건반">건반</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="flabel"><label>세션별 경력 연차</label><span class="h">선택</span></div>
+          <div class="empty-exp" id="emptyExp">세션을 먼저 선택하면 연차를 입력할 수 있어요.</div>
+          <div class="exprows" id="expRows"></div>
+        </div>
+
+        <div class="field">
+          <div class="flabel"><label>선호 장르</label><span class="h">선택 · 중복 가능</span></div>
+          <div class="chips" id="genreChips">
+            <button type="button" class="chip" data-val="록">록</button>
+            <button type="button" class="chip" data-val="팝">팝</button>
+            <button type="button" class="chip" data-val="인디">인디</button>
+            <button type="button" class="chip" data-val="재즈">재즈</button>
+            <button type="button" class="chip" data-val="R&B">R&B</button>
+            <button type="button" class="chip" data-val="메탈">메탈</button>
+            <button type="button" class="chip" data-val="발라드">발라드</button>
+            <button type="button" class="chip" data-val="포크">포크</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 03 학적 · 연락처 -->
+        <div class="sect-head"><span class="n">03</span><span class="t">학적 · 연락처</span><span class="ln"></span></div>
+
+        <div class="field">
+          <div class="flabel"><label for="fDept">학과</label><span class="h">필수</span></div>
+          <input class="inp" id="fDept" maxlength="30" placeholder="예) 실용음악과" />
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <div class="flabel"><label for="fStudentId">학번</label><span class="h">필수</span></div>
+            <input class="inp" id="fStudentId" inputmode="numeric" maxlength="10" placeholder="예) 20261234" />
+          </div>
+          <div class="field">
+            <div class="flabel"><label>학년</label><span class="h">필수</span></div>
+            <div class="seg" id="yearSeg">
+              <button type="button" data-val="1학년">1</button>
+              <button type="button" data-val="2학년">2</button>
+              <button type="button" data-val="3학년">3</button>
+              <button type="button" data-val="4학년">4</button>
+              <button type="button" data-val="휴학">휴학</button>
+            </div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <div class="flabel"><label for="fPhone">연락처</label><span class="h">필수</span></div>
+            <input class="inp" id="fPhone" inputmode="numeric" maxlength="13" placeholder="010-0000-0000" />
+          </div>
+          <div class="field">
+            <div class="flabel"><label for="fKakao">카카오톡 ID</label><span class="h">필수</span></div>
+            <input class="inp" id="fKakao" maxlength="30" placeholder="예) doyoon_k" />
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 04 지원 동기 -->
+        <div class="sect-head"><span class="n">04</span><span class="t">지원 동기</span><span class="ln"></span></div>
+        <div class="field">
+          <div class="flabel"><label for="fMsg">자기소개 · 지원 동기</label><span class="h" id="msgCount">필수 · 0/200</span></div>
+          <textarea class="inp" id="fMsg" rows="3" maxlength="200" placeholder="어떤 음악을 좋아하는지, 왜 청림에 들어오고 싶은지 적어주세요."></textarea>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 05 희망 면접 시간대 -->
+        <div class="sect-head"><span class="n">05</span><span class="t">희망 면접 시간대</span><span class="ln"></span></div>
+        <p class="slot-intro">가능한 시간대를 <b style="color:var(--foreground);">여러 개</b> 골라주세요. 운영진이 그중 하나로 면접을 확정해 안내드려요.</p>
+        <div id="slotArea"></div>
+
+        <button class="btn-primary" id="submitBtn">
+          <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+          지원서 제출하기
+        </button>
+        <p class="formnote">제출 후에도 운영진 통지 전까지 희망 시간대는 변경 요청할 수 있어요.</p>
+      </div>
+    </section>
+
+    <!-- STATUS -->
+    <section id="statusView" hidden>
+      <h1 class="title" id="stTitle">가입 진행 상황</h1>
+      <p class="title-sub" id="stSub"></p>
+      <div class="formcard">
+        <div class="stepper" id="stStepper"></div>
+        <div id="stBody"></div>
+      </div>
+      <a class="btn-primary" id="goExplore" href="/" style="text-decoration:none;">
+        <span class="ico"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        청림 둘러보기
+      </a>
+      <a class="btn-ghost" href="landing.html" style="text-decoration:none;">랜딩으로 돌아가기</a>
+    </section>
+    <div id="stToast" class="sttoast" hidden></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span>© 청림그룹사운드 · 한남대학교</span>
+    <span>CHUNGLIM GROUP SOUND</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* theme */
+  const root = document.documentElement;
+  const saved = localStorage.getItem('theme');
+  const THEME_META = {
+    'worn-denim':   { label:'Worn Denim',   sw:'linear-gradient(135deg,#151A26 50%,#D6A35A 50%)' },
+    'slate-stage':  { label:'Slate Stage',  sw:'linear-gradient(135deg,#161719 50%,#AEB7C4 50%)' },
+    'crimson-amp':  { label:'Ember',        sw:'linear-gradient(135deg,#121A1C 50%,#E58A6B 50%)' },
+    'velvet-night': { label:'Velvet Night', sw:'linear-gradient(135deg,#15141F 50%,#D9B468 50%)' },
+    'neon-moss':    { label:'Green Room',   sw:'linear-gradient(135deg,#121A14 50%,#DA8AA0 50%)' },
+  };
+  const _picker = document.getElementById('themePicker');
+  const _trigger = document.getElementById('themeTrigger');
+  const _ttSw = document.getElementById('ttSwatch');
+  const _ttLb = document.getElementById('ttLabel');
+  function applyTheme(id, store){
+    root.setAttribute('data-theme', id);
+    document.querySelectorAll('.theme-opt').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.dataset.themeId === id));
+    });
+    var m = THEME_META[id];
+    if (m && _ttSw && _ttLb){ _ttSw.style.background = m.sw; _ttLb.textContent = m.label; }
+    if (store !== false) localStorage.setItem('theme', id);
+  }
+  function _setOpen(o){ if(!_picker) return; _picker.classList.toggle('open', o); if(_trigger) _trigger.setAttribute('aria-expanded', String(o)); }
+  applyTheme(THEME_META[saved] ? saved : 'worn-denim', false);
+  if (_trigger) _trigger.addEventListener('click', function(e){ e.stopPropagation(); _setOpen(!_picker.classList.contains('open')); });
+  document.querySelectorAll('.theme-opt').forEach(function(b){
+    b.addEventListener('click', function(){ applyTheme(b.dataset.themeId); _setOpen(false); });
+  });
+  document.addEventListener('click', function(e){ if(_picker && !_picker.contains(e.target)) _setOpen(false); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') _setOpen(false); });
+
+  /* ───── storage keys (shared with the main app) ───── */
+  const IV_KEY = 'CHUNGLIM_interview_v1';
+  const AP_KEY = 'CHUNGLIM_applicants_v2';
+  const MY_KEY = 'CHUNGLIM_my_application_v1';
+
+  function loadApplicants(){ try { const raw = localStorage.getItem(AP_KEY); if (raw){ const v = JSON.parse(raw); if (Array.isArray(v)) return v; } } catch(e){} return []; }
+  function saveApplicants(list){ try { localStorage.setItem(AP_KEY, JSON.stringify(list)); } catch(e){} }
+  const slotByIdFn = (id) => slots.find(s => s.id === id);
+
+  const IV_DEFAULT = [
+    { id:'iv1', date:'2026-09-14', start:'18:00', end:'18:20', capacity:1, booked:1, note:'' },
+    { id:'iv2', date:'2026-09-14', start:'18:30', end:'18:50', capacity:1, booked:1, note:'' },
+    { id:'iv3', date:'2026-09-14', start:'19:00', end:'19:20', capacity:1, booked:0, note:'' },
+    { id:'iv4', date:'2026-09-15', start:'19:00', end:'19:30', capacity:2, booked:1, note:'그룹 면접' },
+    { id:'iv5', date:'2026-09-15', start:'19:30', end:'20:00', capacity:2, booked:0, note:'그룹 면접' },
+  ];
+  /* demo applicants — seeded only if the app hasn't stored any yet, so the operator's list isn't empty */
+  const AP_SEED = [
+    { id:'ap1', name:'김도윤', dept:'경영학과 21', contact:'010-2345-6789', kakao:'doyoon_k', sessions:['보컬'], exp:'고교 밴드부 보컬 2년', message:'무대에서 노래할 때가 가장 행복합니다. 인디록부터 발라드까지 폭넓게 소화할 수 있어요. 꼭 함께하고 싶습니다.', appliedAt:'2026.09.10 21:14', preferredSlotIds:['iv1','iv3'], status:'new', slotId:null, notified:false },
+    { id:'ap2', name:'이서진', dept:'컴퓨터공학과 22', contact:'010-3456-7890', kakao:'seojin.lee', sessions:['기타','베이스'], exp:'독학 4년 · 합주 경험 다수', message:'펑크록과 모던록을 좋아합니다. 리듬·리드 기타 모두 가능하고 베이스도 칠 수 있어요. 합주라면 자신 있습니다!', appliedAt:'2026.09.11 14:02', preferredSlotIds:['iv4','iv5'], status:'interview', slotId:'iv4', notified:false },
+    { id:'ap3', name:'박하늘', dept:'실용음악과 21', contact:'010-4567-8901', kakao:'haneul_drum', sessions:['드럼'], exp:'밴드 활동 3년', message:'드럼 하나는 정말 자신 있습니다. 정기공연 무대에 꼭 서고 싶어서 지원했어요.', appliedAt:'2026.09.09 19:30', preferredSlotIds:['iv1','iv2'], status:'pass', slotId:'iv1', notified:true, notifiedAt:'2026.09.13 11:20' },
+    { id:'ap4', name:'최유나', dept:'영어영문학과 23', contact:'010-5678-9012', kakao:'yuna_c', sessions:['건반','보컬'], exp:'피아노 10년 · 밴드 첫 도전', message:'클래식 피아노를 오래 쳤고 밴드 건반에 도전해보고 싶습니다. 코러스도 가능해요!', appliedAt:'2026.09.11 22:48', preferredSlotIds:['iv3','iv5'], status:'new', slotId:null, notified:false },
+    { id:'ap5', name:'정민호', dept:'기계공학과 20', contact:'010-6789-0123', kakao:'minho_j', sessions:['기타'], exp:'취미 1년', message:'실력은 아직 부족하지만 열정만큼은 누구에게도 지지 않습니다. 열심히 배우겠습니다.', appliedAt:'2026.09.08 16:10', preferredSlotIds:['iv3'], status:'fail', slotId:null, notified:false },
+  ];
+
+  function loadSlots(){
+    try { const raw = localStorage.getItem(IV_KEY); if (raw) { const v = JSON.parse(raw); if (Array.isArray(v)) return v; } } catch(e){}
+    return IV_DEFAULT.map(s => ({ ...s }));
+  }
+  const WD = ['일','월','화','수','목','금','토'];
+  function weekday(iso){ const d = new Date(iso + 'T00:00:00'); return WD[d.getDay()] || ''; }
+  function slotText(s){ return `${s.date.slice(5).replace('-','.')} (${weekday(s.date)}) ${s.start}–${s.end}`; }
+  function nowStamp(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+
+  /* ───── chips (multi-select) ───── */
+  function bindChips(id, onChange){
+    document.querySelectorAll(`#${id} .chip`).forEach(c => c.addEventListener('click', () => {
+      c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+      c.style.borderColor = '';
+      if (onChange) onChange();
+    }));
+  }
+  function selectedChips(id){ return [...document.querySelectorAll(`#${id} .chip[aria-pressed="true"]`)].map(c => c.dataset.val); }
+  bindChips('sessionChips', renderExpRows);
+  bindChips('genreChips');
+
+  const sessionExp = {};
+  function renderExpRows(){
+    const sessions = selectedChips('sessionChips');
+    const box = document.getElementById('expRows');
+    document.getElementById('emptyExp').style.display = sessions.length ? 'none' : '';
+    box.innerHTML = '';
+    sessions.forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'exprow';
+      row.innerHTML = `<span class="sn">${s}</span><input class="yr" type="number" min="0" max="99" value="${sessionExp[s] ?? ''}" /><span class="yu">년</span>`;
+      const inp = row.querySelector('.yr');
+      inp.addEventListener('input', () => { sessionExp[s] = inp.value; });
+      box.appendChild(row);
+    });
+    Object.keys(sessionExp).forEach(k => { if (!sessions.includes(k)) delete sessionExp[k]; });
+  }
+
+  /* year segmented */
+  document.querySelectorAll('#yearSeg button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#yearSeg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    document.getElementById('yearSeg').style.outline = '';
+  }));
+
+  /* phone / counters */
+  const fPhone = document.getElementById('fPhone');
+  fPhone.addEventListener('input', () => {
+    let d = fPhone.value.replace(/\D/g,'').slice(0,11);
+    if (d.length >= 8) d = d.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3');
+    else if (d.length >= 4) d = d.replace(/(\d{3})(\d+)/, '$1-$2');
+    fPhone.value = d; fPhone.style.borderColor = '';
+  });
+  const fStudentId = document.getElementById('fStudentId');
+  fStudentId.addEventListener('input', () => { fStudentId.value = fStudentId.value.replace(/\D/g,''); fStudentId.style.borderColor=''; });
+  const fMsg = document.getElementById('fMsg');
+  fMsg.addEventListener('input', () => { document.getElementById('msgCount').textContent = `필수 · ${fMsg.value.length}/200`; fMsg.style.borderColor=''; });
+  ['fName','fDept','fKakao'].forEach(id => document.getElementById(id).addEventListener('input', e => e.target.style.borderColor=''));
+
+  /* ───── interview slot picker ───── */
+  let slots = loadSlots();
+  const chosen = new Set();
+  function renderSlots(){
+    const area = document.getElementById('slotArea');
+    area.innerHTML = '';
+    if (!slots.length){
+      area.innerHTML = '<div class="slot-empty">아직 등록된 면접 시간대가 없어요. 지원서를 제출하면 운영진이 면접 일정을 별도로 안내드릴게요.</div>';
+      return;
+    }
+    const sorted = [...slots].sort((a,b) => a.date===b.date ? a.start.localeCompare(b.start) : a.date.localeCompare(b.date));
+    const groups = [];
+    sorted.forEach(s => { let g = groups.find(x => x.date===s.date); if(!g){ g={date:s.date, items:[]}; groups.push(g); } g.items.push(s); });
+    groups.forEach(g => {
+      const [yy,mm,dd] = g.date.split('-');
+      const wrap = document.createElement('div');
+      wrap.className = 'slotgroup';
+      const gh = document.createElement('div');
+      gh.className = 'gh';
+      gh.innerHTML = `<span class="d">${mm}.${dd}</span><span class="w">(${weekday(g.date)}요일)</span><span class="ln"></span>`;
+      wrap.appendChild(gh);
+      const listEl = document.createElement('div');
+      listEl.className = 'slotlist';
+      g.items.forEach(s => {
+        const full = s.booked >= s.capacity;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'slotopt';
+        btn.setAttribute('aria-pressed','false');
+        if (full) btn.setAttribute('disabled','');
+        btn.innerHTML = `<span class="box ico"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>`+
+                        `<span class="tm">${s.start}–${s.end}</span>`+
+                        `<span class="rm">${full ? '마감' : (s.note ? s.note : '면접 ' + s.capacity + '명')}</span>`;
+        if (!full) btn.addEventListener('click', () => {
+          const on = btn.getAttribute('aria-pressed') === 'true';
+          btn.setAttribute('aria-pressed', String(!on));
+          if (on) chosen.delete(s.id); else chosen.add(s.id);
+          document.getElementById('slotArea').style.outline = '';
+        });
+        listEl.appendChild(btn);
+      });
+      wrap.appendChild(listEl);
+      area.appendChild(wrap);
+    });
+  }
+  renderSlots();
+
+  /* reusable slot picker (used by the status-screen editor) */
+  function buildSlotList(area, chosenSet){
+    if (!area) return;
+    area.innerHTML = '';
+    if (!slots.length){ area.innerHTML = '<div class="slot-empty">아직 등록된 면접 시간대가 없어요.</div>'; return; }
+    const sorted = [...slots].sort((a,b) => a.date===b.date ? a.start.localeCompare(b.start) : a.date.localeCompare(b.date));
+    const groups = [];
+    sorted.forEach(s => { let g = groups.find(x => x.date===s.date); if(!g){ g={date:s.date, items:[]}; groups.push(g); } g.items.push(s); });
+    groups.forEach(g => {
+      const [yy,mm,dd] = g.date.split('-');
+      const wrap = document.createElement('div'); wrap.className = 'slotgroup';
+      const gh = document.createElement('div'); gh.className = 'gh';
+      gh.innerHTML = `<span class="d">${mm}.${dd}</span><span class="w">(${weekday(g.date)}요일)</span><span class="ln"></span>`;
+      wrap.appendChild(gh);
+      const listEl = document.createElement('div'); listEl.className = 'slotlist';
+      g.items.forEach(s => {
+        const full = s.booked >= s.capacity && !chosenSet.has(s.id);
+        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'slotopt';
+        btn.setAttribute('aria-pressed', String(chosenSet.has(s.id)));
+        if (full) btn.setAttribute('disabled','');
+        btn.innerHTML = `<span class="box ico"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>`+
+                        `<span class="tm">${s.start}–${s.end}</span>`+
+                        `<span class="rm">${full ? '마감' : (s.note ? s.note : '면접 ' + s.capacity + '명')}</span>`;
+        if (!full) btn.addEventListener('click', () => {
+          const on = btn.getAttribute('aria-pressed') === 'true';
+          btn.setAttribute('aria-pressed', String(!on));
+          if (on) chosenSet.delete(s.id); else chosenSet.add(s.id);
+        });
+        listEl.appendChild(btn);
+      });
+      wrap.appendChild(listEl); area.appendChild(wrap);
+    });
+  }
+
+  /* ───── submit ───── */
+  function flag(el){ el.style.borderColor = 'var(--bad)'; }
+  document.getElementById('submitBtn').addEventListener('click', () => {
+    let firstBad = null;
+    const fName = document.getElementById('fName');
+    const fDept = document.getElementById('fDept');
+    const fKakao = document.getElementById('fKakao');
+    const sessions = selectedChips('sessionChips');
+
+    if (!fName.value.trim()){ flag(fName); firstBad = firstBad || fName; }
+    if (!sessions.length){ document.querySelectorAll('#sessionChips .chip').forEach(c => c.style.borderColor='var(--bad)'); firstBad = firstBad || document.getElementById('sessionChips'); }
+    if (!fDept.value.trim()){ flag(fDept); firstBad = firstBad || fDept; }
+    if (!fStudentId.value.trim()){ flag(fStudentId); firstBad = firstBad || fStudentId; }
+    if (!document.querySelector('#yearSeg button[aria-pressed="true"]')){ const ys=document.getElementById('yearSeg'); ys.style.outline='1px solid var(--bad)'; ys.style.outlineOffset='3px'; ys.style.borderRadius='8px'; firstBad = firstBad || ys; }
+    if (!fPhone.value.trim()){ flag(fPhone); firstBad = firstBad || fPhone; }
+    if (!fKakao.value.trim()){ flag(fKakao); firstBad = firstBad || fKakao; }
+    if (!fMsg.value.trim()){ flag(fMsg); firstBad = firstBad || fMsg; }
+    if (slots.length && chosen.size === 0){ const sa=document.getElementById('slotArea'); sa.style.outline='1px solid var(--bad)'; sa.style.outlineOffset='6px'; sa.style.borderRadius='10px'; firstBad = firstBad || sa; }
+
+    if (firstBad){ window.scrollTo({ top: firstBad.getBoundingClientRect().top + window.scrollY - 120, behavior:'smooth' }); return; }
+
+    /* build applicant record */
+    const sid = fStudentId.value.trim();
+    const cohort = sid.length >= 4 ? sid.slice(2,4) : '';
+    const expParts = sessions.filter(s => sessionExp[s]).map(s => `${s} ${sessionExp[s]}년`);
+    const applicant = {
+      id: 'ap' + Date.now(),
+      name: fName.value.trim(),
+      nick: document.getElementById('fNick').value.trim() || null,
+      dept: (fDept.value.trim() + (cohort ? ' ' + cohort : '')).trim(),
+      contact: fPhone.value.trim(),
+      kakao: fKakao.value.trim(),
+      sessions: sessions,
+      genres: selectedChips('genreChips'),
+      exp: expParts.length ? expParts.join(' · ') : '신규 지원',
+      message: fMsg.value.trim(),
+      appliedAt: nowStamp(),
+      preferredSlotIds: [...chosen],
+      status: 'new',
+      slotId: null,
+      notified: false,
+    };
+
+    /* append to applicants store (seed demo set if empty so the operator list keeps context) */
+    let list = loadApplicants();
+    if (!list.length) list = AP_SEED.map(a => ({ ...a }));
+    list.push(applicant);
+    saveApplicants(list);
+
+    /* remember this as "my application" and show the live progress screen */
+    try { localStorage.setItem(MY_KEY, applicant.id); } catch(e){}
+    showStatus(applicant.id);
+  });
+
+  /* ════════════ 가입 진행 상황 (지원자 화면) ════════════ */
+  const PASS_MSG = (a) => `${a.name}님, 청림그룹사운드 신입 면접에 합격하셨습니다! 함께 무대를 만들어가게 되어 정말 기뻐요. 첫 모임 일정은 카카오톡으로 개별 안내드릴게요.`;
+  const FAIL_MSG = (a) => `${a.name}님, 소중한 지원에 진심으로 감사드립니다. 아쉽지만 이번 모집에서는 함께하지 못하게 되었어요. 청림은 언제나 열려 있으니 다음 기회에 또 만나요.`;
+
+  const SVG = {
+    check:'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>',
+    x:'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    cal:'<svg width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>',
+    clock:'<svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5l3.2 2"/></svg>',
+    doc:'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h5"/></svg>',
+    edit:'<svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.05 2.05 0 0 1 2.9 2.9L7 19l-4 1 1-4z"/></svg>',
+  };
+
+  let editingSlots = false;
+  let chosenEdit = new Set();
+  let currentId = null;
+  let toastTimer = null;
+
+  function deriveStage(a){
+    if (a.status === 'interview') return 'interview';
+    if (a.status === 'pass' || a.status === 'fail') return a.notified ? 'result' : 'await';
+    return 'doc';
+  }
+
+  function slotDur(s){
+    const toM = t => { const [h,m] = t.split(':').map(Number); return h*60 + m; };
+    return Math.max(0, toM(s.end) - toM(s.start));
+  }
+
+  function stepperHTML(a, stage){
+    let s1, s2, s3, l1, l2;
+    if (stage === 'doc'){ s1='active'; s2='pending'; s3='pending'; l1=false; l2=false; }
+    else if (stage === 'interview'){ s1='done'; s2='active'; s3='pending'; l1=true; l2=false; }
+    else if (stage === 'await'){ s1='done'; s2='done'; s3='wait'; l1=true; l2=true; }
+    else { s1='done'; s2='done'; s3 = a.status === 'pass' ? 'pass' : 'fail'; l1=true; l2=true; }
+    const node = (state, num, label) => {
+      let inner = num;
+      if (state === 'done' || state === 'pass') inner = SVG.check;
+      else if (state === 'fail') inner = SVG.x;
+      return `<div class="step ${state}"><div class="dot ico">${inner}</div><div class="lbl">${label}</div></div>`;
+    };
+    const resLabel = stage === 'result' ? (a.status === 'pass' ? '합격' : '불합격') : '결과';
+    return node(s1,'1','서류 확인')
+      + `<div class="stepline ${l1?'filled':''}"></div>`
+      + node(s2,'2','면접')
+      + `<div class="stepline ${l2?'filled':''}"></div>`
+      + node(s3,'3',resLabel);
+  }
+
+  function heroHTML(a, stage){
+    let cls, icon, h, p;
+    if (stage === 'doc'){ cls='is-accent'; icon=SVG.doc; h='서류를 확인하고 있어요'; p='운영진이 지원서를 검토하고 있어요. 희망하신 면접 시간대 중 하나로 면접을 확정해 카카오톡으로 안내드릴게요.'; }
+    else if (stage === 'interview'){ cls='is-accent'; icon=SVG.cal; h='면접이 확정되었어요'; p='아래 일정에 맞춰 면접에 참석해 주세요. 시간에 늦지 않게 와주시면 좋아요.'; }
+    else if (stage === 'await'){ cls='is-muted'; icon=SVG.clock; h='면접이 마무리되었어요'; p='결과를 정리하고 있어요. 발표되면 카카오톡으로 가장 먼저 안내드릴게요.'; }
+    else if (a.status === 'pass'){ cls='is-ok'; icon=SVG.check; h='합격을 축하해요'; p=PASS_MSG(a); }
+    else { cls='is-bad'; icon=SVG.x; h='이번엔 함께하지 못했어요'; p=FAIL_MSG(a); }
+    return `<div class="statushero ${cls}"><div class="hi ico">${icon}</div><div><h3>${h}</h3><p>${p}</p></div></div>`;
+  }
+
+  function stageBodyHTML(a, stage){
+    if (stage === 'doc'){
+      if (editingSlots){
+        return `<div class="sect-head"><span class="n">·</span><span class="t">희망 면접 시간대 변경</span><span class="ln"></span></div>`
+          + `<p class="slot-intro">가능한 시간대를 <b style="color:var(--foreground);">여러 개</b> 골라주세요. 운영진이 그중 하나로 면접을 확정해요.</p>`
+          + `<div id="stSlotArea"></div>`
+          + `<div class="editactions"><button class="btn-primary" id="saveSlotsBtn">변경 저장</button><button class="btn-ghost" id="cancelSlotsBtn">취소</button></div>`;
+      }
+      const prefs = (a.preferredSlotIds || []).map(slotByIdFn).filter(Boolean);
+      const items = prefs.length
+        ? prefs.map(s => `<div class="prefitem"><span class="ico">${SVG.cal}</span><span class="tx">${slotText(s)}</span>${s.note?`<span class="nt">${s.note}</span>`:''}</div>`).join('')
+        : `<div class="prefitem"><span class="tx" style="font-family:var(--font-kr);color:var(--muted-foreground);">아직 고른 시간대가 없어요. 운영진이 면접 일정을 안내드릴게요.</span></div>`;
+      return `<div class="sect-head"><span class="n">·</span><span class="t">내가 고른 희망 면접 시간대</span><span class="ln"></span></div>`
+        + `<div class="preflist">${items}</div>`
+        + `<button class="btn-ghost" id="editSlotsBtn"><span class="ico">${SVG.edit}</span> 면접 일정 변경하기</button>`;
+    }
+    if (stage === 'interview' || stage === 'await'){
+      const s = slotByIdFn(a.slotId);
+      const muted = stage === 'await';
+      const head = muted ? '면접 진행 일정' : '확정된 면접 일정';
+      if (!s) return `<div class="sect-head"><span class="n">·</span><span class="t">${head}</span><span class="ln"></span></div><p class="statushint">면접 일정이 곧 안내될 예정이에요.</p>`;
+      const [yy,mm,dd] = s.date.split('-');
+      const card = `<div class="slotcard${muted?' muted':''}"><div class="dchip"><span class="dm">${mm}.${dd}</span><span class="dw">(${weekday(s.date)})</span></div><div class="vline"></div><div class="tinfo"><div class="tt">${s.start} – ${s.end}</div><div class="tn">${s.note ? s.note : '개별 면접'} · 약 ${slotDur(s)}분</div></div></div>`;
+      const hint = muted ? '' : `<p class="statushint">일정 변경이 필요하면 카카오톡으로 운영진에게 연락해 주세요.</p>`;
+      return `<div class="sect-head"><span class="n">·</span><span class="t">${head}</span><span class="ln"></span></div>${card}${hint}`;
+    }
+    return '';
+  }
+
+  function summaryHTML(a){
+    return `<div class="divider"></div>`
+      + `<div class="sect-head"><span class="n">·</span><span class="t">지원 정보</span><span class="ln"></span></div>`
+      + `<div class="summary">`
+      + `<div class="row"><span class="k">이름</span><span class="v">${a.name}${a.nick?` (${a.nick})`:''}</span></div>`
+      + `<div class="row"><span class="k">지원 세션</span><span class="v">${(a.sessions||[]).join(' · ')||'—'}</span></div>`
+      + `<div class="row"><span class="k">학과</span><span class="v">${a.dept||'—'}</span></div>`
+      + `<div class="row"><span class="k">접수일시</span><span class="v" style="font-family:var(--font-mono);font-size:12.5px;">${a.appliedAt||''}</span></div>`
+      + `</div>`;
+  }
+
+  function demoHTML(a){
+    const opts = [['new','서류 확인'],['interview','면접 예정'],['pass','합격'],['fail','불합격']];
+    return `<div class="demobar"><span class="demolabel mono">데모 미리보기 · 운영진이 상태를 바꾸면 이 화면이 자동으로 갱신돼요</span>`
+      + `<div class="demoseg" id="demoSeg">`
+      + opts.map(([v,l]) => `<button data-st="${v}" aria-pressed="${a.status===v}">${l}</button>`).join('')
+      + `</div>`
+      + `<button class="demo-reset" id="demoResetBtn"><span class="ico">${SVG.edit}</span> 새 지원서 작성 (처음 화면으로)</button>`
+      + `</div>`;
+  }
+
+  function renderStatus(a){
+    const stage = deriveStage(a);
+    document.getElementById('kicker').textContent = '신규 부원 · 가입 현황';
+    document.getElementById('stSub').innerHTML = `<b>${a.name}</b>님, 지원해 주셔서 감사합니다. 아래에서 진행 상황을 실시간으로 확인할 수 있어요.`;
+    document.getElementById('stStepper').innerHTML = stepperHTML(a, stage);
+    const body = document.getElementById('stBody');
+    body.innerHTML = heroHTML(a, stage) + stageBodyHTML(a, stage) + summaryHTML(a) + demoHTML(a);
+
+    if (stage === 'doc' && editingSlots){
+      buildSlotList(document.getElementById('stSlotArea'), chosenEdit);
+      const save = document.getElementById('saveSlotsBtn');
+      const cancel = document.getElementById('cancelSlotsBtn');
+      if (save) save.addEventListener('click', () => {
+        const lst = loadApplicants(); const rec = lst.find(x => x.id === a.id);
+        if (rec){ rec.preferredSlotIds = [...chosenEdit]; saveApplicants(lst); }
+        editingSlots = false; showStatus(a.id); showToast('희망 면접 시간대를 변경했어요');
+      });
+      if (cancel) cancel.addEventListener('click', () => { editingSlots = false; renderStatus(a); });
+    } else if (stage === 'doc'){
+      const ed = document.getElementById('editSlotsBtn');
+      if (ed) ed.addEventListener('click', () => {
+        editingSlots = true;
+        chosenEdit = new Set((a.preferredSlotIds || []).filter(id => slotByIdFn(id)));
+        renderStatus(a);
+      });
+    }
+
+    const seg = document.getElementById('demoSeg');
+    if (seg) seg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => applyDemo(a.id, b.dataset.st)));
+
+    const resetBtn = document.getElementById('demoResetBtn');
+    if (resetBtn) resetBtn.addEventListener('click', () => { try { localStorage.removeItem(MY_KEY); } catch(e){} location.reload(); });
+  }
+
+  function applyDemo(id, st){
+    const list = loadApplicants(); const rec = list.find(x => x.id === id); if (!rec) return;
+    const fallbackSlot = () => (rec.preferredSlotIds || []).find(x => slotByIdFn(x)) || (slots[0] && slots[0].id) || null;
+    if (st === 'new'){ rec.status='new'; rec.slotId=null; rec.notified=false; rec.notifiedAt=null; }
+    else if (st === 'interview'){ rec.status='interview'; rec.slotId = rec.slotId || fallbackSlot(); rec.notified=false; rec.notifiedAt=null; }
+    else { rec.status=st; if(!rec.slotId) rec.slotId = fallbackSlot(); rec.notified=true; rec.notifiedAt=nowStamp(); }
+    saveApplicants(list);
+    editingSlots = false;
+    showStatus(id);
+  }
+
+  function showToast(msg){
+    const t = document.getElementById('stToast');
+    if (!t) return;
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 2400);
+  }
+
+  function showStatus(id){
+    slots = loadSlots();
+    const list = loadApplicants();
+    const a = list.find(x => x.id === id);
+    if (!a){ try { localStorage.removeItem(MY_KEY); } catch(e){} return; }
+    currentId = id;
+    document.getElementById('formView').hidden = true;
+    document.getElementById('statusView').hidden = false;
+    renderStatus(a);
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  /* resume an existing application on load */
+  (function resume(){
+    let myId = null;
+    try { myId = localStorage.getItem(MY_KEY); } catch(e){}
+    if (myId){ const list = loadApplicants(); if (list.find(a => a.id === myId)) showStatus(myId); }
+  })();
+
+  /* reflect operator changes made in the admin app (other tab) live */
+  window.addEventListener('storage', (e) => {
+    if (e.key === AP_KEY || e.key === IV_KEY){
+      if (currentId && !document.getElementById('statusView').hidden){ slots = loadSlots(); showStatus(currentId); }
+    }
+  });
+})();
+</script>
+</body>
+</html>

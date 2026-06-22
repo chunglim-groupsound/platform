@@ -1,0 +1,72 @@
+/* landing-page-specific styles */
+
+.hero { padding-top: 74px; padding-bottom: 60px; }
+.hero h1 {
+  font-family: var(--font-display); font-weight: 400; letter-spacing: 0.005em; line-height: 0.9;
+  font-size: clamp(50px, 13vw, 132px); margin: 22px 0 0;
+}
+.hero .sub { margin: 26px 0 0; font-size: clamp(15px, 1.6vw, 18px); color: var(--muted-foreground); max-width: 440px; line-height: 1.75; }
+.hero .sub b { color: var(--foreground); font-weight: 600; }
+
+.cta-row { display: flex; align-items: center; gap: 16px; margin-top: 38px; flex-wrap: wrap; }
+.cta-note { font-size: 13px; color: var(--subtle-foreground); }
+
+.rail { display: flex; gap: 42px; margin-top: 56px; flex-wrap: wrap; }
+.rail .item .n { font-family: var(--font-display); font-size: 46px; line-height: 0.85; color: var(--foreground); }
+.rail .item .n.acc { color: var(--accent-hover); }
+.rail .item .l { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-foreground); margin-top: 9px; }
+
+.sec { padding: 64px 0; border-top: 1px solid var(--border-subtle); }
+.sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 34px; flex-wrap: wrap; }
+.sec-head h2 { margin: 12px 0 0; font-family: var(--font-sans); font-weight: 700; font-size: 30px; letter-spacing: -0.02em; white-space: nowrap; }
+
+.acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.act {
+  border: 1px solid var(--border-subtle); border-radius: 10px; padding: 28px 26px;
+  background: var(--surface); display: flex; flex-direction: column; gap: 16px;
+  transition: border-color .16s, background .16s, transform .16s;
+}
+.act:hover { border-color: var(--border); background: var(--surface-elevated); transform: translateY(-3px); }
+.act .top { display: flex; align-items: center; justify-content: space-between; }
+.act .idx { font-family: var(--font-mono); font-size: 11px; color: var(--subtle-foreground); }
+.act .ic { color: var(--accent-hover); }
+.act h3 { margin: 0; font-family: var(--font-sans); font-weight: 700; font-size: 19px; letter-spacing: -0.01em; }
+.act p { margin: 0; font-size: 13.5px; color: var(--muted-foreground); line-height: 1.65; }
+
+.join-block {
+  margin: 8px 0 0; border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden;
+  background: var(--surface); display: flex; align-items: center; justify-content: space-between;
+  gap: 28px; padding: 34px 38px; flex-wrap: wrap; position: relative;
+}
+.join-block::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+.join-block.is-closed::before { background: var(--border); }
+.join-block .big { font-family: var(--font-sans); font-weight: 700; font-size: 26px; letter-spacing: -0.02em; }
+.join-block .small { font-size: 14px; color: var(--muted-foreground); margin-top: 8px; }
+
+.rec-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.rec-tag {
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.04em; padding: 4px 10px;
+  border-radius: 6px; color: var(--accent-hover);
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+  background: var(--accent-muted); white-space: nowrap;
+}
+.rec-period { font-family: var(--font-mono); font-size: 11.5px; color: var(--subtle-foreground); margin-top: 14px; letter-spacing: 0.04em; }
+.rec-closed-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; border-radius: 9px;
+  border: 1px solid var(--border); color: var(--subtle-foreground);
+  font-family: var(--font-sans); font-weight: 600; font-size: 14px; white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .hero { padding-top: 50px; padding-bottom: 44px; }
+  .hero h1 { font-size: clamp(42px, 12vw, 132px); }
+  .hero .sub { margin-top: 22px; }
+  .cta-row { margin-top: 30px; gap: 12px; }
+  .rail { gap: 28px; margin-top: 42px; }
+  .rail .item .n { font-size: 38px; }
+  .sec { padding: 46px 0; }
+  .sec-head h2 { font-size: 25px; }
+  .acts { grid-template-columns: 1fr; }
+  .join-block { padding: 26px 24px; gap: 22px; }
+  .join-block .big { font-size: 21px; }
+}
