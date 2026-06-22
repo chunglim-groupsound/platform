@@ -12,6 +12,17 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'k.kakaocdn.net' },
     ],
   },
+  // public/ 정적 HTML 파일은 CSS가 인라인으로 포함되어 있어 Next.js 빌드 해시의
+  // 적용을 받지 않음. no-cache로 서버에 ETag를 매번 확인하게 해 CSS 변경 시
+  // 사용자가 자동으로 최신 버전을 받도록 함.
+  headers: async () => [
+    {
+      source: '/(landing|join|join-existing|join-new).html',
+      headers: [
+        { key: 'Cache-Control', value: 'no-cache, must-revalidate' },
+      ],
+    },
+  ],
 };
 
 export default nextConfig;

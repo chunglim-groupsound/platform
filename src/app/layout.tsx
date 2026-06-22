@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: '청림그룹사운드',
   description: '청림그룹사운드 밴드 동아리 — 합주실 예약 · 부원 · 팀 · 공지',
   appleWebApp: { capable: true, title: '청림그룹사운드', statusBarStyle: 'black-translucent' },
+  icons: { icon: '/icon.svg' },
 };
 
 export const viewport: Viewport = {
