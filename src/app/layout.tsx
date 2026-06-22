@@ -15,10 +15,22 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+const themeScript = `
+(function(){try{
+  var s=localStorage.getItem('CHUNGLIM_tweaks_v1');
+  if(s){var t=JSON.parse(s);var e=document.documentElement;
+    if(t.theme)e.setAttribute('data-theme',t.theme);
+    if(t.accent)e.setAttribute('data-accent',t.accent);
+    if(t.displayFont)e.setAttribute('data-font',t.displayFont);
+  }
+}catch(e){}})();
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" data-theme="worn-denim">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

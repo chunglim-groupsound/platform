@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!mounted) {
     return (
-      <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)' }}>
         <div style={{
           width: 40, height: 40, borderRadius: '50%',
           border: '2.5px solid var(--border)',

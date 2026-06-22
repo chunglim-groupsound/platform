@@ -3,7 +3,7 @@ export default function PublicLoading() {
     <div style={{
       position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20,
-      background: 'var(--background)',
+      background: 'var(--background)', zIndex: 9999,
     }}>
       <div style={{
         width: 40, height: 40, borderRadius: '50%',

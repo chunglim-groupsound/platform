@@ -165,7 +165,7 @@ export default function JoinExistingPage() {
                 )}
                 <p className="field-hint">인증키는 회장·총무에게 발급받을 수 있어요. 대소문자는 구분하지 않습니다.</p>
                 <button
-                  className="btn-primary"
+                  className="pub-btn-primary"
                   disabled={normalize(keyValue).length < 6}
                   onClick={verify}
                 >
@@ -342,7 +342,7 @@ export default function JoinExistingPage() {
                   </label>
                 </div>
 
-                <button className="btn-primary" onClick={submit}>
+                <button className="pub-btn-primary" onClick={submit}>
                   <span className="ico">
                     <svg width="17" height="17" viewBox="0 0 24 24"><path d="m11.3 12.6 6-6M15.2 4.7l1.7-1.7 2.1 2.1-1.7 1.7"/><circle cx="8.5" cy="15.5" r="4"/></svg>
                   </span>

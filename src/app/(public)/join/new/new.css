@@ -21,7 +21,7 @@ h1.title {
 .slotopt {
   display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px;
   border: 1px solid var(--border); background: var(--background); cursor: pointer;
-  user-select: none; transition: all .14s; text-align: left; width: 100%;
+  -webkit-user-select: none; user-select: none; transition: all .14s; text-align: left; width: 100%;
 }
 .slotopt:hover:not([disabled]) { border-color: var(--muted-foreground); }
 .slotopt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-muted); }
@@ -57,9 +57,9 @@ h1.title {
 .step.active .lbl { color: var(--foreground); }
 .step.pending .dot { border-color: var(--border); color: var(--subtle-foreground); }
 .step.wait .dot { border-color: var(--accent); color: var(--accent-hover); box-shadow: 0 0 0 4px var(--accent-muted); }
-.step.pass .dot { border-color: var(--ok); background: var(--ok); color: #0E1F16; box-shadow: 0 0 0 4px color-mix(in oklab, var(--ok) 18%, transparent); }
+.step.pass .dot { border-color: var(--ok); background: var(--ok); color: #0E1F16; box-shadow: 0 0 0 4px rgba(111,175,138,0.18); box-shadow: 0 0 0 4px color-mix(in oklab, var(--ok) 18%, transparent); }
 .step.pass .lbl { color: var(--ok-bright); }
-.step.fail .dot { border-color: var(--bad); background: var(--bad); color: #2A1212; box-shadow: 0 0 0 4px color-mix(in oklab, var(--bad) 16%, transparent); }
+.step.fail .dot { border-color: var(--bad); background: var(--bad); color: #2A1212; box-shadow: 0 0 0 4px rgba(224,138,138,0.16); box-shadow: 0 0 0 4px color-mix(in oklab, var(--bad) 16%, transparent); }
 .step.fail .lbl { color: var(--bad); }
 .stepline { flex: 1; height: 2px; background: var(--border); border-radius: 2px; margin-top: 18px; transition: background .25s ease; }
 .stepline.filled { background: var(--accent); }
@@ -78,11 +78,15 @@ h1.title {
 .statushero h3 { font-family: var(--font-sans); font-weight: 700; font-size: 16px; margin: 1px 0 0; letter-spacing: -0.02em; }
 .statushero p { margin: 7px 0 0; font-size: 13px; color: var(--muted-foreground); line-height: 1.65; }
 .statushero.is-accent .hi { background: var(--accent-muted); color: var(--accent-hover); }
+.statushero.is-ok { border-color: var(--border-subtle); background: var(--surface); }
 .statushero.is-ok { border-color: color-mix(in oklab, var(--ok) 40%, transparent); background: color-mix(in oklab, var(--ok) 9%, var(--surface)); }
-.statushero.is-ok .hi { background: color-mix(in oklab, var(--ok) 22%, transparent); color: var(--ok-bright); }
+.statushero.is-ok .hi { background: rgba(111,175,138,0.22); color: var(--ok-bright); }
+.statushero.is-ok .hi { background: color-mix(in oklab, var(--ok) 22%, transparent); }
 .statushero.is-ok h3 { color: var(--ok-bright); }
+.statushero.is-bad { border-color: var(--border-subtle); background: var(--surface); }
 .statushero.is-bad { border-color: color-mix(in oklab, var(--bad) 34%, transparent); background: color-mix(in oklab, var(--bad) 7%, var(--surface)); }
-.statushero.is-bad .hi { background: color-mix(in oklab, var(--bad) 18%, transparent); color: var(--bad); }
+.statushero.is-bad .hi { background: rgba(224,138,138,0.18); color: var(--bad); }
+.statushero.is-bad .hi { background: color-mix(in oklab, var(--bad) 18%, transparent); }
 .statushero.is-muted .hi { background: var(--surface); color: var(--muted-foreground); border: 1px solid var(--border); }
 
 /* preferred slot list */
@@ -92,12 +96,13 @@ h1.title {
 .prefitem .nt { font-family: var(--font-mono); font-size: 11px; color: var(--subtle-foreground); margin-left: auto; }
 
 .editactions { display: flex; gap: 10px; margin-top: 18px; }
-.editactions .btn-primary { flex: 1; margin-top: 0; }
-.editactions .btn-ghost { margin-top: 0; }
+.editactions .pub-btn-primary { flex: 1; margin-top: 0; }
+.editactions .pub-btn-ghost { margin-top: 0; }
 
 /* confirmed slot card */
 .slotcard {
   display: flex; align-items: center; gap: 18px; padding: 18px 20px; border-radius: 12px;
+  border: 1px solid var(--border-subtle);
   border: 1px solid color-mix(in oklab, var(--accent) 38%, transparent); background: var(--accent-muted);
 }
 .slotcard.muted { border-color: var(--border); background: var(--surface-elevated); }
@@ -105,7 +110,7 @@ h1.title {
 .slotcard .dchip .dm { font-family: var(--font-mono); font-weight: 700; font-size: 20px; color: var(--accent-hover); letter-spacing: -0.01em; }
 .slotcard.muted .dchip .dm { color: var(--foreground); }
 .slotcard .dchip .dw { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); }
-.slotcard .vline { width: 1px; align-self: stretch; background: color-mix(in oklab, var(--accent) 28%, transparent); }
+.slotcard .vline { width: 1px; align-self: stretch; background: var(--border-subtle); background: color-mix(in oklab, var(--accent) 28%, transparent); }
 .slotcard.muted .vline { background: var(--border); }
 .slotcard .tinfo .tt { font-family: var(--font-sans); font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
 .slotcard .tinfo .tn { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted-foreground); margin-top: 3px; }
@@ -147,7 +152,7 @@ h1.title {
 .avapick { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
 .avaopt {
   display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-radius: 11px;
-  border: 1px solid var(--border); background: var(--background); cursor: pointer; user-select: none;
+  border: 1px solid var(--border); background: var(--background); cursor: pointer; -webkit-user-select: none; user-select: none;
   transition: border-color .15s ease, background .15s ease;
 }
 .avaopt:hover { border-color: var(--muted-foreground); }

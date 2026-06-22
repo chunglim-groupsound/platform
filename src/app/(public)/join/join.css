@@ -39,7 +39,7 @@
 .choice:hover { border-color: var(--border); background: var(--surface-elevated); transform: translateY(-4px); box-shadow: 0 18px 44px rgba(0,0,0,0.28); }
 .choice:hover::before { background: var(--accent); }
 .choice.primary::before { background: var(--accent); }
-.choice.primary { border-color: color-mix(in oklab, var(--accent) 38%, var(--border-subtle)); }
+.choice.primary { border-color: var(--border-subtle); border-color: color-mix(in oklab, var(--accent) 38%, var(--border-subtle)); }
 
 .choice .top { display: flex; align-items: flex-start; justify-content: space-between; }
 .choice .idx { font-family: var(--font-mono); font-size: 11px; color: var(--subtle-foreground); letter-spacing: 0.04em; }

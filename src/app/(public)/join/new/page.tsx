@@ -320,7 +320,7 @@ export default function JoinNewPage() {
                   onInteract={() => setFieldErrors(fe => ({ ...fe, slots: false }))}
                 />
 
-                <button className="btn-primary" onClick={submit}>
+                <button className="pub-btn-primary" onClick={submit}>
                   <span className="ico"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
                   지원서 제출하기
                 </button>
@@ -474,8 +474,8 @@ function StatusView({ applicant: a, slots, slotById, editingSlots, onStartEdit, 
                 <div className="sect-head"><span className="n">·</span><span className="t">희망 면접 시간대 변경</span><span className="ln" /></div>
                 <SlotPicker slots={slots} chosen={editChosen} setChosen={setEditChosen} hasError={false} onInteract={() => {}} />
                 <div className="editactions">
-                  <button className="btn-primary" onClick={() => onSaveEdit(editChosen)}>변경 저장</button>
-                  <button className="btn-ghost" style={{ width: 'auto', flexShrink: 0, paddingLeft: 22, paddingRight: 22 }} onClick={onCancelEdit}>취소</button>
+                  <button className="pub-btn-primary" onClick={() => onSaveEdit(editChosen)}>변경 저장</button>
+                  <button className="pub-btn-ghost" style={{ width: 'auto', flexShrink: 0, paddingLeft: 22, paddingRight: 22 }} onClick={onCancelEdit}>취소</button>
                 </div>
               </>
             : <>
@@ -492,7 +492,7 @@ function StatusView({ applicant: a, slots, slotById, editingSlots, onStartEdit, 
                     : <div className="prefitem"><span className="tx" style={{ fontFamily: 'var(--font-kr)', color: 'var(--muted-foreground)' }}>아직 고른 시간대가 없어요.</span></div>
                   }
                 </div>
-                <button className="btn-ghost" onClick={onStartEdit}>
+                <button className="pub-btn-ghost" onClick={onStartEdit}>
                   <span className="ico"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.05 2.05 0 0 1 2.9 2.9L7 19l-4 1 1-4z"/></svg></span>
                   면접 일정 변경하기
                 </button>
@@ -544,11 +544,11 @@ function StatusView({ applicant: a, slots, slotById, editingSlots, onStartEdit, 
         </div>
       </div>
 
-      <Link className="btn-primary" href="/home" style={{ textDecoration:'none', marginTop:22 }}>
+      <Link className="pub-btn-primary" href="/home" style={{ textDecoration:'none', marginTop:22 }}>
         <span className="ico"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         청림 둘러보기
       </Link>
-      <Link className="btn-ghost" href="/" style={{ textDecoration:'none' }}>랜딩으로 돌아가기</Link>
+      <Link className="pub-btn-ghost" href="/" style={{ textDecoration:'none' }}>랜딩으로 돌아가기</Link>
     </>
   );
 }

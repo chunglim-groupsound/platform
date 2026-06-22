@@ -3,7 +3,7 @@ export default function RootLoading() {
     <div style={{
       position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20,
-      background: '#151A26',
+      background: '#151A26', zIndex: 9999,
     }}>
       <div style={{
         width: 40, height: 40, borderRadius: '50%',
