@@ -20,6 +20,7 @@
 ## 진행 사항
 
 - 2026-07-02: 프론트엔드는 admin 포함 mock 데이터 기반으로 거의 완성된 상태 확인. 백엔드/DB가 전혀 없는 상태(API 라우트 0개, 인증 가드 미구현)임을 확인하고 명세서 4종 재작성 + 백엔드 개발 체크리스트 작성.
+- 2026-07-02: 백엔드 체크리스트 1절(DB 스키마) 완료 — `supabase/migrations/20260702025203_create_schema.sql`에 enum 14종 + 테이블 24개 + 5절 기준 인덱스 전체 작성, 로컬 `supabase db reset`으로 검증(diff 없음 확인). `supabase/seed.sql`도 함께 작성 — `mock-data.ts`(48명 부원/9팀/공지/타임테이블) + `app-internals.tsx`(지원자·면접 슬롯·모집 설정) + `report.tsx`/`notifications.tsx`(신고·알림) mock을 모두 반영, `db reset` 시 자동 시딩 및 로우 수 검증 완료. RLS(2절)·인증 가드(3절)·API 라우트(4절)는 아직 착수 전. 원격(`chunglim-platform`)에는 아직 `db push` 하지 않음 — 로컬 검증만 완료된 상태.
 
 ---
 
@@ -141,17 +142,17 @@
 
 ### 1. DB 스키마 (Supabase migrations) — `ERD_명세서.md` 기준
 
-- [ ] enum 타입 전체 생성 (`member_status`, `member_role`, `officer_title`, `team_role`, `request_status`, `invite_status`, `application_status`, `notice_kind`, `report_category`, `report_status`, `notification_type`, `term_type`, `booking_kind`, `event_kind`)
-- [ ] `users` 테이블 + 인덱스(`kakao_id` unique, `admin_role` partial unique, `team_id`/`status`/`gen` 인덱스)
-- [ ] `teams`, `team_activation_requests`, `team_join_requests`, `team_invitations`
-- [ ] `member_warnings`, `officer_history`, `generation_leaders`
-- [ ] `applications`, `interview_slots`, `application_slot_preferences`, `recruitment_settings`
-- [ ] `notices`, `notice_images`, `notice_comments`, `notice_replies`, `notice_reads`, `references_info`
-- [ ] `reports`
-- [ ] `notifications`
-- [ ] `terms`, `room_hours_config`, `calendar_events`, `booking_templates`, `bookings`
-- [ ] `audit_logs` (0절에서 확인한 기존 원격 테이블과 대조 후 조정)
-- [ ] seed 스크립트 — `mock-data.ts`의 48명 부원/9팀/공지/예약 데이터를 초기 seed로 변환 (데모/QA용)
+- [x] enum 타입 전체 생성 (`member_status`, `member_role`, `officer_title`, `team_role`, `request_status`, `invite_status`, `application_status`, `notice_kind`, `report_category`, `report_status`, `notification_type`, `term_type`, `booking_kind`, `event_kind`) — `supabase/migrations/20260702025203_create_schema.sql`
+- [x] `users` 테이블 + 인덱스(`kakao_id` unique, `admin_role` partial unique, `team_id`/`status`/`gen` 인덱스)
+- [x] `teams`, `team_activation_requests`, `team_join_requests`, `team_invitations`
+- [x] `member_warnings`, `officer_history`, `generation_leaders`
+- [x] `applications`, `interview_slots`, `application_slot_preferences`, `recruitment_settings`
+- [x] `notices`, `notice_images`, `notice_comments`, `notice_replies`, `notice_reads`, `references_info`
+- [x] `reports`
+- [x] `notifications`
+- [x] `terms`, `room_hours_config`, `calendar_events`, `booking_templates`, `bookings`
+- [x] `audit_logs` (0절에서 확인한 기존 원격 테이블은 전량 drop된 상태였으므로 ERD 기준으로 신규 생성)
+- [x] seed 스크립트 — `mock-data.ts`의 48명 부원/9팀/공지/예약 + 컴포넌트 내 지원자·면접·신고·알림 mock을 `supabase/seed.sql`로 변환 (데모/QA용, `supabase db reset` 시 자동 적용 확인 완료)
 
 ### 2. RLS 정책 — `ERD_명세서.md` 6절 기준
 
