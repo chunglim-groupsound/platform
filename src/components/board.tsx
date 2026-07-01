@@ -1424,16 +1424,15 @@ function NoticesAdminSection() {
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
-      <div style={{ display:'flex', justifyContent:'flex-end' }}>
-        <button className="btn btn-primary" onClick={() => setView({ type:'create' })}>
-          <Icons.plus size={15} />새 공지 작성
-        </button>
-      </div>
-
       <ReferenceCards />
 
       <div>
-        <div className="mono" style={{ fontSize:10, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--subtle-foreground)', marginBottom:12 }}>공지 목록 · {all.length}건</div>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:14, marginBottom:12 }}>
+          <div className="mono" style={{ fontSize:10, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--subtle-foreground)' }}>공지 목록 · {all.length}건</div>
+          <button className="btn btn-primary" onClick={() => setView({ type:'create' })}>
+            <Icons.plus size={15} />새 공지 작성
+          </button>
+        </div>
         <div style={{ border:'1px solid var(--border-subtle)', borderRadius:10, overflow:'hidden' }}>
           {all.length === 0 && (
             <div style={{ padding:'44px 20px', textAlign:'center', color:'var(--subtle-foreground)', fontSize:13 }}>등록된 공지가 없어요.</div>

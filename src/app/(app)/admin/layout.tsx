@@ -56,6 +56,16 @@ const GROUPS: Group[] = [
       { key: 'reports', label: '신고 관리', icon: Icons.flag },
     ],
   },
+  {
+    key: 'officers',
+    label: '연혁',
+    items: [
+      { key: 'president',  label: '회장',   icon: Icons.crown },
+      { key: 'vice',       label: '부회장', icon: Icons.crown },
+      { key: 'treasurer',  label: '총무',   icon: Icons.crown },
+      { key: 'genleader',  label: '기장',   icon: Icons.person },
+    ],
+  },
 ];
 
 const SECTION_GROUP: Record<string, Group> = {};
@@ -71,6 +81,10 @@ const KICK: Record<string, string> = {
   migrate:    '운영진 전용 · 데이터 이전',
   notices:    '운영진 전용 · 공식 공지',
   reports:    '운영진 전용 · 신고·제보 처리',
+  president:  '동아리 연혁 기록',
+  vice:       '동아리 연혁 기록',
+  treasurer:  '동아리 연혁 기록',
+  genleader:  '동아리 연혁 기록',
 };
 
 const TITLE: Record<string, string> = {
@@ -83,6 +97,10 @@ const TITLE: Record<string, string> = {
   migrate:    'MIGRATE',
   notices:    'NOTICES',
   reports:    'REPORTS',
+  president:  'HISTORY',
+  vice:       'HISTORY',
+  treasurer:  'HISTORY',
+  genleader:  'HISTORY',
 };
 
 const INTRO: Record<string, string> = {
@@ -95,6 +113,10 @@ const INTRO: Record<string, string> = {
   migrate:    '기존 부원 명단을 CSV로 한 번에 옮겨옵니다. 양식을 내려받아 채운 뒤 업로드하면, 미리보기로 검증한 다음 명단에 일괄 등록돼요.',
   notices:    '운영진 공지를 작성·수정·삭제하고 상단 고정 여부를 관리합니다. 상시 안내 카드도 이 곳에서 등록·수정할 수 있어요.',
   reports:    '부원이 접수한 신고·제보를 확인하고 처리합니다. 상태를 변경하거나 답변을 남기면 접수자에게 알림이 전달돼요.',
+  president:  '역대 회장 이력을 기록·지정합니다. 열람·수정 권한은 일반 부원과 동일해요.',
+  vice:       '역대 부회장 이력을 기록·지정합니다. 열람·수정 권한은 일반 부원과 동일해요.',
+  treasurer:  '역대 총무 이력을 기록·지정합니다. 열람·수정 권한은 일반 부원과 동일해요.',
+  genleader:  '현재 활동 중인 기수의 기장을 지정합니다. 열람·수정 권한은 일반 부원과 동일해요.',
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -155,8 +177,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* 내비게이션 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 
-        {/* 상위 그룹 필 */}
-        <div ref={groupBarRef} className="admin-tabbar" style={{ display: 'flex', gap: 6, paddingBottom: 14, flexWrap: 'nowrap', overflowX: 'auto' }}>
+        {/* 상위 그룹 탭 — 밑줄 스타일 (구 2뎁스 디자인) */}
+        <div ref={groupBarRef} className="admin-tabbar" style={{ display: 'flex', gap: 24, boxShadow: 'inset 0 -1px 0 var(--border-subtle)', flexWrap: 'nowrap', overflowX: 'auto' }}>
           {GROUPS.map((g) => {
             const on  = activeGroup.key === g.key;
             const href = `/admin/${g.items[0].key}`;
@@ -165,17 +187,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 key={g.key}
                 href={href}
                 ref={on ? activeGroupRef : undefined}
-                className="badge"
                 style={{
-                  borderColor: on
-                    ? 'color-mix(in oklab, var(--accent) 40%, transparent)'
-                    : undefined,
-                  background:  on ? 'var(--accent-muted)' : undefined,
-                  color:       on ? 'var(--accent-hover)' : undefined,
-                  fontSize: 10.5,
-                  padding: '4px 10px',
-                  transition: 'all .14s',
-                  cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', gap: 7,
+                  padding: '11px 2px',
+                  fontFamily: 'var(--font-sans)', fontSize: 14,
+                  fontWeight: on ? 700 : 500,
+                  color: on ? 'var(--foreground)' : 'var(--muted-foreground)',
+                  boxShadow: on ? 'inset 0 -2px 0 var(--accent)' : 'none',
+                  transition: 'color .14s', whiteSpace: 'nowrap', flex: '0 0 auto',
+                  textDecoration: 'none',
                 }}
               >
                 {g.label}
@@ -184,12 +204,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </div>
 
-        {/* 하위 서브 탭 — 아이템 2개 이상인 그룹만 */}
+        {/* 하위 서브 탭 — 아이템 2개 이상인 그룹만, 세그먼트 필 스타일 (타임테이블 내부 탭 디자인) */}
         {showSubTabs ? (
           <div
             ref={subBarRef}
             className="admin-tabbar"
-            style={{ display: 'flex', gap: 24, boxShadow: 'inset 0 -1px 0 var(--border-subtle)', flexWrap: 'nowrap', overflowX: 'auto' }}
+            style={{ display: 'flex', gap: 3, padding: 3, marginTop: 14, border: '1px solid var(--border-subtle)', borderRadius: 9, background: 'var(--surface)', alignSelf: 'flex-start', flexWrap: 'nowrap', overflowX: 'auto' }}
           >
             {activeGroup.items.map(({ key, label, icon: Ic }) => {
               const on = section === key;
@@ -199,17 +219,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href={`/admin/${key}`}
                   ref={on ? activeSubRef : undefined}
                   style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 7,
-                    padding: '11px 2px',
-                    fontFamily: 'var(--font-sans)', fontSize: 14,
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    fontFamily: 'var(--font-sans)', fontSize: 13.5,
                     fontWeight: on ? 700 : 500,
-                    color: on ? 'var(--foreground)' : 'var(--muted-foreground)',
-                    boxShadow: on ? 'inset 0 -2px 0 var(--accent)' : 'none',
-                    transition: 'color .14s', whiteSpace: 'nowrap', flex: '0 0 auto',
+                    padding: '9px 18px', borderRadius: 6,
+                    background: on ? 'var(--accent)' : 'transparent',
+                    color: on ? 'var(--accent-foreground)' : 'var(--muted-foreground)',
+                    transition: 'all .14s', whiteSpace: 'nowrap', flex: '0 0 auto',
                     textDecoration: 'none',
                   }}
                 >
-                  <span className="ico">{React.createElement(Ic, { size: 15 })}</span>{label}
+                  <span className="ico" style={{ display: 'flex' }}>{React.createElement(Ic, { size: 15 })}</span>{label}
                 </Link>
               );
             })}

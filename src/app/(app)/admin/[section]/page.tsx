@@ -11,6 +11,7 @@ import {
 import { MemberAdmin as MA } from '@/components/member-admin';
 import { NoticesModule } from '@/components/board';
 import { ReportModule } from '@/components/report';
+import { OfficersModule } from '@/components/officers';
 
 const SECTIONS: Record<string, React.ComponentType> = {
   recruit:    RecruitSettings,
@@ -22,6 +23,10 @@ const SECTIONS: Record<string, React.ComponentType> = {
   migrate:    MA.MemberMigration,
   notices:    NoticesModule.NoticesAdminSection,
   reports:    ReportModule.ReportAdminSection,
+  president:  OfficersModule.PresidentScreen,
+  vice:       OfficersModule.ViceScreen,
+  treasurer:  OfficersModule.TreasurerScreen,
+  genleader:  OfficersModule.GenLeaderScreen,
 };
 
 export default function AdminSectionPage() {

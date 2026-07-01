@@ -110,6 +110,21 @@ export interface Reference {
   note: string;
 }
 
+export interface OfficerHistoryEntry {
+  id: string;
+  role: '회장' | '부회장' | '총무';
+  year: string;
+  memberId: string | null;
+  name: string;
+  gen: number | null;
+}
+
+export interface GenLeader {
+  gen: number;
+  memberId: string | null;
+  name: string;
+}
+
 export interface ActivationRequest {
   id: string;
   teamId: string;
@@ -459,6 +474,63 @@ const RoleStore = (function(){
   };
 })();
 export { RoleStore };
+
+// ───────────── 역대 회장·부회장·총무 / 기수별 기장 ─────────────
+// 부원 전체 테이블에 넣기엔 부적절한 소수(연혁) 데이터라 별도 테이블(스토어)로 관리.
+// 역대 임원: 탈퇴한 졸업생 등 현재 MEMBERS에 없는 사람도 있을 수 있어 memberId는 선택값, name은 항상 보관.
+let _ohSeq = 1;
+const OFFICER_HISTORY: OfficerHistoryEntry[] = [
+  { id:'oh'+(_ohSeq++), role:'회장',   year:'2026', memberId:'m1',  name:'김도현', gen:18 },
+  { id:'oh'+(_ohSeq++), role:'부회장', year:'2026', memberId:'m19', name:'정하준', gen:21 },
+  { id:'oh'+(_ohSeq++), role:'총무',   year:'2026', memberId:'m8',  name:'임준호', gen:18 },
+  { id:'oh'+(_ohSeq++), role:'회장',   year:'2025', memberId:null,  name:'이규민', gen:17 },
+  { id:'oh'+(_ohSeq++), role:'부회장', year:'2025', memberId:null,  name:'박서현', gen:18 },
+  { id:'oh'+(_ohSeq++), role:'총무',   year:'2025', memberId:null,  name:'최다인', gen:17 },
+  { id:'oh'+(_ohSeq++), role:'회장',   year:'2024', memberId:null,  name:'강태오', gen:16 },
+  { id:'oh'+(_ohSeq++), role:'부회장', year:'2024', memberId:null,  name:'윤소민', gen:17 },
+  { id:'oh'+(_ohSeq++), role:'총무',   year:'2024', memberId:null,  name:'한지원', gen:16 },
+];
+
+// 기수별 기장: 현재 활동 중인 기수만 지정 (졸업·비활동 기수는 관리하지 않음)
+const _ACTIVE_GENS = Array.from(new Set(MEMBERS.map(m => m.gen))).sort((a, b) => a - b);
+const _pickGenLeader = (g: number): Member | undefined => {
+  const inGen = MEMBERS.filter(m => m.gen === g);
+  return inGen.find(m => m.teamRole === 'leader') || inGen[0];
+};
+const GEN_LEADERS: GenLeader[] = _ACTIVE_GENS.map(g => {
+  const m = _pickGenLeader(g);
+  return { gen: g, memberId: m ? m.id : null, name: m ? (m.nick || m.name) : '' };
+});
+
+const HistoryStore = (function () {
+  const listeners = new Set<() => void>();
+  const emit = () => listeners.forEach(l => l());
+  return {
+    officerHistory(): OfficerHistoryEntry[] { return OFFICER_HISTORY.slice().sort((a, b) => b.year.localeCompare(a.year) || a.role.localeCompare(b.role, 'ko')); },
+    addOfficerEntry(entry: Omit<OfficerHistoryEntry, 'id'>): void {
+      OFFICER_HISTORY.push({ id: 'oh' + (_ohSeq++), ...entry });
+      emit();
+    },
+    updateOfficerEntry(id: string, patch: Omit<OfficerHistoryEntry, 'id'>): void {
+      const idx = OFFICER_HISTORY.findIndex(e => e.id === id);
+      if (idx >= 0) { OFFICER_HISTORY[idx] = { id, ...patch }; emit(); }
+    },
+    removeOfficerEntry(id: string): void {
+      const idx = OFFICER_HISTORY.findIndex(e => e.id === id);
+      if (idx >= 0) { OFFICER_HISTORY.splice(idx, 1); emit(); }
+    },
+    activeGens(): number[] { return _ACTIVE_GENS.slice(); },
+    genLeaders(): GenLeader[] { return GEN_LEADERS.slice().sort((a, b) => b.gen - a.gen); },
+    setGenLeader(gen: number, memberId: string | null): void {
+      const row = GEN_LEADERS.find(g => g.gen === gen); if (!row) return;
+      const m = memberId ? MEMBERS.find(x => x.id === memberId) : undefined;
+      row.memberId = memberId; row.name = m ? (m.nick || m.name) : '';
+      emit();
+    },
+    subscribe(l: () => void): () => void { listeners.add(l); return () => listeners.delete(l); },
+  };
+})();
+export { HistoryStore };
 
 /* ───────────── TEAM ACTIVATION STORE ─────────────
    비활성 팀 → 팀장이 활성화 신청 → 운영진이 수락하면 active=true.
