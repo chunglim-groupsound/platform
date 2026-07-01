@@ -135,9 +135,9 @@
 
 ### 0. 사전 확인
 
-- [ ] `supabase db pull`로 원격 프로젝트(`chunglim-platform`, ref `hlaqxryujkfgoweuralg`) 기존 스키마 확인 — `audit_logs` 등 과거 백엔드 구현 당시 테이블이 남아있는지 대조 (TODO.md 하단 "관측성" 항목 참고)
-- [ ] Kakao OAuth 앱 설정 확인 (redirect URI, 요청 scope, `.env.local`의 `KAKAO_CLIENT_ID/SECRET` 유효성)
-- [ ] Supabase 프로젝트 로컬 개발 환경 세팅 (`supabase start`, 마이그레이션 워크플로 확정)
+- [x] `supabase db pull`로 원격 프로젝트(`chunglim-platform`, ref `hlaqxryujkfgoweuralg`) 기존 스키마 확인 (2026-07-02) — 과거 백엔드 구현 당시 테이블 23개(`audit_logs`, `join_applications`, `team_members` 등)가 남아있었으나 새 `ERD_명세서.md`와 테이블/컬럼/enum 체계가 크게 달랐고 전 테이블 0행(데이터 없음) 확인. 사용자 확인 하에 전체 drop 후 재설계하기로 결정 — `supabase/migrations/20260701174328_reset_legacy_schema.sql`로 원격에 적용 완료(현재 원격 `public` 스키마는 빈 상태).
+- [ ] Kakao OAuth 앱 설정 확인 (redirect URI, 요청 scope, `.env.local`의 `KAKAO_CLIENT_ID/SECRET` 유효성) — `.env.local`에 값은 존재하나 Kakao Developers 콘솔 등록 여부는 콘솔 로그인이 필요해 CLI로 확인 불가. 코드베이스엔 아직 실제 OAuth 플로우 없음(버튼은 전부 mock 텍스트) — 1절 이후 실구현 시 재확인 필요.
+- [x] Supabase 프로젝트 로컬 개발 환경 세팅 (2026-07-02) — `supabase init`으로 `config.toml` 생성, `supabase link --project-ref hlaqxryujkfgoweuralg`, `supabase start`(Docker Desktop 기동 후) 정상 동작 확인. 마이그레이션 워크플로: `supabase migration new <name>` → 로컬 파일 작성 → `supabase start`(또는 `db reset`)로 로컬 검증 → `supabase db push`로 원격 반영.
 
 ### 1. DB 스키마 (Supabase migrations) — `ERD_명세서.md` 기준
 
